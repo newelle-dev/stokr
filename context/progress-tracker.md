@@ -1,0 +1,96 @@
+# Progress Tracker
+
+**Update this file after every unit.** Keep it honest and short.
+
+## Current status
+- **Phase:** Documentation complete. Build not started.
+- **Current unit:** Unit 1 (not started)
+- **Last updated:** (agent fills in with the date after each unit)
+- **Next milestone:** friend's "run both" week after Unit 6
+
+## Build roadmap
+Each unit must meet its acceptance criteria and the verification steps in `ai-workflow-rules.md` before the next one starts.
+
+- [ ] **Unit 1: Project setup, database foundation, shop separation** (about 2-3 days)
+  - Next.js + TypeScript + Tailwind + shadcn/ui project runs locally and deploys to Vercel
+  - Supabase connected; `.env.example` exists; scripts for `dev`, `build`, `typecheck`, `lint`, `test`
+  - Migrations create `shops`, `branches`, `profiles`, `products`, `stock_movements`, `sales`, `sale_items`, `stock_counts`, `stock_count_items`, `activity_log` with `shop_id` and RLS on all
+  - Seed creates one test shop in the first shop's shape (2 branches) with one owner and one staff
+  - SQL tests prove: a user from another shop sees nothing; staff can't read cost data
+- [ ] **Unit 2: Login and roles** (about 2 days)
+  - Email + password login and logout; session refresh works
+  - Owner and staff land on different home pages; staff can't open owner pages
+  - Staff cannot reach owner data even by calling the database directly
+- [ ] **Unit 3: Branches and products (owner)** (about 2 days)
+  - Owner can add, edit, and deactivate products (name, category, selling price, cost price, low-stock level)
+  - Owner can add and rename branches; owner can create staff logins and assign branches (`/team`)
+  - Staff can see product names and selling prices only (via `staff_products`), never cost
+  - Every change appears in the activity log
+- [ ] **Unit 4: Stock** (about 2-3 days)
+  - Owner can enter opening stock per branch, restock (optionally updating cost price), and make adjustments with a note
+  - Stock on hand per product and branch is correct and comes only from movements
+  - Movements cannot be edited or deleted (proved by a test)
+- [ ] **Unit 5: Record a sale** (about 3-4 days)
+  - Staff can record a multi-item sale with Cash or GCash in a few taps on a phone
+  - `record_sale` is atomic: sale, items, price/cost snapshot, stock reduction, and log entry all succeed together or not at all
+  - Double tap creates only one sale
+  - Staff can only sell at their branch; the owner can sell at any branch
+  - Selling at zero stock works and is flagged
+  - `/my-sales` shows only that staff member's sales, no cost or profit
+- [ ] **Unit 6: Sales list, void and correction** (about 2-3 days)
+  - Owner sees all sales with filters (date, branch, staff, status)
+  - Owner can void a sale with a reason; stock returns; the sale stays visible as voided; totals exclude it
+  - Owner can record a replacement sale linked to the original, keeping the original seller
+  - Staff cannot edit or delete any sale (proved by a test)
+- [ ] **>> MILESTONE: start the friend's "run both" week (app and notebook side by side)**
+- [ ] **Unit 7: Owner dashboard** (about 3 days)
+  - Shows, in order: today's sales and profit, low-stock list, sales per staff, missing stock
+  - Branch filter works; "today" uses Asia/Manila time
+  - Numbers match a hand calculation from the sales list
+  - Refreshes about every 30 seconds while open
+- [ ] **Unit 8: Stock count and gap report** (about 2-3 days)
+  - Owner can count some or all products at a branch and sees expected vs counted vs difference
+  - Accepting a count writes correction movements and appears in the log
+  - Missing stock (units and cost value) appears on the dashboard
+- [ ] **Unit 9: Polish, phone testing, real data, trial fixes** (about 3-5 days)
+  - Installable to the phone home screen with icons
+  - Loading, empty, and error states on every screen
+  - Real products loaded; issues from the trial week fixed
+  - Manual phone checklist passes on at least one iPhone-sized and one Android-sized screen
+
+## Open questions
+| # | Question | Who answers | Blocks |
+|---|---|---|---|
+| 1 | Confirm currency is PHP and timezone is Asia/Manila | Owner of the app | Unit 1 |
+| 2 | Final app name (Stokr) | Owner of the app | Unit 9 |
+| 3 | Do staff have email addresses to log in with? | Owner of the app / friend | Unit 3 |
+| 4 | Is the product category list (liquid, device, cartridge, other) right? | Friend | Unit 3 |
+| 5 | Confirm: never block a sale at zero stock, only flag it | Owner of the app | Unit 5 |
+| 6 | How often will the friend do a physical stock count? | Friend | Unit 8 |
+| 7 | How often do discounts and returns happen? | Friend | After Unit 6 |
+| 8 | How often do supplier prices change? | Friend | After Unit 4 |
+| 9 | Approve the color palette and fonts in `ui-context.md` | Owner of the app | Unit 3 |
+
+## Decisions log
+| Date | Decision |
+|---|---|
+| (planning) | Only the owner adds or restocks inventory, and only the owner corrects sales |
+| (planning) | Payment methods: Cash and GCash only |
+| (planning) | One current cost per product; each sale saves cost at time of sale; no batch costing |
+| (planning) | No inter-branch transfer feature; owner uses adjustments with a note |
+| (planning) | Online only; low-stock alerts are a dashboard list only |
+| (planning) | Data separation between shops built in now; no signup or billing in v1 |
+| (planning) | Success = staff stop using the notebook and the owner checks the dashboard daily |
+| (planning) | Void-and-keep instead of deleting sales; stock is the sum of movements |
+
+## Backlog (ideas not yet approved)
+*(empty: add ideas here; do not build them until the owner approves)*
+
+## Later (parked, not v1)
+Public signup and billing, offline mode, notifications, product variants, spreadsheet import, batch costing, discount and return features, barcode scanning and receipts, report export, branch transfers, live push updates on the dashboard.
+
+## Trial week notes
+*(empty: fill in during the "run both" week: what was slow, confusing, or wrong)*
+
+## Session log
+*(empty: the agent adds one line per session: date, unit, what was done)*
