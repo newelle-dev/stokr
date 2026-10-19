@@ -37,6 +37,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Staff can only sell at their branch; the owner can sell at any branch
   - Selling at zero stock works and is flagged
   - `/my-sales` shows only that staff member's sales, no cost or profit
+  - Revoke direct INSERT on `sales`, `sale_items`, `stock_movements`, and `activity_log` from `authenticated` once the database functions exist
 - [ ] **Unit 6: Sales list, void and correction** (about 2-3 days)
   - Owner sees all sales with filters (date, branch, staff, status)
   - Owner can void a sale with a reason; stock returns; the sale stays visible as voided; totals exclude it
@@ -84,12 +85,14 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | (planning) | Void-and-keep instead of deleting sales; stock is the sum of movements |
 | 2026-10-19 | Confirmed currency is Philippine Peso (PHP, integer centavos) and timezone is Asia/Manila |
 | 2026-10-19 | Confirmed no `src/` directory; App Router stays in root `app/` with `@/*` mapping to root |
+| 2026-10-19 | Single migration method: All DDL authored in `supabase/migrations/<version>_<name>.sql` and applied via Supabase migration tool (recorded in `supabase_migrations.schema_migrations`). Synchronized initial schema file to DB version `20261019073213`. |
+| 2026-10-19 | Enforced append-only invariant on `activity_log`: UPDATE, DELETE, and TRUNCATE prohibited via database triggers. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*
 
 ## Later (parked, not v1)
-Public signup and billing, offline mode, notifications, product variants, spreadsheet import, batch costing, discount and return features, barcode scanning and receipts, report export, branch transfers, live push updates on the dashboard.
+Public signup and billing, offline mode, notifications, product variants, spreadsheet import, batch costing, discount and return features, barcode scanning and receipts, report export, branch transfers, live push updates on the dashboard, deliberate shop-removal procedure (since append-only triggers on stock_movements and activity_log block cascade deletes if a shop row is deleted).
 
 ## Trial week notes
 *(empty: fill in during the "run both" week: what was slow, confusing, or wrong)*
@@ -98,3 +101,5 @@ Public signup and billing, offline mode, notifications, product variants, spread
 | Date | Unit | Summary |
 |---|---|---|
 | 2026-10-19 | Unit 1 | Initialized Next.js 16 (root app/), Supabase schema migration with 10 tables + RLS applied to dev Supabase DB, seed applied, live SQL security tests verified (staff, cross-shop, anon), proxy route guard verified with Vitest. |
+| 2026-10-19 | Unit 1 Verification | Re-ran live RLS security test suite with positive controls (sales, sale_items, stock_counts, stock_count_items, activity_log); audited anon database privileges and drafted revoke migration; audited git repo and verified zero secrets committed; synchronized local migration filename with dev DB migration history (`20261019073213_initial_schema.sql`); authored append-only trigger migration for `activity_log` and updated architecture invariants. |
+| 2026-10-19 | Unit 1 Hardening | Applied migrations `20261019082401_revoke_anon_public_access`, `20261019082409_make_activity_log_append_only`, and `20261019082512_revoke_anon_and_public_function_execute`. Verified `has_table_privilege` and `has_function_privilege` return false for anon on all public tables and routines. Performed write-path audit identifying staff insert paths on sales/movements/activity_log and profile privilege escalation vulnerability; formulated RLS policy hardening fix. |

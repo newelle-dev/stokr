@@ -70,7 +70,7 @@ Staff never receive cost prices, profit, or other staff members' sales. Base tab
 
 ## Invariants (never violate)
 1. Every business table has `shop_id` and RLS enabled. No table ships without policies.
-2. Stock is never stored as an editable number. It is the sum of `stock_movements`. Movements are append-only: no updates, no deletes.
+2. Stock is never stored as an editable number. It is the sum of `stock_movements`. Both `stock_movements` and `activity_log` are strictly append-only: updates, deletes, and truncates are prohibited and blocked by database triggers.
 3. Sales are never deleted. A mistake is a void with a reason.
 4. Each sale item stores product name, price, and cost at the time of sale. Changing a product later never changes past sales.
 5. Money is integer centavos everywhere (database, code, API). Format only at display time.
