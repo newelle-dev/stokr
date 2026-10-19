@@ -13,52 +13,7 @@ values
   ('00000000-0000-0000-0000-000000000020', '00000000-0000-0000-0000-000000000001', 'Annex Branch', true, now())
 on conflict (id) do nothing;
 
--- 3. Create Auth Users and Profiles
--- Note: inserting mock users into auth.users allows running seed/tests in local or dev Supabase environment
-insert into auth.users (
-  id,
-  instance_id,
-  email,
-  encrypted_password,
-  email_confirmed_at,
-  created_at,
-  updated_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  is_super_admin,
-  role,
-  aud
-)
-values
-  (
-    '00000000-0000-0000-0000-000000000100',
-    '00000000-0000-0000-0000-000000000000',
-    'owner@stokr.local',
-    crypt('password123', gen_salt('bf')),
-    now(),
-    now(),
-    now(),
-    '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Shop Owner"}',
-    false,
-    'authenticated',
-    'authenticated'
-  ),
-  (
-    '00000000-0000-0000-0000-000000000200',
-    '00000000-0000-0000-0000-000000000000',
-    'staff@stokr.local',
-    crypt('password123', gen_salt('bf')),
-    now(),
-    now(),
-    now(),
-    '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Staff Member 1"}',
-    false,
-    'authenticated',
-    'authenticated'
-  )
-on conflict (id) do nothing;
+-- 3. Profiles (Auth users are provisioned via local admin script scripts/setup-dev-auth.ts)
 
 -- Profiles
 insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active, created_at)

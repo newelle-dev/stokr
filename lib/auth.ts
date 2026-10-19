@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation';
 import { createClient } from './supabase/server';
+import { errorResult, successResult, type ActionResult } from './errors';
 import type { UserRole } from './supabase/database.types';
 
 export interface UserSessionProfile {
@@ -13,7 +15,8 @@ export interface UserSessionProfile {
 
 /**
  * Retrieves the currently authenticated user and their active shop profile.
- * Returns null if unauthenticated or profile is inactive.
+ * Invariant: Deactivated accounts (is_active = false) immediately return null
+ * and are treated as logged out on every request.
  */
 export async function getCurrentUser(): Promise<UserSessionProfile | null> {
   const supabase = await createClient();
@@ -49,23 +52,65 @@ export async function getCurrentUser(): Promise<UserSessionProfile | null> {
 }
 
 /**
- * Requires an active owner session. Throws an error if unauthorized.
+ * Page-level guard for Server Components and Layouts under (owner).
+ * If unauthenticated, redirects to /login.
+ * If staff, redirects to /sell.
  */
-export async function requireOwner(): Promise<UserSessionProfile> {
+export async function requireOwnerPage(): Promise<UserSessionProfile> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'owner') {
-    throw new Error('Unauthorized: Owner access required.');
+  if (!user) {
+    redirect('/login');
+  }
+  if (user.role !== 'owner') {
+    redirect('/sell');
   }
   return user;
 }
 
 /**
- * Requires an active staff or owner session. Throws an error if unauthorized.
+ * Page-level guard for Server Components and Layouts under (staff).
+ * If unauthenticated, redirects to /login.
  */
-export async function requireStaffOrOwner(): Promise<UserSessionProfile> {
+export async function requireStaffOrOwnerPage(): Promise<UserSessionProfile> {
   const user = await getCurrentUser();
   if (!user) {
-    throw new Error('Unauthorized: Authentication required.');
+    redirect('/login');
   }
   return user;
+}
+
+/**
+ * Server Action guard requiring an authenticated user.
+ * Invariant: Server action guards return an ActionResult with error code; they do not throw.
+ */
+export async function requireAuthAction(): Promise<ActionResult<UserSessionProfile>> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return errorResult(
+      'UNAUTHORIZED',
+      'You must be signed in to perform this action.'
+    );
+  }
+  return successResult(user);
+}
+
+/**
+ * Server Action guard requiring an owner user.
+ * Invariant: Server action guards return an ActionResult with error code; they do not throw.
+ */
+export async function requireOwnerAction(): Promise<ActionResult<UserSessionProfile>> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return errorResult(
+      'UNAUTHORIZED',
+      'You must be signed in to perform this action.'
+    );
+  }
+  if (user.role !== 'owner') {
+    return errorResult(
+      'FORBIDDEN',
+      'You do not have permission to perform this action.'
+    );
+  }
+  return successResult(user);
 }

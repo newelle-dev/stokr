@@ -3,8 +3,8 @@
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 1 complete.
-- **Current unit:** Unit 2 (not started)
+- **Phase:** Unit 2 complete.
+- **Current unit:** Unit 3 (not started)
 - **Last updated:** 2026-10-19
 - **Next milestone:** friend's "run both" week after Unit 6
 
@@ -17,13 +17,14 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Migrations create `shops`, `branches`, `profiles`, `products`, `stock_movements`, `sales`, `sale_items`, `stock_counts`, `stock_count_items`, `activity_log` with `shop_id` and RLS on all
   - Seed creates one test shop in the first shop's shape (2 branches) with one owner and one staff
   - SQL tests prove: a user from another shop sees nothing; staff can't read cost data
-- [ ] **Unit 2: Login and roles** (about 2 days)
+- [x] **Unit 2: Login and roles** (about 2 days)
   - Email + password login and logout; session refresh works
   - Owner and staff land on different home pages; staff can't open owner pages
   - Staff cannot reach owner data even by calling the database directly
 - [ ] **Unit 3: Branches and products (owner)** (about 2 days)
   - Owner can add, edit, and deactivate products (name, category, selling price, cost price, low-stock level)
   - Owner can add and rename branches; owner can create staff logins and assign branches (`/team`)
+  - Deactivating a staff member in `/team` must ban the user and revoke their sessions via Supabase Auth Admin API (`admin.auth.admin.updateUserById(id, { ban_duration: '876000h' })` / `admin.auth.admin.signOut(jwt, 'all')`)
   - Staff can see product names and selling prices only (via `staff_products`), never cost
   - Every change appears in the activity log
 - [ ] **Unit 4: Stock** (about 2-3 days)
@@ -87,9 +88,13 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | 2026-10-19 | Confirmed no `src/` directory; App Router stays in root `app/` with `@/*` mapping to root |
 | 2026-10-19 | Single migration method: All DDL authored in `supabase/migrations/<version>_<name>.sql` and applied via Supabase migration tool (recorded in `supabase_migrations.schema_migrations`). Synchronized initial schema file to DB version `20261019073213`. |
 | 2026-10-19 | Enforced append-only invariant on `activity_log`: UPDATE, DELETE, and TRUNCATE prohibited via database triggers. |
+| 2026-10-19 | Unit 2 Security & Architecture Hardening: Direct writes to ledger tables are owner-only; actor columns cannot be forged (`created_by = auth.uid()`, `actor_id = auth.uid()`, `recorded_by = auth.uid()`); stock movement reasons `sale` and `void_return` are function-only; staff can read only their own profile row; every owner page calls `requireOwnerPage()` directly; and every unit includes write-path tests proving staff cannot mutate unauthorized tables. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*
+
+## Known limitations
+- Last-owner race condition: A theoretical race could occur if two owners concurrently attempt to deactivate/demote themselves at the exact same millisecond without an explicit table lock. Given Stokr shops have at most 1-2 owners, this edge case is acknowledged as a documented limitation.
 
 ## Later (parked, not v1)
 Public signup and billing, offline mode, notifications, product variants, spreadsheet import, batch costing, discount and return features, barcode scanning and receipts, report export, branch transfers, live push updates on the dashboard, deliberate shop-removal procedure (since append-only triggers on stock_movements and activity_log block cascade deletes if a shop row is deleted).
@@ -103,3 +108,4 @@ Public signup and billing, offline mode, notifications, product variants, spread
 | 2026-10-19 | Unit 1 | Initialized Next.js 16 (root app/), Supabase schema migration with 10 tables + RLS applied to dev Supabase DB, seed applied, live SQL security tests verified (staff, cross-shop, anon), proxy route guard verified with Vitest. |
 | 2026-10-19 | Unit 1 Verification | Re-ran live RLS security test suite with positive controls (sales, sale_items, stock_counts, stock_count_items, activity_log); audited anon database privileges and drafted revoke migration; audited git repo and verified zero secrets committed; synchronized local migration filename with dev DB migration history (`20261019073213_initial_schema.sql`); authored append-only trigger migration for `activity_log` and updated architecture invariants. |
 | 2026-10-19 | Unit 1 Hardening | Applied migrations `20261019082401_revoke_anon_public_access`, `20261019082409_make_activity_log_append_only`, and `20261019082512_revoke_anon_and_public_function_execute`. Verified `has_table_privilege` and `has_function_privilege` return false for anon on all public tables and routines. Performed write-path audit identifying staff insert paths on sales/movements/activity_log and profile privilege escalation vulnerability; formulated RLS policy hardening fix. |
+| 2026-10-19 | Unit 2 | Implemented Unit 2 (Login and Roles): Auth & session refresh via `proxy.ts`, generic error on login failure, role-based landing (`/` -> `/dashboard` or `/sell`), page-level owner guards (`requireOwnerPage()`), non-throwing action guards (`requireAuthAction`, `requireOwnerAction`), database hardening migration (`20261019095210_harden_security.sql`) enforcing unfalsifiable actors, restricted movement reasons, staff profile isolation, and last active owner protection. All unit tests (35/35), integration tests (2/2), SQL security tests (8 blocks), typecheck, lint, and build verified passing. |
