@@ -14,7 +14,16 @@ export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+  const pathname = request.nextUrl.pathname;
+  const isAuthPage = pathname.startsWith('/login');
+  const isPublicPage = pathname === '/' || isAuthPage;
+
   if (!supabaseUrl || !supabaseAnonKey) {
+    if (!isPublicPage) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
     return supabaseResponse;
   }
 
@@ -42,9 +51,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-  const isAuthPage = pathname.startsWith('/login');
-  const isPublicPage = pathname === '/' || isAuthPage;
 
   // If not logged in and requesting a protected route, redirect to /login
   if (!user && !isPublicPage) {
