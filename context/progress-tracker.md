@@ -97,4 +97,4 @@ Public signup and billing, offline mode, notifications, product variants, spread
 ## Session log
 | Date | Unit | Summary |
 |---|---|---|
-| 2026-10-19 | Unit 1 | Initialized Next.js 16 project structure (root app/), Supabase schema migration with 10 tables and RLS, seed data, SQL security tests, money & date libraries with Vitest tests. |
+| 2026-10-19 | Unit 1 | Initialized Next.js 16 (root app/), Supabase schema migration with 10 tables + RLS applied to dev Supabase DB, seed applied, live SQL security tests verified (staff, cross-shop, anon), proxy route guard verified with Vitest. |
