@@ -250,6 +250,7 @@ select
   product_id,
   coalesce(sum(quantity_change), 0)::integer as stock_on_hand
 from public.stock_movements
+where shop_id = (select public.current_user_shop_id())
 group by shop_id, branch_id, product_id;
 
 -- Staff safe products view (omits cost_price_centavos)
@@ -282,6 +283,11 @@ select
 from public.sales
 where shop_id = (select public.current_user_shop_id())
   and sold_by = (select auth.uid());
+
+-- Explicitly revoke public/anon access from all views
+revoke all on public.stock_levels from anon;
+revoke all on public.staff_products from anon;
+revoke all on public.my_sales from anon;
 
 -- ============================================================================
 -- 7. ROW LEVEL SECURITY (RLS) POLICIES
@@ -390,3 +396,13 @@ create policy "activity_log_select_owner" on public.activity_log
 create policy "activity_log_insert" on public.activity_log
   for insert to authenticated
   with check (shop_id = (select public.current_user_shop_id()));
+
+-- ============================================================================
+-- 8. PERMISSIONS & GRANTS
+-- ============================================================================
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant select on public.stock_levels to anon, authenticated;
+grant select on public.staff_products to anon, authenticated;
+grant select on public.my_sales to anon, authenticated;
+grant execute on all functions in schema public to anon, authenticated;
