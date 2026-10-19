@@ -41,6 +41,7 @@ Next.js (App Router) + TypeScript (strict) + Supabase (Postgres, Auth, RLS) + Ta
 7. **Verify before moving on:** acceptance criteria met, `npm run typecheck`, `npm run lint`, `npm test`, SQL tests, and the manual phone checklist.
 8. **After each unit:** update `progress-tracker.md`, make one commit (`unit N: description`), and give a short plain-language summary.
 9. **Skills are guidance, context files are law.** If an installed skill conflicts with `/context/`, follow `/context/` and ask the owner. No new skills, MCP servers, or plugins without approval.
+10. **No `src/` directory.** Keep the Next.js App Router in the root `app/` folder. Do not move `app/` into `src/`. Import alias `@/*` maps to the project root.
 
 ## Working with the owner
 The owner is the product owner and a junior developer. Use plain language, explain trade-offs by practical impact, be honest about limits, and push back politely when asked to break the scope or an invariant. Keep them in control: ask before schema changes, auth changes, or anything in the "Hard stops" list in `ai-workflow-rules.md`.

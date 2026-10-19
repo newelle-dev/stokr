@@ -3,14 +3,15 @@
 ## TypeScript
 - `strict: true`. No `any` (use `unknown` and narrow it). No `@ts-ignore` without a comment explaining why and owner approval.
 - Prefer `type` for data shapes. Use string unions for fixed choices (`'cash' | 'gcash'`).
-- Database types are generated with `supabase gen types` into `src/lib/supabase/database.types.ts`. Never hand-edit this file.
+- Database types are generated with `supabase gen types` into `lib/supabase/database.types.ts`. Never hand-edit this file.
 - Database columns are `snake_case`; TypeScript is `camelCase`. Convert at the data-access boundary, in one place per feature.
-- Money is an integer number of centavos. All money math and formatting goes through `src/lib/money.ts`. No floating-point money anywhere.
-- Dates are stored in UTC. All "today" and display logic goes through `src/lib/dates.ts` using the `Asia/Manila` timezone.
+- Money is an integer number of centavos. All money math and formatting goes through `lib/money.ts`. No floating-point money anywhere.
+- Dates are stored in UTC. All "today" and display logic goes through `lib/dates.ts` using the `Asia/Manila` timezone.
 
 ## Folder organization
+There is **no `src/` directory.** The App Router lives in the root `app/` folder, and the import alias `@/*` points to the project root.
+
 ```
-src/
   app/
     (auth)/login/
     (staff)/sell/            (owner may also use /sell)
@@ -34,7 +35,7 @@ src/
     ui/                 shadcn/ui primitives (generated)
     shared/             small reusable pieces (MoneyText, EmptyState, PageHeader)
   lib/
-    supabase/           server.ts, client.ts, admin.ts, middleware helper, database.types.ts
+    supabase/           server.ts, client.ts, admin.ts, proxy.ts (session helper), database.types.ts
     money.ts
     dates.ts
     auth.ts             getCurrentUser, requireOwner, requireStaffOrOwner
@@ -59,6 +60,9 @@ public/                 manifest, icons
   5. Revalidates affected paths.
 - Never trust the role or shop sent by the browser. Always read it from the session.
 - Route handlers (`route.ts`) are not used in v1 unless the owner approves a need.
+- This project uses the current Next.js (16 or newer). Use `proxy.ts` in the project root, never `middleware.ts`, and export a function named `proxy`.
+- `proxy.ts` only refreshes the Supabase session and does coarse redirects (logged-out users go to `/login`). It is never the only protection: every server action and every database table still checks the user and role (RLS is the real protection).
+- Before using any Next.js API, check the installed version and the official docs for it. Do not rely on older patterns from memory (for example: `params`, `cookies()`, and `headers()` are async in current versions).
 
 ## API result shape
 ```

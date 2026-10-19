@@ -3,15 +3,15 @@
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Documentation complete. Build not started.
-- **Current unit:** Unit 1 (not started)
-- **Last updated:** (agent fills in with the date after each unit)
+- **Phase:** Unit 1 complete.
+- **Current unit:** Unit 2 (not started)
+- **Last updated:** 2026-10-19
 - **Next milestone:** friend's "run both" week after Unit 6
 
 ## Build roadmap
 Each unit must meet its acceptance criteria and the verification steps in `ai-workflow-rules.md` before the next one starts.
 
-- [ ] **Unit 1: Project setup, database foundation, shop separation** (about 2-3 days)
+- [x] **Unit 1: Project setup, database foundation, shop separation** (about 2-3 days)
   - Next.js + TypeScript + Tailwind + shadcn/ui project runs locally and deploys to Vercel
   - Supabase connected; `.env.example` exists; scripts for `dev`, `build`, `typecheck`, `lint`, `test`
   - Migrations create `shops`, `branches`, `profiles`, `products`, `stock_movements`, `sales`, `sale_items`, `stock_counts`, `stock_count_items`, `activity_log` with `shop_id` and RLS on all
@@ -61,7 +61,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 ## Open questions
 | # | Question | Who answers | Blocks |
 |---|---|---|---|
-| 1 | Confirm currency is PHP and timezone is Asia/Manila | Owner of the app | Unit 1 |
+| 1 | ~Confirm currency is PHP and timezone is Asia/Manila~ (Confirmed: PHP & Asia/Manila) | Owner of the app | Unit 1 (Resolved) |
 | 2 | Final app name (Stokr) | Owner of the app | Unit 9 |
 | 3 | Do staff have email addresses to log in with? | Owner of the app / friend | Unit 3 |
 | 4 | Is the product category list (liquid, device, cartridge, other) right? | Friend | Unit 3 |
@@ -82,6 +82,8 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | (planning) | Data separation between shops built in now; no signup or billing in v1 |
 | (planning) | Success = staff stop using the notebook and the owner checks the dashboard daily |
 | (planning) | Void-and-keep instead of deleting sales; stock is the sum of movements |
+| 2026-10-19 | Confirmed currency is Philippine Peso (PHP, integer centavos) and timezone is Asia/Manila |
+| 2026-10-19 | Confirmed no `src/` directory; App Router stays in root `app/` with `@/*` mapping to root |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*
@@ -93,4 +95,6 @@ Public signup and billing, offline mode, notifications, product variants, spread
 *(empty: fill in during the "run both" week: what was slow, confusing, or wrong)*
 
 ## Session log
-*(empty: the agent adds one line per session: date, unit, what was done)*
+| Date | Unit | Summary |
+|---|---|---|
+| 2026-10-19 | Unit 1 | Initialized Next.js 16 project structure (root app/), Supabase schema migration with 10 tables and RLS, seed data, SQL security tests, money & date libraries with Vitest tests. |

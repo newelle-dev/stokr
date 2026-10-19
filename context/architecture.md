@@ -30,7 +30,7 @@
 - Role lives in `profiles.role`: `owner` or `staff`.
 - Owner creates staff accounts from `/team` (server action using the service role key). Staff get a temporary password and are asked to change it on first login.
 - Staff have a home `branch_id`. Staff can only record sales for that branch. The owner can record at any branch.
-- Route guards in Next.js layouts redirect by role. Guards are for usability; **RLS is the real protection.**
+- Route guards use `proxy.ts` (session refresh and redirect to `/login`) plus role checks in layouts. Guards are for usability; **RLS and server-side role checks are the real protection.** `proxy.ts` alone must never be relied on to protect server actions.
 
 ## Data model
 Money is stored as whole centavos (integers). Timestamps are `timestamptz` (UTC).
