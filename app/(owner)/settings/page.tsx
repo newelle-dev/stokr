@@ -4,6 +4,7 @@ import { getOwnerBranches } from '@/features/branches/queries';
 import { BranchList } from '@/features/branches/components/branch-list';
 import { StoreCodeCard } from './store-code-card';
 
+
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
