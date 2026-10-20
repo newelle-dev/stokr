@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { requireStaffOrOwnerPage } from '@/lib/auth';
 import { SignOutButton } from '@/components/shared/sign-out-button';
+import { LogoMark } from '@/components/ui/logo';
 
 export default async function StaffLayout({
   children,
@@ -14,9 +15,7 @@ export default async function StaffLayout({
       {/* Top Header */}
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--card)] px-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-            S
-          </div>
+          <LogoMark className="h-8 w-8" />
           <div>
             <div className="text-base font-semibold leading-tight text-[var(--foreground)]">
               Stokr

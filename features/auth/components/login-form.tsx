@@ -9,6 +9,7 @@ import { loginAction } from '../actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Logo } from '@/components/ui/logo';
 import {
   Card,
   CardHeader,
@@ -59,11 +60,11 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm border-[var(--border)] bg-[var(--card)] shadow-sm">
       <CardHeader className="space-y-1 text-center">
-        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-          S
+        <div className="mx-auto mb-2 flex justify-center">
+          <Logo height={20} width={192} />
         </div>
         <CardTitle className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
-          Sign in to Stokr
+          Sign In
         </CardTitle>
         <CardDescription className="text-sm text-[var(--muted-foreground)]">
           Enter your shop credentials to access your account
