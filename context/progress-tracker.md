@@ -3,9 +3,9 @@
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 2 complete.
-- **Current unit:** Unit 3 (not started)
-- **Last updated:** 2026-10-19
+- **Phase:** Unit 3 complete.
+- **Current unit:** Unit 4 (not started)
+- **Last updated:** 2026-10-20
 - **Next milestone:** friend's "run both" week after Unit 6
 
 ## Build roadmap
@@ -21,7 +21,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Email + password login and logout; session refresh works
   - Owner and staff land on different home pages; staff can't open owner pages
   - Staff cannot reach owner data even by calling the database directly
-- [ ] **Unit 3: Branches and products (owner)** (about 2 days)
+- [x] **Unit 3: Branches and products (owner)** (about 2 days)
   - Owner can add, edit, and deactivate products (name, category, selling price, cost price, low-stock level)
   - Owner can add and rename branches; owner can create staff logins and assign branches (`/team`)
   - Deactivating a staff member in `/team` must ban the user and revoke their sessions via Supabase Auth Admin API (`admin.auth.admin.updateUserById(id, { ban_duration: '876000h' })` / `admin.auth.admin.signOut(jwt, 'all')`)
@@ -65,13 +65,13 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 |---|---|---|---|
 | 1 | ~Confirm currency is PHP and timezone is Asia/Manila~ (Confirmed: PHP & Asia/Manila) | Owner of the app | Unit 1 (Resolved) |
 | 2 | Final app name (Stokr) | Owner of the app | Unit 9 |
-| 3 | Do staff have email addresses to log in with? | Owner of the app / friend | Unit 3 |
-| 4 | Is the product category list (liquid, device, cartridge, other) right? | Friend | Unit 3 |
+| 3 | ~Do staff have email addresses to log in with?~ (Resolved: Store code + username mapped to `username.storecode@staff.stokr.invalid`) | Owner of the app / friend | Unit 3 (Resolved) |
+| 4 | ~Is the product category list (liquid, device, cartridge, other) right?~ (Resolved: Approved) | Friend | Unit 3 (Resolved) |
 | 5 | Confirm: never block a sale at zero stock, only flag it | Owner of the app | Unit 5 |
 | 6 | How often will the friend do a physical stock count? | Friend | Unit 8 |
 | 7 | How often do discounts and returns happen? | Friend | After Unit 6 |
 | 8 | How often do supplier prices change? | Friend | After Unit 4 |
-| 9 | Approve the color palette and fonts in `ui-context.md` | Owner of the app | Unit 3 |
+| 9 | ~Approve the color palette and fonts in `ui-context.md`~ (Resolved: Approved) | Owner of the app | Unit 3 (Resolved) |
 
 ## Decisions log
 | Date | Decision |
@@ -89,6 +89,15 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | 2026-10-19 | Single migration method: All DDL authored in `supabase/migrations/<version>_<name>.sql` and applied via Supabase migration tool (recorded in `supabase_migrations.schema_migrations`). Synchronized initial schema file to DB version `20261019073213`. |
 | 2026-10-19 | Enforced append-only invariant on `activity_log`: UPDATE, DELETE, and TRUNCATE prohibited via database triggers. |
 | 2026-10-19 | Unit 2 Security & Architecture Hardening: Direct writes to ledger tables are owner-only; actor columns cannot be forged (`created_by = auth.uid()`, `actor_id = auth.uid()`, `recorded_by = auth.uid()`); stock movement reasons `sale` and `void_return` are function-only; staff can read only their own profile row; every owner page calls `requireOwnerPage()` directly; and every unit includes write-path tests proving staff cannot mutate unauthorized tables. |
+| 2026-10-20 | Cache Policy & Dynamic Routing: Removed `cacheComponents` and `partialPrefetching` from `next.config.ts`. Enforced invariant 18: Never use `"use cache"` or any cross-request caching for data tied to a shop or user; all such reads are dynamic (`export const dynamic = 'force-dynamic'`). |
+| 2026-10-20 | Workflow Rule: "Show me before applying" means stop completely, show the complete SQL/code, and wait for the owner's explicit go before applying or executing. |
+| 2026-10-20 | Full 10-Table Write-Path Matrix: Extended `unit2_security_tests.sql` to test direct INSERT, UPDATE, and DELETE by staff users across all 10 tables (`shops`, `branches`, `profiles`, `products`, `stock_movements`, `sales`, `sale_items`, `stock_counts`, `stock_count_items`, `activity_log`). |
+| 2026-10-20 | Profile ID Immutability: Enforced via `validate_profile_mutation()` trigger (`id cannot be changed.`). Applied via migration `20261020083950_profile_id_immutable.sql`. |
+| 2026-10-20 | Shop-Scoped Composite Foreign Keys & No Cascade: Applied composite unique keys `(shop_id, id)` and composite foreign keys `(shop_id, referenced_id)` across all 15 tenant references via migration `20261020084634_shop_scoped_composite_foreign_keys.sql`. Prohibited `CASCADE` and `SET NULL` (default `NO ACTION` enforced). Deleting entities with history refused with `23503`. Documented as Invariants 19 & 20 in `context/architecture.md`. |
+| 2026-10-20 | Unit 3 Architecture & Invariant 21: Added Invariant 21 (never authorize via `user_metadata`; roles and access originate strictly from `profiles`). Added `shops.store_code` (unique regex `^[a-z0-9]{3,20}$`) and `profiles.username`. Staff login internally routes to `username.storecode@staff.stokr.invalid`. |
+| 2026-10-20 | Staff Password Lockdown & DB Immunity: Added `profiles.must_change_password` and fail-closed table `public.profile_security` (composite PK/FK `(shop_id, profile_id)`, default NO ACTION, RLS enabled, zero public privileges). When `must_change_password = true`, RLS helpers `current_user_shop_id()`, `is_owner()`, and `current_user_role()` return NULL, locking down the session at DB and page layers. Trigger snapshots encrypted hash on flag transition; `complete_password_change()` enforces new hash != temp hash and clears flag. |
+| 2026-10-20 | Activity Log Trigger Actor Enforcement: In `log_entity_activity()`, requests with JWT claims but null `auth.uid()` raise an exception; direct connections without JWT claims bypass trigger for migrations/seeds. All profile mutations in app actions execute via owner session client to maintain authentic `auth.uid()`, with admin service-role client used exclusively for auth user provisioning and bans. |
+| 2026-10-20 | Branch Deactivation Guard: `validate_branch_mutation()` blocks branch deactivation if active staff are assigned or if attempting to deactivate the last remaining active branch. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*
@@ -109,3 +118,7 @@ Public signup and billing, offline mode, notifications, product variants, spread
 | 2026-10-19 | Unit 1 Verification | Re-ran live RLS security test suite with positive controls (sales, sale_items, stock_counts, stock_count_items, activity_log); audited anon database privileges and drafted revoke migration; audited git repo and verified zero secrets committed; synchronized local migration filename with dev DB migration history (`20261019073213_initial_schema.sql`); authored append-only trigger migration for `activity_log` and updated architecture invariants. |
 | 2026-10-19 | Unit 1 Hardening | Applied migrations `20261019082401_revoke_anon_public_access`, `20261019082409_make_activity_log_append_only`, and `20261019082512_revoke_anon_and_public_function_execute`. Verified `has_table_privilege` and `has_function_privilege` return false for anon on all public tables and routines. Performed write-path audit identifying staff insert paths on sales/movements/activity_log and profile privilege escalation vulnerability; formulated RLS policy hardening fix. |
 | 2026-10-19 | Unit 2 | Implemented Unit 2 (Login and Roles): Auth & session refresh via `proxy.ts`, generic error on login failure, role-based landing (`/` -> `/dashboard` or `/sell`), page-level owner guards (`requireOwnerPage()`), non-throwing action guards (`requireAuthAction`, `requireOwnerAction`), database hardening migration (`20261019095210_harden_security.sql`) enforcing unfalsifiable actors, restricted movement reasons, staff profile isolation, and last active owner protection. All unit tests (35/35), integration tests (2/2), SQL security tests (8 blocks), typecheck, lint, and build verified passing. |
+| 2026-10-20 | Unit 2 Review & Hardening | Removed cacheComponents/partialPrefetching from next.config.ts; standard dynamic routing enforced via export const dynamic = 'force-dynamic'; added Invariant 18 forbidding cross-request caching of user/shop data; extended SQL test suite to cover staff INSERT, UPDATE, and DELETE on all 10 tables; recorded rule that 'show me before applying' mandates a complete stop and explicit approval. |
+| 2026-10-20 | Unit 2 Signup & Write Matrix Verification | Strengthened public signup integration test to strictly assert /signups not allowed for this instance/i and fail on any other error or success; verified dev auth.users has zero stray accounts (exactly 2 seed users); executed comprehensive 58-row live security test suite (INSERT/UPDATE/DELETE rejections across all 10 tables, owner positive controls, immutability assertions); disabled public signups in dashboard and verified `npm run test:integration` passes 2/2. |
+| 2026-10-20 | Unit 3 Prep / Composite Foreign Keys | Applied profile ID immutability migration (`20261020083950_profile_id_immutable.sql`) and shop-scoped composite foreign keys migration (`20261020084634_shop_scoped_composite_foreign_keys.sql`) enforcing composite keys across all 15 tenant references with default NO ACTION (all cascades/set null removed). Added Invariants 19 & 20 to architecture.md. Verified with 31/31 passing tests in `composite_foreign_keys_test.sql`. |
+| 2026-10-20 | Unit 3 | Implemented Unit 3 (Branches, products, and staff accounts): Applied migration `20261020100000_unit3_branches_products_team.sql` adding `shops.store_code`, `profiles.username`, `must_change_password`, `profile_security` table, automated `log_entity_activity()` triggers, and branch deactivation guards. Built `/products`, `/team`, and `/settings` pages with server-action CRUD, below-cost pricing warnings, store-code generation, and accessible dialogs. Added forced first-login password change flow (`/change-password`) with database-level isolation and fail-closed snapshot verification. Built responsive owner layout (sidebar on desktop, bottom navigation tab bar on mobile). Verified with 42 unit tests, 12 live database integration tests, 0 lint errors/warnings, clean typecheck, and Next.js production build. |

@@ -7,9 +7,11 @@ export interface UserSessionProfile {
   id: string;
   shopId: string;
   fullName: string;
+  username: string | null;
   role: UserRole;
   branchId: string | null;
   isActive: boolean;
+  mustChangePassword: boolean;
   email: string | null;
 }
 
@@ -32,7 +34,7 @@ export async function getCurrentUser(): Promise<UserSessionProfile | null> {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('id, shop_id, full_name, role, branch_id, is_active')
+    .select('id, shop_id, full_name, username, role, branch_id, is_active, must_change_password')
     .eq('id', user.id)
     .single();
 
@@ -44,9 +46,11 @@ export async function getCurrentUser(): Promise<UserSessionProfile | null> {
     id: profile.id,
     shopId: profile.shop_id,
     fullName: profile.full_name,
-    role: profile.role,
+    username: profile.username,
+    role: profile.role as UserRole,
     branchId: profile.branch_id,
     isActive: profile.is_active,
+    mustChangePassword: profile.must_change_password,
     email: user.email ?? null,
   };
 }
@@ -54,12 +58,16 @@ export async function getCurrentUser(): Promise<UserSessionProfile | null> {
 /**
  * Page-level guard for Server Components and Layouts under (owner).
  * If unauthenticated, redirects to /login.
+ * If password change is required, redirects to /change-password.
  * If staff, redirects to /sell.
  */
 export async function requireOwnerPage(): Promise<UserSessionProfile> {
   const user = await getCurrentUser();
   if (!user) {
     redirect('/login');
+  }
+  if (user.mustChangePassword) {
+    redirect('/change-password');
   }
   if (user.role !== 'owner') {
     redirect('/sell');
@@ -70,8 +78,24 @@ export async function requireOwnerPage(): Promise<UserSessionProfile> {
 /**
  * Page-level guard for Server Components and Layouts under (staff).
  * If unauthenticated, redirects to /login.
+ * If password change is required, redirects to /change-password.
  */
 export async function requireStaffOrOwnerPage(): Promise<UserSessionProfile> {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect('/login');
+  }
+  if (user.mustChangePassword) {
+    redirect('/change-password');
+  }
+  return user;
+}
+
+/**
+ * Page-level guard for /change-password.
+ * If unauthenticated, redirects to /login.
+ */
+export async function requirePasswordChangePage(): Promise<UserSessionProfile> {
   const user = await getCurrentUser();
   if (!user) {
     redirect('/login');

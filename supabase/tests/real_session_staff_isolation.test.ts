@@ -108,4 +108,28 @@ describe('Real Session Staff Isolation (Live DB)', () => {
       is_active: true,
     });
   });
+
+  it('rejects attempts to change profiles.id by the owner with "id cannot be changed."', async () => {
+    const ownerClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const { data: authData, error: authError } = await ownerClient.auth.signInWithPassword({
+      email: creds.owner.email,
+      password: creds.owner.password,
+    });
+
+    expect(authError).toBeNull();
+    expect(authData.session).not.toBeNull();
+
+    // Owner attempts to modify a profile's id
+    const { error: updateError } = await ownerClient
+      .from('profiles')
+      .update({ id: '00000000-0000-0000-0000-999999999999' })
+      .eq('id', creds.staff.id);
+
+    expect(updateError).not.toBeNull();
+    expect(updateError?.message).toMatch(/id cannot be changed/i);
+  });
 });
+

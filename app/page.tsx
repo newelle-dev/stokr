@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 
-export const instant = false;
+export const dynamic = 'force-dynamic';
 
 /**
  * Root page acts as the role dispatcher.
@@ -14,6 +14,10 @@ export default async function HomePage() {
 
   if (!user) {
     redirect('/login');
+  }
+
+  if (user.mustChangePassword) {
+    redirect('/change-password');
   }
 
   if (user.role === 'owner') {

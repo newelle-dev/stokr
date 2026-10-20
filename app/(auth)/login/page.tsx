@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { LoginForm } from '@/features/auth/components/login-form';
 
-export const instant = false;
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Sign In | Stokr',

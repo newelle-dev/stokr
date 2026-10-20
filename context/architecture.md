@@ -86,6 +86,10 @@ Staff never receive cost prices, profit, or other staff members' sales. Base tab
 15. Stock movement reasons `sale` and `void_return` are function-only (`record_sale` and `void_sale`) and cannot be written by direct INSERT.
 16. Staff can read only their own profile row; staff cannot read other staff profiles or owner profiles.
 17. Every `page.tsx` under `app/(owner)` must call `requireOwnerPage()` directly; layouts are for UI structure only and must not be the only guard.
+18. Dynamic data only: never use `"use cache"` or any cross-request caching for data tied to a shop or user; all such reads are dynamic.
+19. Cross-shop references are impossible because every foreign key referencing a tenant table is composite `(shop_id, referenced_id)` matching `(shop_id, id)` on the parent table.
+20. Business records are never deleted, only deactivated or voided. Foreign keys between tenant tables never cascade (`ON DELETE CASCADE` and `ON DELETE SET NULL` are forbidden; all tenant foreign keys use default NO ACTION). Deleting a branch, product, profile, or sale that has history must fail with a foreign key violation.
+21. Never use `user_metadata` or any user-editable data for authorization; roles and access come only from the `profiles` table.
 
 ## Environment variables
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: allowed in the browser.

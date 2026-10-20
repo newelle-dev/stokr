@@ -50,7 +50,8 @@ describe('Public Signup Disabled (Live DB)', () => {
     }
 
     expect(error).not.toBeNull();
-    expect(error?.message).toMatch(/signups not allowed|signup is disabled|not authorized|disabled|rate limit/i);
+    expect(error?.message).toMatch(/signups not allowed for this instance/i);
     expect(data.session).toBeNull();
+    expect(data.user).toBeNull();
   });
 });

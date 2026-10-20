@@ -41,6 +41,14 @@ export function parsePesosToCentavos(pesoAmount: number | string): number {
 }
 
 /**
+ * Converts integer centavos to decimal pesos (e.g., 123450 -> 1234.50).
+ */
+export function centavosToPesos(centavos: number): number {
+  assertIntegerCentavos(centavos);
+  return centavos / 100;
+}
+
+/**
  * Adds multiple centavo amounts together.
  */
 export function addMoney(...amounts: number[]): number {

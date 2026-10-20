@@ -63,6 +63,7 @@ public/                 manifest, icons
 - Every `page.tsx` under `app/(owner)` must call `requireOwnerPage()` itself; layouts are for UI structure only and must not be the only guard.
 - This project uses the current Next.js (16 or newer). Use `proxy.ts` in the project root, never `middleware.ts`, and export a function named `proxy`.
 - `proxy.ts` only refreshes the Supabase session and does coarse redirects (logged-out users go to `/login`). It is never the only protection: every server action and every database table still checks the user and role (RLS is the real protection).
+- Never use `"use cache"` or any cross-request caching for data tied to a shop or user; all such reads are dynamic.
 - Before using any Next.js API, check the installed version and the official docs for it. Do not rely on older patterns from memory (for example: `params`, `cookies()`, and `headers()` are async in current versions).
 
 ## API result shape

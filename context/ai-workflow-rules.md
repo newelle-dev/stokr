@@ -75,4 +75,5 @@ A unit is done only when **all** of these pass:
 - Anything that would send cost or profit data to a staff user
 - Adding a paid service or a new account
 - Changing the scope, the data model, or an invariant
+- "Show me before applying" means stop completely, present the proposal/SQL, and wait for the owner's explicit go before applying it.
 

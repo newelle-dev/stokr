@@ -1,7 +1,7 @@
 import { requireStaffOrOwnerPage } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-export const instant = false;
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Sell | Stokr',

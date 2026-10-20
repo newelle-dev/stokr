@@ -2,8 +2,8 @@
 -- Seed script for Unit 1: 1 shop in the first shop's shape (2 branches), 1 owner, 1 staff, sample inventory.
 
 -- 1. Create Demo Shop
-insert into public.shops (id, name, created_at)
-values ('00000000-0000-0000-0000-000000000001', 'Cloud Haven Vape Shop', now())
+insert into public.shops (id, name, store_code, created_at)
+values ('00000000-0000-0000-0000-000000000001', 'Cloud Haven Vape Shop', 'cloudhaven', now())
 on conflict (id) do nothing;
 
 -- 2. Create 2 Branches
@@ -16,10 +16,10 @@ on conflict (id) do nothing;
 -- 3. Profiles (Auth users are provisioned via local admin script scripts/setup-dev-auth.ts)
 
 -- Profiles
-insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active, created_at)
+insert into public.profiles (id, shop_id, full_name, role, username, branch_id, must_change_password, is_active, created_at)
 values
-  ('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Shop Owner', 'owner', null, true, now()),
-  ('00000000-0000-0000-0000-000000000200', '00000000-0000-0000-0000-000000000001', 'Staff Member 1', 'staff', '00000000-0000-0000-0000-000000000010', true, now())
+  ('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Shop Owner', 'owner', null, null, false, true, now()),
+  ('00000000-0000-0000-0000-000000000200', '00000000-0000-0000-0000-000000000001', 'Staff Member 1', 'staff', 'staff1', '00000000-0000-0000-0000-000000000010', false, true, now())
 on conflict (id) do nothing;
 
 -- 4. Sample Products
