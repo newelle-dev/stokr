@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 // Load .env
 const envPath = path.resolve(process.cwd(), '.env');
@@ -40,9 +41,13 @@ async function main() {
 
   const staffId = creds.staff.id;
   const staffEmail = creds.staff.email;
-  const restoredPermanentPassword = creds.staff.password; // 'Stokr-Dev-Staff-3bY7*kL9#mN2!wE5xT8'
-  const tempPassword1 = 'TempPassOne!2026';
-  const tempPassword2 = 'TempPassTwo!2026';
+  const restoredPermanentPassword = creds.staff.password;
+  
+  const generateRandomPassword = () =>
+    `Sec_${crypto.randomBytes(12).toString('hex')}!Aa1`;
+  const tempPassword1 = generateRandomPassword();
+  const tempPassword2 = generateRandomPassword();
+  const intermediatePassword = generateRandomPassword();
 
   try {
     // 1. Owner signs in with real session
@@ -89,7 +94,7 @@ async function main() {
     if (hash1 === hash2) throw new Error('Snapshot hash did not change on second reset!');
 
     // 4. Staff signs in with Second Temp Password
-    console.log('\n[Step 4] Staff signs in with Second Temp Password (TempPassTwo!2026)...');
+    console.log('\n[Step 4] Staff signs in with Second Temp Password...');
     const staffClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -122,8 +127,8 @@ async function main() {
 
     // 6. Staff performs REAL password change via Supabase Auth
     console.log('\n[Step 6] Staff performs REAL password change via Supabase Auth...');
-    const { data: updateData, error: updateErr } = await staffClient.auth.updateUser({
-      password: restoredPermanentPassword,
+    const { error: updateErr } = await staffClient.auth.updateUser({
+      password: intermediatePassword,
     });
     if (updateErr) throw new Error(`Staff updateUser failed: ${updateErr.message}`);
     console.log('Staff updated password in Supabase Auth successfully.');
@@ -158,17 +163,17 @@ async function main() {
       throw new Error('Expected profile_security row to be deleted!');
     }
 
-    // 9. Confirm staff signs in with permanent password
-    console.log('\n[Step 9] Verifying staff can sign in with permanent password...');
+    // 9. Confirm staff signs in with newly changed password
+    console.log('\n[Step 9] Verifying staff can sign in with newly changed password...');
     const finalStaffClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { error: finalSignInErr } = await finalStaffClient.auth.signInWithPassword({
       email: staffEmail,
-      password: restoredPermanentPassword,
+      password: intermediatePassword,
     });
-    if (finalSignInErr) throw new Error(`Final sign in with permanent password failed: ${finalSignInErr.message}`);
-    console.log('PASS: Staff signed in successfully with permanent password.');
+    if (finalSignInErr) throw new Error(`Final sign in with newly changed password failed: ${finalSignInErr.message}`);
+    console.log('PASS: Staff signed in successfully with newly changed password.');
 
     // 10. Check auth.users count
     const { data: authUsers } = await adminClient.auth.admin.listUsers();
@@ -181,6 +186,7 @@ async function main() {
   } finally {
     // Guaranteed cleanup: ensure seed staff account password and must_change_password are fully restored
     try {
+      console.log('\n[Cleanup] Restoring original seed staff password and flag state...');
       await adminClient.auth.admin.updateUserById(staffId, { password: restoredPermanentPassword });
       await adminClient.from('profile_security').delete().eq('profile_id', staffId);
       const restoreStaff = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -188,6 +194,7 @@ async function main() {
       if (!restoreLoginErr) {
         await restoreStaff.rpc('complete_password_change');
       }
+      console.log('PASS: Seed staff account successfully restored to original password.');
     } catch (cleanupErr) {
       console.error('Warning: Seed staff account restoration encountered an error:', cleanupErr);
     }

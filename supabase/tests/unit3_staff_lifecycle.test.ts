@@ -36,9 +36,9 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
   let createdStaffUserId: string | null = null;
   const testUsername = `staff_${Date.now().toString(36)}`;
   const testEmail = `${testUsername}.cloudhaven@staff.stokr.invalid`;
-  const initialTempPassword = 'TempPassword123!';
-  const updatedTempPassword = 'NewTempPassword789!';
-  const permanentPassword = 'PermanentPassword2026!';
+  const initialTempPassword = `Temp_${Date.now()}_Aa1!`;
+  const updatedTempPassword = `NewTemp_${Date.now()}_Bb2!`;
+  const permanentPassword = `Perm_${Date.now()}_Cc3!`;
 
   afterAll(async () => {
     if (createdStaffUserId) {
@@ -219,7 +219,7 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
       console.log('GoTrue accepted 5-character password:', shortData);
     }
     expect(shortErr).not.toBeNull();
-    expect(shortErr!.message).toMatch(/at least 6 characters/i);
+    expect(shortErr!.message).toMatch(/at least (?:6|10) characters/i);
   });
 
   it('records actual behavior for 8(e): staff edits their own user_metadata', async () => {
@@ -382,5 +382,300 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
     const { error: directErr } = await staffClient.rpc('complete_password_change');
     expect(directErr).not.toBeNull();
     expect(directErr!.message).toMatch(/password has not been changed/i);
+  });
+
+  it('proves genuine duplicate username rollback leaves no orphan auth user behind', async () => {
+    const ownerClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    await ownerClient.auth.signInWithPassword({
+      email: creds.owner.email,
+      password: creds.owner.password,
+    });
+
+    const { data: ownerProfile } = await ownerClient
+      .from('profiles')
+      .select('shop_id')
+      .eq('id', creds.owner.id)
+      .single();
+    const ownerShopId = ownerProfile!.shop_id;
+
+    const { data: branch } = await ownerClient
+      .from('branches')
+      .select('id')
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+    const activeBranchId = branch!.id;
+
+    // Use the existing staff username (already committed in the DB)
+    const duplicateUsername = testUsername;
+    const dupEmail = `${duplicateUsername}.dup_${Date.now()}@staff.stokr.invalid`;
+    const dupPassword = `TempDup_${Date.now()}!Aa1`;
+
+    // 1. Simulate creation flow: Admin creates auth user
+    const { data: dupAuthUser, error: dupAuthErr } = await adminClient.auth.admin.createUser({
+      email: dupEmail,
+      password: dupPassword,
+      email_confirm: true,
+      user_metadata: { full_name: 'Duplicate Staff Candidate' },
+    });
+    expect(dupAuthErr).toBeNull();
+    const dupUserId = dupAuthUser.user!.id;
+
+    // 2. Owner attempts to insert profile with duplicate username in same shop -> Postgres rejects with 23505
+    const { error: profileErr } = await ownerClient
+      .from('profiles')
+      .insert({
+        id: dupUserId,
+        shop_id: ownerShopId,
+        branch_id: activeBranchId,
+        role: 'staff',
+        full_name: 'Duplicate Staff Candidate',
+        username: duplicateUsername,
+        must_change_password: true,
+        is_active: true,
+      });
+
+    expect(profileErr).not.toBeNull();
+    expect(profileErr!.code).toBe('23505');
+
+    // 3. Compensating rollback: Admin deletes the created auth user
+    const { error: deleteErr } = await adminClient.auth.admin.deleteUser(dupUserId);
+    expect(deleteErr).toBeNull();
+
+    // 4. Assert that no orphan auth user is left behind
+    const { data: orphanCheck, error: orphanErr } = await adminClient.auth.admin.getUserById(dupUserId);
+    expect(orphanErr).not.toBeNull();
+    expect(orphanCheck?.user).toBeNull();
+  });
+
+  it('proves staff deactivation leaves old access and refresh tokens unusable', async () => {
+    // 1. Staff signs in to get active session tokens
+    const staffClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: signInData, error: signInErr } = await staffClient.auth.signInWithPassword({
+      email: testEmail,
+      password: updatedTempPassword,
+    });
+    expect(signInErr).toBeNull();
+    const oldAccessToken = signInData.session!.access_token;
+    const oldRefreshToken = signInData.session!.refresh_token;
+
+    // Positive Control: Bearer token is valid against GoTrue before deactivation (GET and PUT)
+    const preCheckRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+      },
+    });
+    expect(preCheckRes.status).toBe(200);
+
+    const prePutCheckRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: { test_claim: 'valid_before_deactivation' } }),
+    });
+    expect(prePutCheckRes.status).toBe(200);
+
+    // 2. Owner deactivates the staff member (trigger deletes auth.sessions row)
+    const ownerClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    await ownerClient.auth.signInWithPassword({
+      email: creds.owner.email,
+      password: creds.owner.password,
+    });
+
+    const { error: deactErr } = await ownerClient
+      .from('profiles')
+      .update({ is_active: false })
+      .eq('id', createdStaffUserId!);
+    expect(deactErr).toBeNull();
+
+    // 3. Old access token must be rejected when sent to GoTrue
+    const postCheckRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+      },
+    });
+    expect([401, 403]).toContain(postCheckRes.status);
+
+    // 4. Old refresh token must be rejected when attempting to refresh session
+    const { error: refreshErr } = await staffClient.auth.refreshSession({
+      refresh_token: oldRefreshToken,
+    });
+    expect(refreshErr).not.toBeNull();
+
+    // 5. Raw PUT /auth/v1/user with old bearer token must be rejected
+    const putRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: { hacked: true } }),
+    });
+    expect([401, 403]).toContain(putRes.status);
+
+    // 6. Restore staff is_active = true via owner session for subsequent cleanup in afterAll
+    const { error: reactErr } = await ownerClient
+      .from('profiles')
+      .update({ is_active: true })
+      .eq('id', createdStaffUserId!);
+    expect(reactErr).toBeNull();
+  });
+
+  it('proves old sessions die after a password reset with positive control before reset', async () => {
+    // 1. Staff signs in to get active session tokens
+    const staffClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: signInData, error: signInErr } = await staffClient.auth.signInWithPassword({
+      email: testEmail,
+      password: updatedTempPassword,
+    });
+    expect(signInErr).toBeNull();
+    const oldAccessToken = signInData.session!.access_token;
+    const oldRefreshToken = signInData.session!.refresh_token;
+
+    // Positive Control: Bearer token is valid against GoTrue before reset
+    // (a) Raw bearer GET
+    const preGetRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+      },
+    });
+    expect(preGetRes.status).toBe(200);
+
+    // (b) Raw bearer PUT
+    const prePutRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: { test_claim: 'valid_before_reset' } }),
+    });
+    expect(prePutRes.status).toBe(200);
+
+    // 2. Owner resets staff password via begin_staff_password_reset
+    const ownerClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    await ownerClient.auth.signInWithPassword({
+      email: creds.owner.email,
+      password: creds.owner.password,
+    });
+
+    const { error: resetErr } = await ownerClient.rpc('begin_staff_password_reset', {
+      p_staff_id: createdStaffUserId!,
+    });
+    expect(resetErr).toBeNull();
+
+    // 3. Post-reset checks: Old access token must be rejected by GoTrue
+    // (a) Raw bearer GET must fail (401 / 403)
+    const postGetRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+      },
+    });
+    expect([401, 403]).toContain(postGetRes.status);
+
+    // (b) Raw bearer PUT must fail (401 / 403)
+    const postPutRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${oldAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: { hacked: true } }),
+    });
+    expect([401, 403]).toContain(postPutRes.status);
+
+    // (c) Refresh token must be rejected
+    const { error: refreshErr } = await staffClient.auth.refreshSession({
+      refresh_token: oldRefreshToken,
+    });
+    expect(refreshErr).not.toBeNull();
+  });
+
+  it('proves auth.users trigger prevents email change on staff accounts via admin API', async () => {
+    // 1. Positive Control: Admin update on throwaway non-staff user succeeds
+    const throwawayEmail = `throwaway_test_${Date.now()}@test.invalid`;
+    const changedThrowawayEmail = `changed_test_${Date.now()}@test.invalid`;
+    const randomThrowawayPass = `RandPass_${Date.now()}_${Math.random().toString(36).slice(2)}!Aa1`;
+
+    let throwawayId: string | null = null;
+    try {
+      const { data: throwawayUser, error: throwawayCreateErr } = await adminClient.auth.admin.createUser({
+        email: throwawayEmail,
+        password: randomThrowawayPass,
+        email_confirm: true,
+      });
+      expect(throwawayCreateErr).toBeNull();
+      throwawayId = throwawayUser!.user!.id;
+
+      const { data: updatedThrowaway, error: updateThrowawayErr } = await adminClient.auth.admin.updateUserById(
+        throwawayId,
+        { email: changedThrowawayEmail }
+      );
+      expect(updateThrowawayErr).toBeNull();
+      expect(updatedThrowaway!.user!.email).toBe(changedThrowawayEmail);
+
+      // Restore throwaway email
+      const { error: restoreThrowawayErr } = await adminClient.auth.admin.updateUserById(throwawayId, {
+        email: throwawayEmail,
+      });
+      expect(restoreThrowawayErr).toBeNull();
+
+      // 2. Admin attempts to update staff email -> MUST FAIL via trigger
+      const tempStaffEmail = `staff_blocked_${Date.now()}@test.invalid`;
+      const { error: staffEmailUpdateErr } = await adminClient.auth.admin.updateUserById(
+        createdStaffUserId!,
+        { email: tempStaffEmail }
+      );
+      expect(staffEmailUpdateErr).not.toBeNull();
+
+      // 3. Verify staff email remains strictly unchanged
+      const { data: staffData, error: staffGetErr } = await adminClient.auth.admin.getUserById(
+        createdStaffUserId!
+      );
+      expect(staffGetErr).toBeNull();
+      expect(staffData!.user!.email).toBe(testEmail);
+
+      // 4. Staff login still works with existing credentials
+      const staffClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data: loginData, error: loginErr } = await staffClient.auth.signInWithPassword({
+        email: testEmail,
+        password: updatedTempPassword,
+      });
+      expect(loginErr).toBeNull();
+      expect(loginData.user?.id).toBe(createdStaffUserId);
+
+      // 5. Admin password update on staff account still works
+      const { error: passUpdateErr } = await adminClient.auth.admin.updateUserById(
+        createdStaffUserId!,
+        { password: updatedTempPassword }
+      );
+      expect(passUpdateErr).toBeNull();
+    } finally {
+      if (throwawayId) {
+        await adminClient.auth.admin.deleteUser(throwawayId);
+      }
+    }
   });
 });

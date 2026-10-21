@@ -69,7 +69,7 @@ async function main() {
 
   // Step 2: Use begin_staff_password_reset() to legitimately set must_change_password = true
   console.log('\nSetting must_change_password = true via legitimate begin_staff_password_reset()...');
-  const tempPassword = 'TempPasswordForTest4b!2026';
+  const tempPassword = `Temp_${Date.now()}_${Math.random().toString(36).slice(2)}!Aa1`;
   await adminClient.auth.admin.updateUserById(staffId, { password: tempPassword });
   const { error: rpcErr } = await ownerClient.rpc('begin_staff_password_reset', { p_staff_id: staffId });
   if (rpcErr) {
