@@ -19,6 +19,8 @@ import {
   CardContent,
 } from '@/components/ui/card';
 
+import { SignOutButton } from '@/components/shared/sign-out-button';
+
 interface ChangePasswordFormProps {
   mustChangePassword: boolean;
   username?: string | null;
@@ -208,6 +210,10 @@ export function ChangePasswordForm({
               </span>
             )}
           </Button>
+
+          <div className="pt-2 text-center">
+            <SignOutButton className="w-full" />
+          </div>
         </CardContent>
       </form>
     </Card>

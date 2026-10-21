@@ -86,6 +86,13 @@ describe('staffLoginSchema', () => {
     expect(staffLoginSchema.safeParse({ storeCode: 'cloud_haven', username: 'staff1', password: 'p' }).success).toBe(false);
     expect(staffLoginSchema.safeParse({ storeCode: 'cloud-haven', username: 'staff1', password: 'p' }).success).toBe(false);
   });
+
+  it('forbids leading, trailing, and consecutive dots in username', () => {
+    expect(staffLoginSchema.safeParse({ storeCode: 'cloudhaven', username: '.staff', password: 'p' }).success).toBe(false);
+    expect(staffLoginSchema.safeParse({ storeCode: 'cloudhaven', username: 'staff.', password: 'p' }).success).toBe(false);
+    expect(staffLoginSchema.safeParse({ storeCode: 'cloudhaven', username: 'st..aff', password: 'p' }).success).toBe(false);
+    expect(staffLoginSchema.safeParse({ storeCode: 'cloudhaven', username: 'valid.staff_name-1', password: 'p' }).success).toBe(true);
+  });
 });
 
 describe('changePasswordSchema', () => {

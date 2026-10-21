@@ -34,7 +34,7 @@ The first shop is the only shop in the system at first, but data separation betw
 4. **Owner** corrects mistakes by voiding a sale (staff cannot edit or delete sales).
 
 ## Version 1 features (in scope)
-1. Login with two roles (Owner, Staff). Each person has their own login, including the owner.
+1. Login with two roles (Owner, Staff). Each person has their own login, including the owner. Owner logs in via email; staff log in via store code + username (with internal hidden email address).
 2. Branches (the first shop has 2). Staff are assigned to one branch; the owner can reassign them.
 3. Products: name, category, selling price, cost price, low-stock level. Owner only.
 4. Opening stock, restock, and manual stock adjustments with a note. Owner only. Branch-to-branch moves are done as two adjustments with a note.
@@ -91,7 +91,7 @@ Supporting checks:
 1. How often will they do a physical stock count?
 2. How often do discounts or returns happen at the counter?
 3. How often do supplier prices change?
-4. Do staff have email addresses to log in with?
+4. ~Do staff have email addresses to log in with?~ (Resolved: Staff log in using store code + username; internal dummy email `username.store_code@staff.stokr.invalid` is generated and hidden).
 
 ## Assumptions to confirm
 - Currency is Philippine pesos (PHP); timezone is Asia/Manila.

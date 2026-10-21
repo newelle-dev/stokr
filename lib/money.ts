@@ -28,6 +28,85 @@ export function formatMoney(centavos: number): string {
   return isNegative ? `-${formatted}` : formatted;
 }
 
+export type ParseMoneyResult =
+  | { success: true; centavos: number }
+  | { success: false; error: string };
+
+/**
+ * Strict parser for user-entered monetary amounts in Philippine Pesos.
+ * Rules:
+ * - Digits with at most 2 decimal places.
+ * - Optional comma grouping (e.g. 1,234.50 or 1234.50).
+ * - Optional leading peso sign (₱ or P).
+ * - Returns an error message for invalid input, junk, negatives, or >2 decimal places.
+ * - Never silently defaults to 0.
+ */
+export function parseMoneyInput(
+  rawInput: string,
+  options?: { minCentavos?: number; fieldName?: string }
+): ParseMoneyResult {
+  const minCentavos = options?.minCentavos ?? 0;
+  const fieldName = options?.fieldName ?? 'Amount';
+
+  if (!rawInput || typeof rawInput !== 'string') {
+    return { success: false, error: `${fieldName} is required.` };
+  }
+
+  const trimmed = rawInput.trim();
+  if (trimmed === '') {
+    return { success: false, error: `${fieldName} is required.` };
+  }
+
+  if (trimmed.startsWith('-')) {
+    return { success: false, error: `${fieldName} cannot be negative.` };
+  }
+
+  // Strip optional leading peso sign: ₱ or P
+  const cleanStr = trimmed.replace(/^[₱pP]\s*/, '').trim();
+  if (cleanStr === '') {
+    return { success: false, error: `${fieldName} is required.` };
+  }
+
+  // Check for more than 2 decimal places
+  if (/\.\d{3,}$/.test(cleanStr)) {
+    return { success: false, error: `${fieldName} cannot have more than 2 decimal places.` };
+  }
+
+  // Validate format: digits with optional thousands commas, optional decimal with up to 2 digits
+  const moneyRegex = /^(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?$/;
+  if (!moneyRegex.test(cleanStr)) {
+    return {
+      success: false,
+      error: `Invalid ${fieldName.toLowerCase()} format. Enter a valid amount (e.g. 19.99 or 1,234.50).`,
+    };
+  }
+
+  const normalized = cleanStr.replace(/,/g, '');
+  const [pesosPart, centsPart = ''] = normalized.split('.');
+
+  const pesos = parseInt(pesosPart, 10);
+  if (!Number.isSafeInteger(pesos)) {
+    return { success: false, error: `${fieldName} exceeds maximum allowable limit.` };
+  }
+
+  const paddedCents = centsPart.padEnd(2, '0');
+  const cents = parseInt(paddedCents, 10);
+
+  const totalCentavos = pesos * 100 + cents;
+  if (!Number.isSafeInteger(totalCentavos)) {
+    return { success: false, error: `${fieldName} exceeds maximum allowable limit.` };
+  }
+
+  if (totalCentavos < minCentavos) {
+    if (minCentavos === 1) {
+      return { success: false, error: `${fieldName} must be at least ₱0.01.` };
+    }
+    return { success: false, error: `${fieldName} cannot be less than ${formatMoney(minCentavos)}.` };
+  }
+
+  return { success: true, centavos: totalCentavos };
+}
+
 /**
  * Converts pesos to centavos safely from user input string or float.
  * Uses Math.round to avoid float imprecision (e.g., 19.99 * 100).

@@ -28,16 +28,15 @@ function generateSecureTempPassword(): string {
   const symbols = '!@#$%^&*';
   const all = upper + lower + numbers + symbols;
 
-  const bytes = crypto.randomBytes(16);
   const result: string[] = [
-    upper[bytes[0] % upper.length],
-    lower[bytes[1] % lower.length],
-    numbers[bytes[2] % numbers.length],
-    symbols[bytes[3] % symbols.length],
+    upper[crypto.randomInt(0, upper.length)],
+    lower[crypto.randomInt(0, lower.length)],
+    numbers[crypto.randomInt(0, numbers.length)],
+    symbols[crypto.randomInt(0, symbols.length)],
   ];
 
   for (let i = 4; i < 16; i++) {
-    result.push(all[bytes[i] % all.length]);
+    result.push(all[crypto.randomInt(0, all.length)]);
   }
 
   // Shuffle array using Fisher-Yates
@@ -144,7 +143,16 @@ export async function createStaffAction(
 
   if (profileErr) {
     // Compensating rollback: delete newly created auth user so no orphan remains
-    await adminClient.auth.admin.deleteUser(newUserId);
+    const { error: deleteUserErr } = await adminClient.auth.admin.deleteUser(newUserId);
+    if (deleteUserErr) {
+      console.error(
+        `[CRITICAL] Failed to delete orphaned auth user during cleanup. UserId: ${newUserId}. Error: ${deleteUserErr.message}`
+      );
+      return errorResult(
+        'ORPHAN_CLEANUP_FAILED',
+        'A username is blocked, contact support.'
+      );
+    }
 
     if (profileErr.code === '23505' || profileErr.message.includes('uq_profiles_shop_username')) {
       return errorResult(
@@ -210,24 +218,13 @@ export async function resetStaffPasswordAction(
     return errorResult('AUTH_ERROR', 'Failed to update temporary password in authentication service.');
   }
 
-  // (b) Owner sets must_change_password = true in profiles
-  // If must_change_password was already true, toggle false then true so AFTER UPDATE trigger fires
-  if (profile.must_change_password) {
-    await supabase
-      .from('profiles')
-      .update({ must_change_password: false })
-      .eq('id', parsed.data.staffId)
-      .eq('shop_id', owner.shopId);
-  }
+  // (b) Owner session initiates password reset via begin_staff_password_reset
+  const { error: resetErr } = await supabase.rpc('begin_staff_password_reset', {
+    p_staff_id: parsed.data.staffId,
+  });
 
-  const { error: profileUpdateErr } = await supabase
-    .from('profiles')
-    .update({ must_change_password: true })
-    .eq('id', parsed.data.staffId)
-    .eq('shop_id', owner.shopId);
-
-  if (profileUpdateErr) {
-    return errorResult('DB_ERROR', 'Failed to mark password reset required on staff profile. Please retry.');
+  if (resetErr) {
+    return errorResult('DB_ERROR', resetErr.message ?? 'Failed to initiate password reset.');
   }
 
   revalidatePath('/team');
@@ -286,9 +283,21 @@ export async function deactivateStaffAction(
   }
 
   // 2. Admin client bans user in Supabase Auth to invalidate all refresh tokens
-  await adminClient.auth.admin.updateUserById(parsed.data.staffId, {
+  const { error: banErr } = await adminClient.auth.admin.updateUserById(parsed.data.staffId, {
     ban_duration: '876000h',
   });
+
+  if (banErr) {
+    console.error(
+      `[CRITICAL] Failed to ban auth user during staff deactivation. StaffId: ${parsed.data.staffId}. Error: ${banErr.message}`
+    );
+    revalidatePath('/team');
+    revalidatePath('/settings');
+    return errorResult(
+      'AUTH_ERROR',
+      'Staff profile was deactivated but failed to invalidate login session. Please contact support.'
+    );
+  }
 
   revalidatePath('/team');
   revalidatePath('/settings');

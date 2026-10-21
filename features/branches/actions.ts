@@ -40,6 +40,16 @@ export async function createBranchAction(
     .single();
 
   if (insertErr || !newBranch) {
+    if (
+      insertErr?.code === '23505' ||
+      insertErr?.message?.includes('branches_shop_id_name') ||
+      insertErr?.message?.includes('unique constraint')
+    ) {
+      return errorResult(
+        'DUPLICATE_NAME',
+        `A branch named "${parsed.data.name}" already exists in your shop.`
+      );
+    }
     return errorResult('DB_ERROR', 'Failed to create branch. Please try again.');
   }
 
@@ -78,6 +88,16 @@ export async function renameBranchAction(
     .eq('shop_id', owner.shopId);
 
   if (updateErr) {
+    if (
+      updateErr.code === '23505' ||
+      updateErr.message?.includes('branches_shop_id_name') ||
+      updateErr.message?.includes('unique constraint')
+    ) {
+      return errorResult(
+        'DUPLICATE_NAME',
+        `A branch named "${parsed.data.name}" already exists in your shop.`
+      );
+    }
     return errorResult('DB_ERROR', 'Failed to rename branch. Please try again.');
   }
 

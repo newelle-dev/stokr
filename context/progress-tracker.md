@@ -3,9 +3,9 @@
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 2 complete.
-- **Current unit:** Unit 3 (not started)
-- **Last updated:** 2026-10-20
+- **Phase:** Unit 3 complete (in review).
+- **Current unit:** Unit 3 (App and Database complete)
+- **Last updated:** 2026-10-21
 - **Next milestone:** friend's "run both" week after Unit 6
 
 ## Build roadmap
@@ -21,10 +21,10 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Email + password login and logout; session refresh works
   - Owner and staff land on different home pages; staff can't open owner pages
   - Staff cannot reach owner data even by calling the database directly
-- [ ] **Unit 3: Branches and products (owner)** (about 2 days)
+- [x] **Unit 3: Branches and products (owner)** (about 2 days)
   - Owner can add, edit, and deactivate products (name, category, selling price, cost price, low-stock level)
   - Owner can add and rename branches; owner can create staff logins and assign branches (`/team`)
-  - Deactivating a staff member in `/team` must ban the user and revoke their sessions via Supabase Auth Admin API (`admin.auth.admin.updateUserById(id, { ban_duration: '876000h' })` / `admin.auth.admin.signOut(jwt, 'all')`)
+  - Deactivating a staff member terminates all active sessions immediately via database trigger; password reset terminates sessions via `begin_staff_password_reset`
   - Staff can see product names and selling prices only (via `staff_products`), never cost
   - Every change appears in the activity log
 - [ ] **Unit 4: Stock** (about 2-3 days)
@@ -68,13 +68,13 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 |---|---|---|---|
 | 1 | ~Confirm currency is PHP and timezone is Asia/Manila~ (Confirmed: PHP & Asia/Manila) | Owner of the app | Unit 1 (Resolved) |
 | 2 | Final app name (Stokr) | Owner of the app | Unit 9 |
-| 3 | Do staff have email addresses to log in with? | Owner of the app / friend | Unit 3 |
+| 3 | ~Do staff have email addresses to log in with?~ (Closed: staff log in by store code and username with hidden address) | Owner of the app / friend | Unit 3 (Resolved) |
 | 4 | Is the product category list (liquid, device, cartridge, other) right? | Friend | Unit 3 |
 | 5 | Confirm: never block a sale at zero stock, only flag it | Owner of the app | Unit 5 |
 | 6 | How often will the friend do a physical stock count? | Friend | Unit 8 |
 | 7 | How often do discounts and returns happen? | Friend | After Unit 6 |
 | 8 | How often do supplier prices change? | Friend | After Unit 4 |
-| 9 | Approve the color palette and fonts in `ui-context.md` | Owner of the app | Unit 3 |
+| 9 | ~Approve the color palette and fonts in `ui-context.md`~ (Closed: dark palette, Geist font, emerald/gold accents approved) | Owner of the app | Unit 3 (Resolved) |
 
 ## Decisions log
 | Date | Decision |
@@ -100,6 +100,9 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | 2026-10-21 | Staff Login & Password Lockdown (Unit 3): Staff authenticate using store code + username + password (mapped internally to hidden `username.storecode@staff.stokr.invalid`). In probe test (b), GoTrue rejected staff email modification with status 400 `Email address "probe.cloudhaven@staff.stokr.invalid" is invalid` (the error named the existing address). Forced password change enforced via must_change_password locking RLS helpers, begin_staff_password_reset() security definer RPC, and fail-closed complete_password_change(). |
 | 2026-10-21 | Functions-Only Write Paths & Future Revisit: Remove direct owner INSERT/UPDATE/DELETE on sales and sale_items in Units 5 and 6 (database functions only), and on stock_counts and stock_count_items in Unit 8; revisit email change if any email/recovery flow is ever added. |
 | 2026-10-21 | Pre-launch Auth Requirements: Before launch, configure custom SMTP provider and an owner forgot-password recovery flow. |
+| 2026-10-21 | Table Mutations Lockdown (Unit 3 Migration 2): Revoked DELETE on branches, products, stock_counts, and stock_count_items from authenticated; made store_code immutable by trigger; logged shop renames in activity_log; revoked UPDATE on sales from authenticated; restricted stock_counts insert. Applied via migration `20261021065454_lockdown_table_mutations_and_shops.sql`. |
+| 2026-10-21 | Session Invalidation & Staff Email Lockdown: Applied `20261021085218_session_invalidation_on_reset_and_deactivation.sql` (invalidating auth.sessions on password reset and staff deactivation) and `20261021085231_prevent_staff_email_change.sql` (trigger on auth.users preventing modification of staff email addresses). |
+| 2026-10-21 | Unit 3 App Implementation: Added strict `parseMoneyInput` in `lib/money.ts` (digits with at most 2 decimals, optional commas/peso sign, returns descriptive errors, never silently 0, selling price min 1 centavo, cost price min 0); replaced duplicated parseFloat blocks in product create and edit modals with inline errors; added sign-out button on `/change-password` page; enforced `server-only` on admin client; verified with comprehensive unit and real-session integration test suites. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*

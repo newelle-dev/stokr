@@ -12,15 +12,18 @@ export const createProductSchema = z.object({
   sellingPriceCentavos: z
     .number()
     .int('Selling price must be an integer in centavos')
-    .min(0, 'Selling price cannot be negative'),
+    .min(1, 'Selling price must be at least ₱0.01')
+    .max(100_000_000, 'Selling price cannot exceed ₱1,000,000.00'),
   costPriceCentavos: z
     .number()
     .int('Cost price must be an integer in centavos')
-    .min(0, 'Cost price cannot be negative'),
+    .min(0, 'Cost price cannot be negative')
+    .max(100_000_000, 'Cost price cannot exceed ₱1,000,000.00'),
   lowStockThreshold: z
     .number()
     .int('Threshold must be an integer')
     .min(0, 'Threshold cannot be negative')
+    .max(100_000, 'Threshold cannot exceed 100,000')
     .default(5),
 });
 
@@ -35,15 +38,18 @@ export const updateProductSchema = z.object({
   sellingPriceCentavos: z
     .number()
     .int('Selling price must be an integer in centavos')
-    .min(0, 'Selling price cannot be negative'),
+    .min(1, 'Selling price must be at least ₱0.01')
+    .max(100_000_000, 'Selling price cannot exceed ₱1,000,000.00'),
   costPriceCentavos: z
     .number()
     .int('Cost price must be an integer in centavos')
-    .min(0, 'Cost price cannot be negative'),
+    .min(0, 'Cost price cannot be negative')
+    .max(100_000_000, 'Cost price cannot exceed ₱1,000,000.00'),
   lowStockThreshold: z
     .number()
     .int('Threshold must be an integer')
-    .min(0, 'Threshold cannot be negative'),
+    .min(0, 'Threshold cannot be negative')
+    .max(100_000, 'Threshold cannot exceed 100,000'),
 });
 
 export const productIdSchema = z.object({

@@ -24,7 +24,10 @@ export const staffLoginSchema = z.object({
     .toLowerCase()
     .min(3, 'Username must be 3-30 characters')
     .max(30, 'Username must be 3-30 characters')
-    .regex(/^[a-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'),
+    .regex(/^[a-z0-9._-]+$/, 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores')
+    .refine((val) => !val.startsWith('.'), 'Username cannot start with a dot')
+    .refine((val) => !val.endsWith('.'), 'Username cannot end with a dot')
+    .refine((val) => !val.includes('..'), 'Username cannot contain consecutive dots'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -37,7 +40,8 @@ export const changePasswordSchema = z
     currentPassword: z.string().optional(),
     newPassword: z
       .string()
-      .min(10, 'Password must be at least 10 characters'),
+      .min(10, 'Password must be at least 10 characters')
+      .max(72, 'Password cannot exceed 72 characters'),
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

@@ -26,9 +26,15 @@
 - No public signup. The first shop and owner are created by a seed script or manually in the Supabase dashboard.
 
 ## Auth model
-- Login: email + password via Supabase Auth.
-- Role lives in `profiles.role`: `owner` or `staff`.
+- Login:
+  - Owner logs in with email + password via Supabase Auth.
+  - Staff log in using store code + username + password. The underlying email address (`username.store_code@staff.stokr.invalid`) is internal and hidden from the user.
+- Staff email is locked at the auth layer by a trigger on `auth.users` (`trg_prevent_staff_email_change`), preventing modification even via the admin API.
+- Role lives in `profiles.role`: `owner` or `staff`. Never use `user_metadata` for authorization (Invariant 21).
 - Owner creates staff accounts from `/team` (server action using the service role key). Staff get a temporary password and are asked to change it on first login.
+- Forced password change workflow: setting temporary password snapshots the encrypted hash in `profile_security`. Staff account cannot access shop data until password is changed. `complete_password_change()` fails closed if the password has not changed or no marker exists.
+- Active sessions are immediately invalidated (deleted from `auth.sessions`) upon password reset (`begin_staff_password_reset`) and upon staff profile deactivation (`trg_terminate_sessions_on_profile_deactivation`).
+- Supabase admin client (`lib/supabase/admin.ts`) enforces `import 'server-only'` to guarantee the service role key never leaks into client-side bundles.
 - Staff have a home `branch_id`. Staff can only record sales for that branch. The owner can record at any branch.
 - Route guards use `proxy.ts` (session refresh and redirect to `/login`) plus role checks in layouts. Guards are for usability; **RLS and server-side role checks are the real protection.** `proxy.ts` alone must never be relied on to protect server actions.
 

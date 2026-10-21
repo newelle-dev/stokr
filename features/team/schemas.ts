@@ -15,7 +15,16 @@ export const createStaffSchema = z.object({
     .regex(
       /^[a-z0-9._-]+$/,
       'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'
-    ),
+    )
+    .refine((val) => !val.startsWith('.'), {
+      message: 'Username cannot start with a dot',
+    })
+    .refine((val) => !val.endsWith('.'), {
+      message: 'Username cannot end with a dot',
+    })
+    .refine((val) => !val.includes('..'), {
+      message: 'Username cannot contain consecutive dots',
+    }),
   branchId: z.string().uuid('Please select a valid branch'),
 });
 

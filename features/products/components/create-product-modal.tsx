@@ -10,7 +10,7 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { parsePesosToCentavos, formatMoney } from '@/lib/money';
+import { parseMoneyInput, formatMoney } from '@/lib/money';
 
 interface CreateProductModalProps {
   isOpen: boolean;
@@ -28,9 +28,11 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  // Raw string inputs for currency (pesos with decimals)
+  // Raw string inputs for currency (pesos with decimals, optional commas/peso sign)
   const [sellingPriceStr, setSellingPriceStr] = React.useState('');
   const [costPriceStr, setCostPriceStr] = React.useState('');
+  const [sellingPriceError, setSellingPriceError] = React.useState<string | null>(null);
+  const [costPriceError, setCostPriceError] = React.useState<string | null>(null);
 
   const {
     register,
@@ -49,50 +51,79 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
     },
   });
 
-  const sellingCentavos = React.useMemo(() => {
-    try {
-      return parsePesosToCentavos(parseFloat(sellingPriceStr) || 0);
-    } catch {
-      return 0;
-    }
-  }, [sellingPriceStr]);
+  const sellingParsed = React.useMemo(
+    () => parseMoneyInput(sellingPriceStr, { minCentavos: 1, fieldName: 'Selling price' }),
+    [sellingPriceStr]
+  );
 
-  const costCentavos = React.useMemo(() => {
-    try {
-      return parsePesosToCentavos(parseFloat(costPriceStr) || 0);
-    } catch {
-      return 0;
-    }
-  }, [costPriceStr]);
+  const costParsed = React.useMemo(
+    () => parseMoneyInput(costPriceStr, { minCentavos: 0, fieldName: 'Cost price' }),
+    [costPriceStr]
+  );
 
+  const sellingCentavos = sellingParsed.success ? sellingParsed.centavos : 0;
+  const costCentavos = costParsed.success ? costParsed.centavos : 0;
   const isBelowCost = sellingCentavos > 0 && costCentavos > 0 && sellingCentavos < costCentavos;
 
   const onSellingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSellingPriceStr(val);
-    try {
-      setValue('sellingPriceCentavos', parsePesosToCentavos(parseFloat(val) || 0));
-    } catch {
-      setValue('sellingPriceCentavos', 0);
+    if (!val.trim()) {
+      setSellingPriceError(null);
+      setValue('sellingPriceCentavos', 0, { shouldValidate: true });
+      return;
+    }
+    const res = parseMoneyInput(val, { minCentavos: 1, fieldName: 'Selling price' });
+    if (res.success) {
+      setSellingPriceError(null);
+      setValue('sellingPriceCentavos', res.centavos, { shouldValidate: true });
+    } else {
+      setSellingPriceError(res.error);
+      setValue('sellingPriceCentavos', 0, { shouldValidate: false });
     }
   };
 
   const onCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setCostPriceStr(val);
-    try {
-      setValue('costPriceCentavos', parsePesosToCentavos(parseFloat(val) || 0));
-    } catch {
-      setValue('costPriceCentavos', 0);
+    if (!val.trim()) {
+      setCostPriceError(null);
+      setValue('costPriceCentavos', 0, { shouldValidate: true });
+      return;
+    }
+    const res = parseMoneyInput(val, { minCentavos: 0, fieldName: 'Cost price' });
+    if (res.success) {
+      setCostPriceError(null);
+      setValue('costPriceCentavos', res.centavos, { shouldValidate: true });
+    } else {
+      setCostPriceError(res.error);
+      setValue('costPriceCentavos', -1, { shouldValidate: false });
     }
   };
 
   const onSubmit = async (data: CreateProductInput) => {
     setErrorMsg(null);
+
+    const sellRes = parseMoneyInput(sellingPriceStr, { minCentavos: 1, fieldName: 'Selling price' });
+    if (!sellRes.success) {
+      setSellingPriceError(sellRes.error);
+      return;
+    }
+
+    const costRes = parseMoneyInput(costPriceStr, { minCentavos: 0, fieldName: 'Cost price' });
+    if (!costRes.success) {
+      setCostPriceError(costRes.error);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const result = await createProductAction(data);
+      const result = await createProductAction({
+        ...data,
+        sellingPriceCentavos: sellRes.centavos,
+        costPriceCentavos: costRes.centavos,
+      });
       if (!result.ok) {
         setErrorMsg(result.error.message);
         setIsSubmitting(false);
@@ -109,6 +140,8 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
     reset();
     setSellingPriceStr('');
     setCostPriceStr('');
+    setSellingPriceError(null);
+    setCostPriceError(null);
     setErrorMsg(null);
     setIsSubmitting(false);
     onClose();
@@ -202,20 +235,23 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
             </Label>
             <Input
               id="costPrice"
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="decimal"
               placeholder="0.00"
               className="h-11 font-mono text-base"
               disabled={isSubmitting}
               value={costPriceStr}
               onChange={onCostChange}
             />
-            {errors.costPriceCentavos && (
+            {costPriceError ? (
+              <p className="text-xs text-[var(--destructive)]">
+                {costPriceError}
+              </p>
+            ) : errors.costPriceCentavos ? (
               <p className="text-xs text-[var(--destructive)]">
                 {errors.costPriceCentavos.message}
               </p>
-            )}
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -224,20 +260,23 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
             </Label>
             <Input
               id="sellingPrice"
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="decimal"
               placeholder="0.00"
               className="h-11 font-mono text-base"
               disabled={isSubmitting}
               value={sellingPriceStr}
               onChange={onSellingChange}
             />
-            {errors.sellingPriceCentavos && (
+            {sellingPriceError ? (
+              <p className="text-xs text-[var(--destructive)]">
+                {sellingPriceError}
+              </p>
+            ) : errors.sellingPriceCentavos ? (
               <p className="text-xs text-[var(--destructive)]">
                 {errors.sellingPriceCentavos.message}
               </p>
-            )}
+            ) : null}
           </div>
         </div>
 

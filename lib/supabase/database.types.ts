@@ -759,6 +759,10 @@ export type Database = {
       }
     }
     Functions: {
+      begin_staff_password_reset: {
+        Args: { p_staff_id: string }
+        Returns: undefined
+      }
       complete_password_change: { Args: never; Returns: undefined }
       current_user_role: { Args: never; Returns: string }
       current_user_shop_id: { Args: never; Returns: string }

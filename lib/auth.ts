@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from './supabase/server';
 import { errorResult, successResult, type ActionResult } from './errors';
@@ -19,8 +20,9 @@ export interface UserSessionProfile {
  * Retrieves the currently authenticated user and their active shop profile.
  * Invariant: Deactivated accounts (is_active = false) immediately return null
  * and are treated as logged out on every request.
+ * Wrapped in React cache for request-level memoization across server components.
  */
-export async function getCurrentUser(): Promise<UserSessionProfile | null> {
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<UserSessionProfile | null> {
   const supabase = await createClient();
 
   const {
@@ -53,7 +55,7 @@ export async function getCurrentUser(): Promise<UserSessionProfile | null> {
     mustChangePassword: profile.must_change_password,
     email: user.email ?? null,
   };
-}
+});
 
 /**
  * Page-level guard for Server Components and Layouts under (owner).
@@ -115,6 +117,12 @@ export async function requireAuthAction(): Promise<ActionResult<UserSessionProfi
       'You must be signed in to perform this action.'
     );
   }
+  if (user.mustChangePassword) {
+    return errorResult(
+      'FORBIDDEN',
+      'You must change your password before performing any other action.'
+    );
+  }
   return successResult(user);
 }
 
@@ -130,6 +138,12 @@ export async function requireOwnerAction(): Promise<ActionResult<UserSessionProf
       'You must be signed in to perform this action.'
     );
   }
+  if (user.mustChangePassword) {
+    return errorResult(
+      'FORBIDDEN',
+      'You must change your password before performing any other action.'
+    );
+  }
   if (user.role !== 'owner') {
     return errorResult(
       'FORBIDDEN',
@@ -138,3 +152,4 @@ export async function requireOwnerAction(): Promise<ActionResult<UserSessionProf
   }
   return successResult(user);
 }
+

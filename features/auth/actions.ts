@@ -170,7 +170,15 @@ export async function completePasswordChangeAction(
     password: parsed.data.newPassword,
   });
 
-  if (updateAuthErr) {
+  const isSamePasswordError =
+    updateAuthErr &&
+    (updateAuthErr.message.toLowerCase().includes('different from the old password') ||
+      (updateAuthErr as unknown as { code?: string }).code === 'same_password');
+
+  // If forced mode and same-password error, the auth password was already set
+  // in a previous attempt that failed before complete_password_change was recorded.
+  // Allow execution to continue to complete_password_change() for retry-safety.
+  if (updateAuthErr && !(user.mustChangePassword && isSamePasswordError)) {
     return errorResult('AUTH_ERROR', updateAuthErr.message);
   }
 

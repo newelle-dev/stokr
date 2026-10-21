@@ -23,6 +23,7 @@ let mockProfile: {
   role: 'owner' | 'staff';
   branch_id: string | null;
   is_active: boolean;
+  must_change_password?: boolean;
 } | null = null;
 let mockAuthError: Error | null = null;
 let mockProfileError: Error | null = null;
@@ -130,6 +131,25 @@ describe('lib/auth helpers', () => {
         expect(result.data.id).toBe('staff-1');
       }
     });
+
+    it('returns FORBIDDEN when must_change_password is true', async () => {
+      mockUser = { id: 'staff-1', email: 'staff@shop.local' };
+      mockProfile = {
+        id: 'staff-1',
+        shop_id: 'shop-1',
+        full_name: 'Pending Password Staff',
+        role: 'staff',
+        branch_id: 'branch-1',
+        is_active: true,
+        must_change_password: true,
+      };
+
+      const result = await requireAuthAction();
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('FORBIDDEN');
+      }
+    });
   });
 
   describe('requireOwnerAction', () => {
@@ -139,6 +159,25 @@ describe('lib/auth helpers', () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe('UNAUTHORIZED');
+      }
+    });
+
+    it('returns FORBIDDEN when owner must_change_password is true', async () => {
+      mockUser = { id: 'owner-1', email: 'owner@shop.local' };
+      mockProfile = {
+        id: 'owner-1',
+        shop_id: 'shop-1',
+        full_name: 'Shop Owner',
+        role: 'owner',
+        branch_id: null,
+        is_active: true,
+        must_change_password: true,
+      };
+
+      const result = await requireOwnerAction();
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe('FORBIDDEN');
       }
     });
 
