@@ -160,7 +160,7 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
     });
 
     const { data: emailData, error: emailErr } = await staffClient.auth.updateUser({
-      email: 'hacked_staff@evil.com',
+      email: 'hacked_staff@example.com',
     });
 
     console.log('[Actual Behavior 8(b) - Email Change Request]');
@@ -294,7 +294,7 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
   });
 
   it('proves fail-closed refusal when must_change_password is true but no marker exists', async () => {
-    // Owner sets must_change_password = true (auth.uid() is owner)
+    // Owner initiates password reset via begin_staff_password_reset
     const ownerClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -303,13 +303,12 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
       password: creds.owner.password,
     });
 
-    const { error: setFlagErr } = await ownerClient
-      .from('profiles')
-      .update({ must_change_password: true })
-      .eq('id', createdStaffUserId!);
-    expect(setFlagErr).toBeNull();
+    const { error: resetErr } = await ownerClient.rpc('begin_staff_password_reset', {
+      p_staff_id: createdStaffUserId!,
+    });
+    expect(resetErr).toBeNull();
 
-    // Now remove the marker row created by the trigger to simulate missing marker
+    // Now remove the marker row created by the function to simulate missing marker
     const { error: delSecErr } = await adminClient
       .from('profile_security')
       .delete()
@@ -330,7 +329,7 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
     expect(refuseErr!.message).toMatch(/no temporary password marker found/i);
   });
 
-  it('proves password-reset flow: owner sets temp password via admin, updates flag, snapshots fresh hash', async () => {
+  it('proves password-reset flow: owner sets temp password via admin, calls begin_staff_password_reset, snapshots fresh hash', async () => {
     const ownerClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -338,6 +337,14 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
       email: creds.owner.email,
       password: creds.owner.password,
     });
+
+    // Direct UPDATE of must_change_password by owner must be rejected (currently true -> attempt false)
+    const { error: directFlagErr } = await ownerClient
+      .from('profiles')
+      .update({ must_change_password: false })
+      .eq('id', createdStaffUserId!);
+    expect(directFlagErr).not.toBeNull();
+    expect(directFlagErr!.message).toMatch(/must_change_password cannot be modified directly/i);
 
     // Reset flow order:
     // (a) Admin sets new temp password
@@ -347,18 +354,11 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
     );
     expect(adminUpdateErr).toBeNull();
 
-    // (b) Owner sets must_change_password = true
-    // First flip to false then true to ensure transition if it was already true
-    await ownerClient
-      .from('profiles')
-      .update({ must_change_password: false })
-      .eq('id', createdStaffUserId!);
-
-    const { error: ownerUpdateErr } = await ownerClient
-      .from('profiles')
-      .update({ must_change_password: true })
-      .eq('id', createdStaffUserId!);
-    expect(ownerUpdateErr).toBeNull();
+    // (b) Owner initiates password reset via begin_staff_password_reset()
+    const { error: ownerResetErr } = await ownerClient.rpc('begin_staff_password_reset', {
+      p_staff_id: createdStaffUserId!,
+    });
+    expect(ownerResetErr).toBeNull();
 
     // Verify snapshot in profile_security matches new temp password hash
     const { data: newSecRow } = await adminClient

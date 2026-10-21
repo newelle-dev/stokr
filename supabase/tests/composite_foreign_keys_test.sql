@@ -60,10 +60,10 @@ insert into cfk_fixtures values (
 );
 
 -- Seed base entities in postgres superuser role
-insert into public.shops (id, name)
-select shop_a, 'Shop A' from cfk_fixtures on conflict do nothing;
-insert into public.shops (id, name)
-select shop_b, 'Shop B' from cfk_fixtures on conflict do nothing;
+insert into public.shops (id, name, store_code)
+select shop_a, 'Shop A', 'cfkshopa' from cfk_fixtures on conflict do nothing;
+insert into public.shops (id, name, store_code)
+select shop_b, 'Shop B', 'cfkshopb' from cfk_fixtures on conflict do nothing;
 
 insert into public.branches (id, shop_id, name)
 select branch_a, shop_a, 'Branch A' from cfk_fixtures on conflict do nothing;
@@ -111,7 +111,7 @@ begin
   v_sqlstate := '00000';
   v_temp_user := gen_random_uuid();
   insert into auth.users (id, instance_id, email, aud, role) values (v_temp_user, '00000000-0000-0000-0000-000000000000', 'u1@test.local', 'authenticated', 'authenticated');
-  insert into public.profiles (id, shop_id, full_name, role, branch_id) values (v_temp_user, f.shop_a, 'Pos Control', 'staff', f.branch_a);
+  insert into public.profiles (id, shop_id, full_name, role, branch_id, username) values (v_temp_user, f.shop_a, 'Pos Control', 'staff', f.branch_a, 'cfkuser1');
   perform pg_temp.record_cfk('Positive Control', 'profiles', 'branch_id', 'PASS', 'Same-shop branch insert succeeded');
 
   -- Disable trigger temporarily to test the composite foreign key directly
@@ -120,7 +120,7 @@ begin
   v_temp_user := gen_random_uuid();
   insert into auth.users (id, instance_id, email, aud, role) values (v_temp_user, '00000000-0000-0000-0000-000000000000', 'u2@test.local', 'authenticated', 'authenticated');
   begin
-    insert into public.profiles (id, shop_id, full_name, role, branch_id) values (v_temp_user, f.shop_a, 'Cross Shop', 'staff', f.branch_b);
+    insert into public.profiles (id, shop_id, full_name, role, branch_id, username) values (v_temp_user, f.shop_a, 'Cross Shop', 'staff', f.branch_b, 'cfkuser2');
   exception when others then get stacked diagnostics v_sqlstate = RETURNED_SQLSTATE; end;
   perform pg_temp.record_cfk('Cross-Shop Rejection', 'profiles', 'branch_id', case when v_sqlstate = '23503' then 'PASS' else 'FAIL' end, format('SQLSTATE: %s', v_sqlstate));
   alter table public.profiles enable trigger tr_validate_profile_mutation;

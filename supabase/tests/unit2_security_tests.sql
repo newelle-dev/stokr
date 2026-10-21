@@ -76,10 +76,10 @@ insert into u2_test_params values (
 );
 
 -- 1. Seed Shops
-insert into public.shops (id, name)
-select shop_a_id, 'Shop Alpha' from u2_test_params on conflict do nothing;
-insert into public.shops (id, name)
-select shop_b_id, 'Shop Beta' from u2_test_params on conflict do nothing;
+insert into public.shops (id, name, store_code)
+select shop_a_id, 'Shop Alpha', 'u2shopa' from u2_test_params on conflict do nothing;
+insert into public.shops (id, name, store_code)
+select shop_b_id, 'Shop Beta', 'u2shopb' from u2_test_params on conflict do nothing;
 
 -- 2. Seed Branches
 insert into public.branches (id, shop_id, name)
@@ -98,8 +98,8 @@ select owner_b_id, '00000000-0000-0000-0000-000000000000', 'owner_b@test.local',
 -- 4. Seed Profiles
 insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
 select owner_a_id, shop_a_id, 'Owner A', 'owner', null, true from u2_test_params on conflict do nothing;
-insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
-select staff_a_id, shop_a_id, 'Staff A', 'staff', branch_a_id, true from u2_test_params on conflict do nothing;
+insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active, username)
+select staff_a_id, shop_a_id, 'Staff A', 'staff', branch_a_id, true, 'u2staffa' from u2_test_params on conflict do nothing;
 insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
 select owner_b_id, shop_b_id, 'Owner B', 'owner', null, true from u2_test_params on conflict do nothing;
 
@@ -155,7 +155,7 @@ begin
 
   -- 1.1 shops
   v_err := false;
-  begin insert into public.shops (name) values ('Rogue Shop'); exception when others then v_err := true; end;
+  begin insert into public.shops (name, store_code) values ('Rogue Shop', 'rogueshop'); exception when others then v_err := true; end;
   perform pg_temp.record_result('shops', 'INSERT (Staff)', case when v_err then 'PASS' else 'FAIL' end, 'Direct insert rejected');
 
   -- 1.2 branches
@@ -165,7 +165,7 @@ begin
 
   -- 1.3 profiles
   v_err := false;
-  begin insert into public.profiles (id, shop_id, full_name, role) values (gen_random_uuid(), v_shop_id, 'Rogue Staff', 'staff'); exception when others then v_err := true; end;
+  begin insert into public.profiles (id, shop_id, full_name, role, branch_id, username) values (gen_random_uuid(), v_shop_id, 'Rogue Staff', 'staff', v_branch_id, 'roguestaff'); exception when others then v_err := true; end;
   perform pg_temp.record_result('profiles', 'INSERT (Staff)', case when v_err then 'PASS' else 'FAIL' end, 'Direct insert rejected');
 
   -- 1.4 products
@@ -459,8 +459,8 @@ begin
   select count(*) into v_count from public.stock_count_items where shop_id = v_shop_id;
   if v_count <> 1 then raise exception 'Stock count items fixture modified or deleted!'; end if;
 
-  -- 10. activity_log intact
-  select count(*) into v_count from public.activity_log where shop_id = v_shop_id;
+  -- 10. activity_log seed intact (seed row exists)
+  select count(*) into v_count from public.activity_log where id = '11111111-9999-9999-9999-999999999999';
   if v_count <> 1 then raise exception 'Activity log fixture modified or deleted!'; end if;
 
   perform pg_temp.record_result('ALL 10 TABLES', 'INTEGRITY VERIFY', 'PASS', 'All fixture rows verified completely intact and unchanged');
@@ -488,12 +488,13 @@ begin
   exception when others then v_err := true; end;
   perform pg_temp.record_result('stock_movements', 'FORGERY (created_by)', case when v_err then 'PASS' else 'FAIL' end, 'Owner forged created_by rejected');
 
+  -- Direct activity_log insert is completely revoked from authenticated role
   v_err := false;
   begin
     insert into public.activity_log (shop_id, actor_id, action, entity_type)
     values (v_shop_id, v_staff_id, 'audit_entry', 'product');
   exception when others then v_err := true; end;
-  perform pg_temp.record_result('activity_log', 'FORGERY (actor_id)', case when v_err then 'PASS' else 'FAIL' end, 'Owner forged actor_id rejected');
+  perform pg_temp.record_result('activity_log', 'FORGERY (actor_id)', case when v_err then 'PASS' else 'FAIL' end, 'Direct insert revoked from authenticated');
 
   v_err := false;
   begin

@@ -3,8 +3,8 @@
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 3 complete.
-- **Current unit:** Unit 4 (not started)
+- **Phase:** Unit 2 complete.
+- **Current unit:** Unit 3 (not started)
 - **Last updated:** 2026-10-20
 - **Next milestone:** friend's "run both" week after Unit 6
 
@@ -21,7 +21,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Email + password login and logout; session refresh works
   - Owner and staff land on different home pages; staff can't open owner pages
   - Staff cannot reach owner data even by calling the database directly
-- [x] **Unit 3: Branches and products (owner)** (about 2 days)
+- [ ] **Unit 3: Branches and products (owner)** (about 2 days)
   - Owner can add, edit, and deactivate products (name, category, selling price, cost price, low-stock level)
   - Owner can add and rename branches; owner can create staff logins and assign branches (`/team`)
   - Deactivating a staff member in `/team` must ban the user and revoke their sessions via Supabase Auth Admin API (`admin.auth.admin.updateUserById(id, { ban_duration: '876000h' })` / `admin.auth.admin.signOut(jwt, 'all')`)
@@ -38,12 +38,13 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Staff can only sell at their branch; the owner can sell at any branch
   - Selling at zero stock works and is flagged
   - `/my-sales` shows only that staff member's sales, no cost or profit
-  - Revoke direct INSERT on `sales`, `sale_items`, `stock_movements`, and `activity_log` from `authenticated` once the database functions exist
+  - Revoke direct owner INSERT/UPDATE/DELETE on sales and sale_items in Units 5 and 6 (database functions only: `record_sale`, `void_sale`); revoke direct INSERT on `stock_movements` from `authenticated` once the database functions exist
 - [ ] **Unit 6: Sales list, void and correction** (about 2-3 days)
   - Owner sees all sales with filters (date, branch, staff, status)
   - Owner can void a sale with a reason; stock returns; the sale stays visible as voided; totals exclude it
   - Owner can record a replacement sale linked to the original, keeping the original seller
   - Staff cannot edit or delete any sale (proved by a test)
+  - Direct owner UPDATE and DELETE on `sales` and `sale_items` completely revoked from `authenticated` (voids via `void_sale` database function only)
 - [ ] **>> MILESTONE: start the friend's "run both" week (app and notebook side by side)**
 - [ ] **Unit 7: Owner dashboard** (about 3 days)
   - Shows, in order: today's sales and profit, low-stock list, sales per staff, missing stock
@@ -54,24 +55,26 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Owner can count some or all products at a branch and sees expected vs counted vs difference
   - Accepting a count writes correction movements and appears in the log
   - Missing stock (units and cost value) appears on the dashboard
+  - Direct owner INSERT/UPDATE/DELETE on `stock_counts` and `stock_count_items` completely revoked from `authenticated` (database functions only)
 - [ ] **Unit 9: Polish, phone testing, real data, trial fixes** (about 3-5 days)
   - Installable to the phone home screen with icons
   - Loading, empty, and error states on every screen
   - Real products loaded; issues from the trial week fixed
   - Manual phone checklist passes on at least one iPhone-sized and one Android-sized screen
+  - Pre-launch requirement: configure custom SMTP provider and implement owner forgot-password recovery flow
 
 ## Open questions
 | # | Question | Who answers | Blocks |
 |---|---|---|---|
 | 1 | ~Confirm currency is PHP and timezone is Asia/Manila~ (Confirmed: PHP & Asia/Manila) | Owner of the app | Unit 1 (Resolved) |
 | 2 | Final app name (Stokr) | Owner of the app | Unit 9 |
-| 3 | ~Do staff have email addresses to log in with?~ (Resolved: Store code + username mapped to `username.storecode@staff.stokr.invalid`) | Owner of the app / friend | Unit 3 (Resolved) |
-| 4 | ~Is the product category list (liquid, device, cartridge, other) right?~ (Resolved: Approved) | Friend | Unit 3 (Resolved) |
+| 3 | Do staff have email addresses to log in with? | Owner of the app / friend | Unit 3 |
+| 4 | Is the product category list (liquid, device, cartridge, other) right? | Friend | Unit 3 |
 | 5 | Confirm: never block a sale at zero stock, only flag it | Owner of the app | Unit 5 |
 | 6 | How often will the friend do a physical stock count? | Friend | Unit 8 |
 | 7 | How often do discounts and returns happen? | Friend | After Unit 6 |
 | 8 | How often do supplier prices change? | Friend | After Unit 4 |
-| 9 | ~Approve the color palette and fonts in `ui-context.md`~ (Resolved: Approved) | Owner of the app | Unit 3 (Resolved) |
+| 9 | Approve the color palette and fonts in `ui-context.md` | Owner of the app | Unit 3 |
 
 ## Decisions log
 | Date | Decision |
@@ -94,10 +97,9 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | 2026-10-20 | Full 10-Table Write-Path Matrix: Extended `unit2_security_tests.sql` to test direct INSERT, UPDATE, and DELETE by staff users across all 10 tables (`shops`, `branches`, `profiles`, `products`, `stock_movements`, `sales`, `sale_items`, `stock_counts`, `stock_count_items`, `activity_log`). |
 | 2026-10-20 | Profile ID Immutability: Enforced via `validate_profile_mutation()` trigger (`id cannot be changed.`). Applied via migration `20261020083950_profile_id_immutable.sql`. |
 | 2026-10-20 | Shop-Scoped Composite Foreign Keys & No Cascade: Applied composite unique keys `(shop_id, id)` and composite foreign keys `(shop_id, referenced_id)` across all 15 tenant references via migration `20261020084634_shop_scoped_composite_foreign_keys.sql`. Prohibited `CASCADE` and `SET NULL` (default `NO ACTION` enforced). Deleting entities with history refused with `23503`. Documented as Invariants 19 & 20 in `context/architecture.md`. |
-| 2026-10-20 | Unit 3 Architecture & Invariant 21: Added Invariant 21 (never authorize via `user_metadata`; roles and access originate strictly from `profiles`). Added `shops.store_code` (unique regex `^[a-z0-9]{3,20}$`) and `profiles.username`. Staff login internally routes to `username.storecode@staff.stokr.invalid`. |
-| 2026-10-20 | Staff Password Lockdown & DB Immunity: Added `profiles.must_change_password` and fail-closed table `public.profile_security` (composite PK/FK `(shop_id, profile_id)`, default NO ACTION, RLS enabled, zero public privileges). When `must_change_password = true`, RLS helpers `current_user_shop_id()`, `is_owner()`, and `current_user_role()` return NULL, locking down the session at DB and page layers. Trigger snapshots encrypted hash on flag transition; `complete_password_change()` enforces new hash != temp hash and clears flag. |
-| 2026-10-20 | Activity Log Trigger Actor Enforcement: In `log_entity_activity()`, requests with JWT claims but null `auth.uid()` raise an exception; direct connections without JWT claims bypass trigger for migrations/seeds. All profile mutations in app actions execute via owner session client to maintain authentic `auth.uid()`, with admin service-role client used exclusively for auth user provisioning and bans. |
-| 2026-10-20 | Branch Deactivation Guard: `validate_branch_mutation()` blocks branch deactivation if active staff are assigned or if attempting to deactivate the last remaining active branch. |
+| 2026-10-21 | Staff Login & Password Lockdown (Unit 3): Staff authenticate using store code + username + password (mapped internally to hidden `username.storecode@staff.stokr.invalid`). In probe test (b), GoTrue rejected staff email modification with status 400 `Email address "probe.cloudhaven@staff.stokr.invalid" is invalid` (the error named the existing address). Forced password change enforced via must_change_password locking RLS helpers, begin_staff_password_reset() security definer RPC, and fail-closed complete_password_change(). |
+| 2026-10-21 | Functions-Only Write Paths & Future Revisit: Remove direct owner INSERT/UPDATE/DELETE on sales and sale_items in Units 5 and 6 (database functions only), and on stock_counts and stock_count_items in Unit 8; revisit email change if any email/recovery flow is ever added. |
+| 2026-10-21 | Pre-launch Auth Requirements: Before launch, configure custom SMTP provider and an owner forgot-password recovery flow. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*
@@ -121,4 +123,3 @@ Public signup and billing, offline mode, notifications, product variants, spread
 | 2026-10-20 | Unit 2 Review & Hardening | Removed cacheComponents/partialPrefetching from next.config.ts; standard dynamic routing enforced via export const dynamic = 'force-dynamic'; added Invariant 18 forbidding cross-request caching of user/shop data; extended SQL test suite to cover staff INSERT, UPDATE, and DELETE on all 10 tables; recorded rule that 'show me before applying' mandates a complete stop and explicit approval. |
 | 2026-10-20 | Unit 2 Signup & Write Matrix Verification | Strengthened public signup integration test to strictly assert /signups not allowed for this instance/i and fail on any other error or success; verified dev auth.users has zero stray accounts (exactly 2 seed users); executed comprehensive 58-row live security test suite (INSERT/UPDATE/DELETE rejections across all 10 tables, owner positive controls, immutability assertions); disabled public signups in dashboard and verified `npm run test:integration` passes 2/2. |
 | 2026-10-20 | Unit 3 Prep / Composite Foreign Keys | Applied profile ID immutability migration (`20261020083950_profile_id_immutable.sql`) and shop-scoped composite foreign keys migration (`20261020084634_shop_scoped_composite_foreign_keys.sql`) enforcing composite keys across all 15 tenant references with default NO ACTION (all cascades/set null removed). Added Invariants 19 & 20 to architecture.md. Verified with 31/31 passing tests in `composite_foreign_keys_test.sql`. |
-| 2026-10-20 | Unit 3 | Implemented Unit 3 (Branches, products, and staff accounts): Applied migration `20261020100000_unit3_branches_products_team.sql` adding `shops.store_code`, `profiles.username`, `must_change_password`, `profile_security` table, automated `log_entity_activity()` triggers, and branch deactivation guards. Built `/products`, `/team`, and `/settings` pages with server-action CRUD, below-cost pricing warnings, store-code generation, and accessible dialogs. Added forced first-login password change flow (`/change-password`) with database-level isolation and fail-closed snapshot verification. Built responsive owner layout (sidebar on desktop, bottom navigation tab bar on mobile). Verified with 42 unit tests, 12 live database integration tests, 0 lint errors/warnings, clean typecheck, and Next.js production build. |

@@ -31,7 +31,7 @@ describe('Public Signup Disabled (Live DB)', () => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const randomEmail = `unauthorized_signup_${Date.now()}@gmail.com`;
+    const randomEmail = `unauthorized_signup_${Date.now()}@example.com`;
     const { data, error } = await client.auth.signUp({
       email: randomEmail,
       password: 'Strong-Password-123!@#',
