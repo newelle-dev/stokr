@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/lib/zod-resolver';
 import { updateBranchSchema, type UpdateBranchInput } from '../schemas';
 import { renameBranchAction } from '../actions';
 import { Modal } from '@/components/ui/modal';

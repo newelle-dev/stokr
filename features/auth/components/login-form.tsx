@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/lib/zod-resolver';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Store, Shield } from 'lucide-react';
 import {

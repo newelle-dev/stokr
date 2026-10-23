@@ -63,6 +63,8 @@ describe('money utilities', () => {
       expect(parseMoneyInput('₱ 1,234.50')).toEqual({ success: true, centavos: 123450 });
       expect(parseMoneyInput('0')).toEqual({ success: true, centavos: 0 });
       expect(parseMoneyInput('0.00')).toEqual({ success: true, centavos: 0 });
+      expect(parseMoneyInput('0.29')).toEqual({ success: true, centavos: 29 });
+      expect(parseMoneyInput('19.9')).toEqual({ success: true, centavos: 1990 });
     });
 
     it('rejects junk input with an error, never silently 0', () => {
@@ -84,6 +86,12 @@ describe('money utilities', () => {
       expect(res2.success).toBe(false);
       if (!res2.success) {
         expect(res2.error).toMatch(/more than 2 decimal places/i);
+      }
+
+      const res3 = parseMoneyInput('1.005');
+      expect(res3.success).toBe(false);
+      if (!res3.success) {
+        expect(res3.error).toMatch(/more than 2 decimal places/i);
       }
     });
 

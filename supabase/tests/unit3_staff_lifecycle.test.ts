@@ -2,6 +2,7 @@ import { describe, expect, it, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 // Load .env
 const envPath = path.resolve(process.cwd(), '.env');
@@ -615,7 +616,7 @@ describe('Unit 3 Real-Session Staff Lifecycle & Password Lockdown Tests', () => 
     // 1. Positive Control: Admin update on throwaway non-staff user succeeds
     const throwawayEmail = `throwaway_test_${Date.now()}@test.invalid`;
     const changedThrowawayEmail = `changed_test_${Date.now()}@test.invalid`;
-    const randomThrowawayPass = `RandPass_${Date.now()}_${Math.random().toString(36).slice(2)}!Aa1`;
+    const randomThrowawayPass = `Throwaway_${crypto.randomBytes(16).toString('hex')}!Aa1`;
 
     let throwawayId: string | null = null;
     try {

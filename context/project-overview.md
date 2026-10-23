@@ -94,6 +94,6 @@ Supporting checks:
 4. ~Do staff have email addresses to log in with?~ (Resolved: Staff log in using store code + username; internal dummy email `username.store_code@staff.stokr.invalid` is generated and hidden).
 
 ## Assumptions to confirm
-- Currency is Philippine pesos (PHP); timezone is Asia/Manila.
-- A sale is never blocked when system stock is zero or negative; it is flagged on the dashboard instead.
-- Product categories: liquid, device, cartridge, other.
+- ~Currency is Philippine pesos (PHP); timezone is Asia/Manila.~ (Confirmed)
+- ~A sale is never blocked when system stock is zero or negative; it is flagged on the dashboard instead.~ (Confirmed)
+- Product categories: liquid, device, cartridge, other. (Pending friend confirmation)

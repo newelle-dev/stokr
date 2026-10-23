@@ -62,15 +62,16 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Real products loaded; issues from the trial week fixed
   - Manual phone checklist passes on at least one iPhone-sized and one Android-sized screen
   - Pre-launch requirement: configure custom SMTP provider and implement owner forgot-password recovery flow
+  - Pre-launch requirement: re-run npm audit before launch (7 production-side transitive findings via shadcn CLI deps); never use audit fix --force
 
 ## Open questions
 | # | Question | Who answers | Blocks |
 |---|---|---|---|
 | 1 | ~Confirm currency is PHP and timezone is Asia/Manila~ (Confirmed: PHP & Asia/Manila) | Owner of the app | Unit 1 (Resolved) |
-| 2 | Final app name (Stokr) | Owner of the app | Unit 9 |
+| 2 | ~Final app name~ (Confirmed: Stokr) | Owner of the app | Unit 9 (Resolved) |
 | 3 | ~Do staff have email addresses to log in with?~ (Closed: staff log in by store code and username with hidden address) | Owner of the app / friend | Unit 3 (Resolved) |
 | 4 | Is the product category list (liquid, device, cartridge, other) right? | Friend | Unit 3 |
-| 5 | Confirm: never block a sale at zero stock, only flag it | Owner of the app | Unit 5 |
+| 5 | ~Confirm: never block a sale at zero stock, only flag it~ (Confirmed: Never block a sale at zero stock; flag on dashboard) | Owner of the app | Unit 5 (Resolved) |
 | 6 | How often will the friend do a physical stock count? | Friend | Unit 8 |
 | 7 | How often do discounts and returns happen? | Friend | After Unit 6 |
 | 8 | How often do supplier prices change? | Friend | After Unit 4 |
@@ -103,6 +104,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | 2026-10-21 | Table Mutations Lockdown (Unit 3 Migration 2): Revoked DELETE on branches, products, stock_counts, and stock_count_items from authenticated; made store_code immutable by trigger; logged shop renames in activity_log; revoked UPDATE on sales from authenticated; restricted stock_counts insert. Applied via migration `20261021065454_lockdown_table_mutations_and_shops.sql`. |
 | 2026-10-21 | Session Invalidation & Staff Email Lockdown: Applied `20261021085218_session_invalidation_on_reset_and_deactivation.sql` (invalidating auth.sessions on password reset and staff deactivation) and `20261021085231_prevent_staff_email_change.sql` (trigger on auth.users preventing modification of staff email addresses). |
 | 2026-10-21 | Unit 3 App Implementation: Added strict `parseMoneyInput` in `lib/money.ts` (digits with at most 2 decimals, optional commas/peso sign, returns descriptive errors, never silently 0, selling price min 1 centavo, cost price min 0); replaced duplicated parseFloat blocks in product create and edit modals with inline errors; added sign-out button on `/change-password` page; enforced `server-only` on admin client; verified with comprehensive unit and real-session integration test suites. |
+| 2026-10-23 | Confirmed final app name is Stokr. Confirmed Invariant 13: never block a sale at zero or negative stock; record the sale and flag on the dashboard instead. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*

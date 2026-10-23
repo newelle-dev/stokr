@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/lib/zod-resolver';
 import { Copy, Check, ShieldAlert, KeyRound } from 'lucide-react';
 import { createStaffSchema, type CreateStaffInput } from '../schemas';
 import { createStaffAction, type CreatedStaffResult } from '../actions';

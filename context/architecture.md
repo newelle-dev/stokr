@@ -87,7 +87,7 @@ Staff never receive cost prices, profit, or other staff members' sales. Base tab
 10. A staff sale always has `sold_by` equal to the logged-in user and a branch equal to their assigned branch.
 11. Day boundaries ("today") are computed in Asia/Manila time, not UTC and not the device's timezone.
 12. All schema changes go through migration files in `supabase/migrations`. No manual edits to the live schema.
-13. A sale is never blocked by zero or negative stock. It is flagged instead. *(Assumption pending owner confirmation.)*
+13. A sale is never blocked by zero or negative stock. It is flagged instead.
 14. Direct writes to ledger and audit tables are owner-only; actor columns cannot be forged (`created_by = auth.uid()`, `actor_id = auth.uid()`, `recorded_by = auth.uid()`).
 15. Stock movement reasons `sale` and `void_return` are function-only (`record_sale` and `void_sale`) and cannot be written by direct INSERT.
 16. Staff can read only their own profile row; staff cannot read other staff profiles or owner profiles.
