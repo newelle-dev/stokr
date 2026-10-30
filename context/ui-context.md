@@ -31,7 +31,7 @@ Rules:
 - Light mode is the default. Dark mode follows the device setting.
 
 ## Typography
-- Font: **Inter**, falling back to the system sans-serif.
+- Font: **Geist**, falling back to the system sans-serif.
 - Base text: 16px minimum on mobile (smaller text makes iPhones zoom into form fields).
 
 | Role | Size / weight |

@@ -45,6 +45,59 @@ describe('zodResolver (Zod v4 compatibility)', () => {
     expect(result.errors.confirmPassword?.message).toBe('Passwords do not match');
   });
 
+  it('handles transforms (toLowerCase, trim) and passes transformed values on success', async () => {
+    const transformSchema = z.object({
+      username: z
+        .string()
+        .trim()
+        .transform((val) => val.toLowerCase()),
+      storeCode: z
+        .string()
+        .trim()
+        .transform((val) => val.toLowerCase()),
+    });
+
+    const resolver = zodResolver(transformSchema);
+    const result = await resolver(
+      {
+        username: '  AdminStaff_01  ',
+        storeCode: '  CLOUD-HAVEN  ',
+      },
+      {},
+      defaultOptions
+    );
+
+    expect(result.errors).toEqual({});
+    expect(result.values.username).toBe('adminstaff_01');
+    expect(result.values.storeCode).toBe('cloud-haven');
+  });
+
+  it('handles field-level refinements and sets error on the targeted field path', async () => {
+    const refinementSchema = z
+      .object({
+        password: z.string().min(8),
+        confirmPassword: z.string(),
+      })
+      .refine((data) => data.password === data.confirmPassword, {
+        message: 'Confirmation does not match original password',
+        path: ['confirmPassword'],
+      });
+
+    const resolver = zodResolver(refinementSchema);
+    const result = await resolver(
+      {
+        password: 'Password123!',
+        confirmPassword: 'DifferentPassword!',
+      },
+      {},
+      defaultOptions
+    );
+
+    expect(result.errors.confirmPassword?.message).toBe('Confirmation does not match original password');
+    expect(result.errors.confirmPassword?.type).toBe('custom');
+    expect(result.errors.password).toBeUndefined();
+  });
+
   it('handles nested schemas and root refine errors', async () => {
     const nestedSchema = z
       .object({

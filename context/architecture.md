@@ -96,6 +96,8 @@ Staff never receive cost prices, profit, or other staff members' sales. Base tab
 19. Cross-shop references are impossible because every foreign key referencing a tenant table is composite `(shop_id, referenced_id)` matching `(shop_id, id)` on the parent table.
 20. Business records are never deleted, only deactivated or voided. Foreign keys between tenant tables never cascade (`ON DELETE CASCADE` and `ON DELETE SET NULL` are forbidden; all tenant foreign keys use default NO ACTION). Deleting a branch, product, profile, or sale that has history must fail with a foreign key violation.
 21. Never use `user_metadata` or any user-editable data for authorization; roles and access come only from the `profiles` table.
+22. `shops.store_code` is immutable and cannot be updated once set.
+23. `profiles.must_change_password` changes only through `begin_staff_password_reset()` and `complete_password_change()`.
 
 ## Environment variables
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: allowed in the browser.

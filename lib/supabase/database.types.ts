@@ -1,10 +1,3 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
 
 export type UserRole = 'owner' | 'staff';
 export type ProductCategory = 'liquid' | 'device' | 'cartridge' | 'other';
@@ -17,6 +10,14 @@ export type StockMovementReason =
   | 'void_return'
   | 'adjustment'
   | 'count_correction';
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -767,6 +768,27 @@ export type Database = {
       current_user_role: { Args: never; Returns: string }
       current_user_shop_id: { Args: never; Returns: string }
       is_owner: { Args: never; Returns: boolean }
+      record_adjustment: {
+        Args: {
+          p_branch_id: string
+          p_note: string
+          p_product_id: string
+          p_quantity_change: number
+          p_reason: string
+        }
+        Returns: Json
+      }
+      record_bulk_opening_stock: { Args: { p_items: Json }; Returns: Json }
+      record_restock: {
+        Args: {
+          p_branch_id: string
+          p_new_cost_price_centavos?: number
+          p_note?: string
+          p_product_id: string
+          p_quantity: number
+        }
+        Returns: Json
+      }
       request_is_maintenance_mode: { Args: never; Returns: boolean }
     }
     Enums: {

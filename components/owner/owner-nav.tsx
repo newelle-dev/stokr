@@ -47,18 +47,17 @@ const NAV_ITEMS: NavItem[] = [
     enabled: true,
   },
   {
+    label: 'Stock',
+    href: '/stock',
+    icon: Boxes,
+    enabled: true,
+  },
+  {
     label: 'Sales',
     href: '#',
     icon: ShoppingCart,
     enabled: false,
-    badge: 'Unit 4',
-  },
-  {
-    label: 'Inventory',
-    href: '#',
-    icon: Boxes,
-    enabled: false,
-    badge: 'Unit 4',
+    badge: 'Unit 5',
   },
   {
     label: 'Reports',
