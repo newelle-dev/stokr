@@ -537,7 +537,7 @@ begin
     insert into public.stock_movements (shop_id, branch_id, product_id, quantity_change, reason, created_by)
     values (v_shop_id, v_branch_id, v_prod_id, 25, 'restock', v_owner_id);
   exception when others then v_err := true; end;
-  perform pg_temp.record_result('stock_movements', 'REASON (restock)', case when not v_err then 'PASS' else 'FAIL' end, 'Direct reason restock permitted for owner');
+  perform pg_temp.record_result('stock_movements', 'REASON (restock)', case when v_err then 'PASS' else 'FAIL' end, 'Direct reason restock rejected (Unit 4: record_restock only)');
 end;
 $$;
 

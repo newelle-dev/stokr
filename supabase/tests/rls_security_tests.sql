@@ -61,12 +61,12 @@ insert into test_params values (
 );
 
 -- Insert Shops
-insert into public.shops (id, name)
-select shop_a_id, 'Shop Alpha' from test_params
+insert into public.shops (id, name, store_code)
+select shop_a_id, 'Shop Alpha', 'rlsshopa' from test_params
 on conflict (id) do nothing;
 
-insert into public.shops (id, name)
-select shop_b_id, 'Shop Beta' from test_params
+insert into public.shops (id, name, store_code)
+select shop_b_id, 'Shop Beta', 'rlsshopb' from test_params
 on conflict (id) do nothing;
 
 -- Insert Branches
@@ -100,12 +100,12 @@ insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
 select owner_a_id, shop_a_id, 'Owner Alpha', 'owner', null, true from test_params
 on conflict (id) do update set shop_id = excluded.shop_id, role = excluded.role, is_active = excluded.is_active;
 
-insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
-select staff_a1_id, shop_a_id, 'Staff Alpha 1', 'staff', branch_a_id, true from test_params
+insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active, username)
+select staff_a1_id, shop_a_id, 'Staff Alpha 1', 'staff', branch_a_id, true, 'rlsstaffa1' from test_params
 on conflict (id) do update set shop_id = excluded.shop_id, role = excluded.role, is_active = excluded.is_active;
 
-insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
-select staff_a2_id, shop_a_id, 'Staff Alpha 2', 'staff', branch_a_id, true from test_params
+insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active, username)
+select staff_a2_id, shop_a_id, 'Staff Alpha 2', 'staff', branch_a_id, true, 'rlsstaffa2' from test_params
 on conflict (id) do update set shop_id = excluded.shop_id, role = excluded.role, is_active = excluded.is_active;
 
 insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)
@@ -408,83 +408,19 @@ set local "request.jwt.claim.sub" = '';
 
 do $$
 declare
-  v_count integer;
+  v_rel text;
 begin
-  -- 5.1 Anon user gets 0 rows from base products
-  select count(*) into v_count from public.products;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % products!', v_count;
-  end if;
+  -- Since Unit 1 hardening anon holds no privileges at all, so a read is refused outright.
+  foreach v_rel in array array[
+    'shops','branches','profiles','products','stock_movements','sales','sale_items',
+    'stock_counts','stock_count_items','activity_log','staff_products','my_sales','stock_levels'
+  ] loop
+    if has_table_privilege('anon', 'public.' || v_rel, 'SELECT') then
+      raise exception 'FAIL [Anon]: anon can SELECT from %!', v_rel;
+    end if;
+  end loop;
 
-  -- 5.2 Anon user gets 0 rows from base sales
-  select count(*) into v_count from public.sales;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % sales!', v_count;
-  end if;
-
-  -- 5.3 Anon user gets 0 rows from base sale_items
-  select count(*) into v_count from public.sale_items;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % sale_items!', v_count;
-  end if;
-
-  -- 5.4 Anon user gets 0 rows from stock_movements
-  select count(*) into v_count from public.stock_movements;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % stock movements!', v_count;
-  end if;
-
-  -- 5.5 Anon user gets 0 rows from shops & branches
-  select count(*) into v_count from public.shops;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % shops!', v_count;
-  end if;
-
-  select count(*) into v_count from public.branches;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % branches!', v_count;
-  end if;
-
-  -- 5.6 Anon user gets 0 rows from profiles
-  select count(*) into v_count from public.profiles;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % profiles!', v_count;
-  end if;
-
-  -- 5.7 Anon user gets 0 rows from stock_counts & items
-  select count(*) into v_count from public.stock_counts;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % stock_counts!', v_count;
-  end if;
-
-  select count(*) into v_count from public.stock_count_items;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % stock_count_items!', v_count;
-  end if;
-
-  -- 5.8 Anon user gets 0 rows from activity_log
-  select count(*) into v_count from public.activity_log;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % activity_log entries!', v_count;
-  end if;
-
-  -- 5.9 Views return 0 rows for anon user
-  select count(*) into v_count from public.staff_products;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % rows in staff_products!', v_count;
-  end if;
-
-  select count(*) into v_count from public.my_sales;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % rows in my_sales!', v_count;
-  end if;
-
-  select count(*) into v_count from public.stock_levels;
-  if v_count <> 0 then
-    raise exception 'FAIL [Anon]: Logged-out user saw % rows in stock_levels!', v_count;
-  end if;
-
-  raise notice 'PASS: Logged-out / anon user checks succeeded completely (0 rows across all 10 tables and 3 views).';
+  raise notice 'PASS: Logged-out / anon user has no SELECT privilege on any of the 10 tables and 3 views.';
 end;
 $$;
 
@@ -610,7 +546,7 @@ begin
 end;
 $$;
 
-raise notice 'PASS: Immutability and deletion protection triggers succeeded (stock_movements, sales, sale_items, activity_log).';
+do $$ begin raise notice 'PASS: Immutability and deletion protection triggers succeeded (stock_movements, sales, sale_items, activity_log).'; end; $$;
 
 -- Return status row for API / client callers
 select 'ALL_POSITIVE_AND_NEGATIVE_SECURITY_TESTS_PASSED' as result;

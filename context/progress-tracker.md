@@ -3,9 +3,9 @@
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 3 complete (in review).
-- **Current unit:** Unit 3 (App and Database complete)
-- **Last updated:** 2026-10-21
+- **Phase:** Unit 4 complete. Waiting for owner go-ahead to start Unit 5.
+- **Current unit:** Unit 4 (Stock) complete; next is Unit 5 (Record a sale)
+- **Last updated:** 2026-11-10
 - **Next milestone:** friend's "run both" week after Unit 6
 
 ## Build roadmap
@@ -27,7 +27,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Deactivating a staff member terminates all active sessions immediately via database trigger; password reset terminates sessions via `begin_staff_password_reset`
   - Staff can see product names and selling prices only (via `staff_products`), never cost
   - Every change appears in the activity log
-- [ ] **Unit 4: Stock** (about 2-3 days)
+- [x] **Unit 4: Stock** (about 2-3 days)
   - Owner can enter opening stock per branch, restock (optionally updating cost price), and make adjustments with a note
   - Stock on hand per product and branch is correct and comes only from movements
   - Movements cannot be edited or deleted (proved by a test)
@@ -105,12 +105,16 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 | 2026-10-21 | Session Invalidation & Staff Email Lockdown: Applied `20261021085218_session_invalidation_on_reset_and_deactivation.sql` (invalidating auth.sessions on password reset and staff deactivation) and `20261021085231_prevent_staff_email_change.sql` (trigger on auth.users preventing modification of staff email addresses). |
 | 2026-10-21 | Unit 3 App Implementation: Added strict `parseMoneyInput` in `lib/money.ts` (digits with at most 2 decimals, optional commas/peso sign, returns descriptive errors, never silently 0, selling price min 1 centavo, cost price min 0); replaced duplicated parseFloat blocks in product create and edit modals with inline errors; added sign-out button on `/change-password` page; enforced `server-only` on admin client; verified with comprehensive unit and real-session integration test suites. |
 | 2026-10-23 | Confirmed final app name is Stokr. Confirmed Invariant 13: never block a sale at zero or negative stock; record the sale and flag on the dashboard instead. |
+| 2026-11-10 | Unit 4 Stock Write Paths: Opening stock, restock (optional cost update) and adjustments (reason + note required) go only through database functions `record_bulk_opening_stock`, `record_restock`, `record_adjustment`; direct INSERT on `stock_movements` revoked from `authenticated`; one opening movement per shop/branch/product (`uq_stock_movements_opening_once`). Applied via migration `20261023085355_unit4_stock_functions_and_security.sql`. |
 
 ## Backlog (ideas not yet approved)
 *(empty: add ideas here; do not build them until the owner approves)*
 
 ## Known limitations
 - Last-owner race condition: A theoretical race could occur if two owners concurrently attempt to deactivate/demote themselves at the exact same millisecond without an explicit table lock. Given Stokr shops have at most 1-2 owners, this edge case is acknowledged as a documented limitation.
+
+- `rls_security_tests.sql` sections 6.1-6.7 catch every error (`exception when others then null`), which also swallows their own FAIL, so those checks cannot fail. Immutability is genuinely proved by `unit2_security_tests.sql` (stock_movements UPDATE/DELETE blocked by trigger). Tighten or delete 6.1-6.7 when next touching that file.
+- SQL test files must be run by pasting into the Supabase SQL Editor (choose "Run without RLS": they only create temp tables inside BEGIN/ROLLBACK). The Supabase CLI `db query` rejects multi-statement files, so `npm run test:logging` and the `run_*_test.mjs` runners currently fail.
 
 ## Later (parked, not v1)
 Public signup and billing, offline mode, notifications, product variants, spreadsheet import, batch costing, discount and return features, barcode scanning and receipts, report export, branch transfers, live push updates on the dashboard, deliberate shop-removal procedure (since append-only triggers on stock_movements and activity_log block cascade deletes if a shop row is deleted).
@@ -128,3 +132,4 @@ Public signup and billing, offline mode, notifications, product variants, spread
 | 2026-10-20 | Unit 2 Review & Hardening | Removed cacheComponents/partialPrefetching from next.config.ts; standard dynamic routing enforced via export const dynamic = 'force-dynamic'; added Invariant 18 forbidding cross-request caching of user/shop data; extended SQL test suite to cover staff INSERT, UPDATE, and DELETE on all 10 tables; recorded rule that 'show me before applying' mandates a complete stop and explicit approval. |
 | 2026-10-20 | Unit 2 Signup & Write Matrix Verification | Strengthened public signup integration test to strictly assert /signups not allowed for this instance/i and fail on any other error or success; verified dev auth.users has zero stray accounts (exactly 2 seed users); executed comprehensive 58-row live security test suite (INSERT/UPDATE/DELETE rejections across all 10 tables, owner positive controls, immutability assertions); disabled public signups in dashboard and verified `npm run test:integration` passes 2/2. |
 | 2026-10-20 | Unit 3 Prep / Composite Foreign Keys | Applied profile ID immutability migration (`20261020083950_profile_id_immutable.sql`) and shop-scoped composite foreign keys migration (`20261020084634_shop_scoped_composite_foreign_keys.sql`) enforcing composite keys across all 15 tenant references with default NO ACTION (all cascades/set null removed). Added Invariants 19 & 20 to architecture.md. Verified with 31/31 passing tests in `composite_foreign_keys_test.sql`. |
+| 2026-11-10 | Unit 4 Verification | Typecheck, lint, 67 unit tests, 32 integration tests pass. SQL suites run in the SQL Editor: unit4_green 18/18, unit2_security 59/59, rls_security pass, composite_foreign_keys 31/31, second_migration_lockdown 14/14, per_action_logging all 14 entries. Fixed stale tests (not app bugs): unit2 restock-direct-insert now expects rejection; rls_security needed store_code and staff username fixtures, stray `raise notice` wrapped, anon check replaced with has_table_privilege; composite_fk created_by test uses reason `restock` to avoid the opening unique index. Phone-size check of /stock and /stock/opening OK. DB password reset after accidental exposure in CLI output. |

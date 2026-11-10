@@ -149,7 +149,7 @@ begin
   v_sqlstate := '00000';
   begin
     insert into public.stock_movements (shop_id, branch_id, product_id, quantity_change, reason, created_by)
-    values (f.shop_a, f.branch_a, f.prod_a, 10, 'opening', f.user_b);
+    values (f.shop_a, f.branch_a, f.prod_a, 10, 'restock', f.user_b);
   exception when others then get stacked diagnostics v_sqlstate = RETURNED_SQLSTATE; end;
   perform pg_temp.record_cfk('Cross-Shop Rejection', 'stock_movements', 'created_by', case when v_sqlstate = '23503' then 'PASS' else 'FAIL' end, format('SQLSTATE: %s', v_sqlstate));
 
