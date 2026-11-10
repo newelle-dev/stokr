@@ -6,8 +6,8 @@ tags: [para/project]
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 5 built and passing automated checks. Waiting for the owner's phone check and sign-off.
-- **Current unit:** Unit 5 (Record a sale), awaiting sign-off. Unit 4 complete.
+- **Phase:** Unit 5 done (owner phone check and sign-off, 2026-11-10). Unit 6 is next and not started.
+- **Current unit:** Unit 6 (Sales list, void and correction). Units 1-5 complete.
 - **Last updated:** 2026-11-10
 - **Next milestone:** friend's "run both" week after Unit 6
 
@@ -15,7 +15,7 @@ tags: [para/project]
 Done: Units 1-4, see [[units-1-4]] (archive). Decisions: [[decisions-log]]. Rules: [[architecture]], [[ai-workflow-rules]].
 Each unit must meet its acceptance criteria and the verification steps in `ai-workflow-rules.md` before the next one starts.
 
-- [ ] **Unit 5: Record a sale** (about 3-4 days)
+- [x] **Unit 5: Record a sale** (about 3-4 days). Done 2026-11-10; owner phone check passed. Contract archived in `4-archive/unit-5-record-sale/`.
   - Staff can record a multi-item sale with Cash or GCash in a few taps on a phone
   - `record_sale` is atomic: sale, items, price/cost snapshot, stock reduction, and log entry all succeed together or not at all
   - Double tap creates only one sale
@@ -23,7 +23,6 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Selling at zero stock works and is flagged
   - `/my-sales` shows only that staff member's sales, no cost or profit
   - Revoke direct owner INSERT/UPDATE/DELETE on sales and sale_items in Units 5 and 6 (database functions only: `record_sale`, `void_sale`); revoke direct INSERT on `stock_movements` from `authenticated` once the database functions exist
-  - **Status:** built. Automated checks pass (typecheck, lint, 93 unit tests, build, 40 SQL checks on dev). Not yet done: owner's phone check and sign-off (phone checklist in `ai-workflow-rules.md`). Once signed off, tick this box and archive the unit folder.
 - [ ] **Unit 6: Sales list, void and correction** (about 2-3 days)
   - Owner sees all sales with filters (date, branch, staff, status)
   - Owner can void a sale with a reason; stock returns; the sale stays visible as voided; totals exclude it

@@ -17,8 +17,8 @@ Approved by owner 2026-11-10. Build done 2026-11-10; waiting for owner's phone c
 - [x] 2. Revoke direct owner INSERT/UPDATE/DELETE on `sales`/`sale_items` and direct INSERT on `stock_movements` (per tracker). Show SQL first. (`stock_movements` INSERT was already revoked in Unit 4. `sales`/`sale_items` applied to dev by hand 2026-11-10: `20261110120000_unit5_revoke_direct_sales_writes.sql`.)
 - [x] 3. SQL tests: staff, other-shop user, double tap, zero-stock flag, atomic rollback. (`supabase/tests/unit5_record_sale_tests.sql`, 40 checks pass on dev, all rolled back. Re-run after steps 2 and 4.)
 - [x] 4. Server action + Zod + unit tests; `/my-sales` data without cost or profit. (`features/sales/`: `recordSaleAction`, schema, friendly error mapping, `getMySales` on the `my_sales` and `my_sale_items` views; 18 unit tests; typecheck, lint and all 85 tests pass. Added `record_sale` and `my_sale_items` to `lib/supabase/database.types.ts` from the generator.)
-- [ ] 5. UI: multi-item sale in a few taps, Cash/GCash, `/my-sales`. (Built: `app/(staff)/sell`, `app/(staff)/my-sales`, `features/sales/components/`, staff nav links. Cart logic in `features/sales/cart.ts` with 8 tests. Build passes. Not yet checked on a phone or logged in as staff; that is the phone checklist in step 6.)
-- [ ] 6. Verify: typecheck, lint, npm test, SQL tests, phone checklist. (Passed: typecheck, lint, 93 unit tests, production build, 40 SQL checks on dev with all test data rolled back. Not done: phone checklist and owner sign-off. Error screens added for `/sell` and `/my-sales`.)
+- [x] 5. UI: multi-item sale in a few taps, Cash/GCash, `/my-sales`. (Built: `app/(staff)/sell`, `app/(staff)/my-sales`, `features/sales/components/`, staff nav links. Cart logic in `features/sales/cart.ts` with 8 tests. Build passes. Not yet checked on a phone or logged in as staff; that is the phone checklist in step 6.)
+- [x] 6. Verify: typecheck, lint, npm test, SQL tests, phone checklist. (Passed: typecheck, lint, 93 unit tests, production build, 40 SQL checks on dev with all test data rolled back, phone check by the owner on 2026-11-10. Sign-off given.)
 
 ## Outputs
 - Database (dev project only so far): `record_sale` (with review fixes), `my_sale_items` view, revokes on `sales`, `sale_items` and `stock_movements`. Migration files in `supabase/migrations/20261110*_unit5_*.sql`.
@@ -29,5 +29,5 @@ Approved by owner 2026-11-10. Build done 2026-11-10; waiting for owner's phone c
 - Known gaps: see the Unit 5 open items in [[progress-tracker]].
 
 ## Done when
-- [ ] All Unit 5 acceptance criteria demonstrated
-- [ ] Owner has seen it working and says it's done
+- [x] All Unit 5 acceptance criteria demonstrated (database tests on dev, unit tests, phone check)
+- [x] Owner has seen it working and says it's done (2026-11-10)
