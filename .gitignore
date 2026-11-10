@@ -44,3 +44,6 @@ next-env.d.ts
 # local secrets and scratch
 *.local.json
 /scratch/
+
+# generated knowledge graph (graphify)
+graphify-out/
