@@ -47,3 +47,8 @@ next-env.d.ts
 
 # generated knowledge graph (graphify)
 graphify-out/
+
+# obsidian: keep shared settings, ignore per-user state
+context/.obsidian/workspace.json
+context/.obsidian/workspaces.json
+context/.obsidian/cache

@@ -1,0 +1,35 @@
+---
+tags: [para/area, decisions]
+---
+# Decisions log
+
+Durable decisions. Add a row whenever the owner decides something. See [[progress-tracker]] for the current unit.
+
+| Date | Decision |
+|---|---|
+| (planning) | Only the owner adds or restocks inventory, and only the owner corrects sales |
+| (planning) | Payment methods: Cash and GCash only |
+| (planning) | One current cost per product; each sale saves cost at time of sale; no batch costing |
+| (planning) | No inter-branch transfer feature; owner uses adjustments with a note |
+| (planning) | Online only; low-stock alerts are a dashboard list only |
+| (planning) | Data separation between shops built in now; no signup or billing in v1 |
+| (planning) | Success = staff stop using the notebook and the owner checks the dashboard daily |
+| (planning) | Void-and-keep instead of deleting sales; stock is the sum of movements |
+| 2026-10-19 | Confirmed currency is Philippine Peso (PHP, integer centavos) and timezone is Asia/Manila |
+| 2026-10-19 | Confirmed no `src/` directory; App Router stays in root `app/` with `@/*` mapping to root |
+| 2026-10-19 | Single migration method: All DDL authored in `supabase/migrations/<version>_<name>.sql` and applied via Supabase migration tool (recorded in `supabase_migrations.schema_migrations`). Synchronized initial schema file to DB version `20261019073213`. |
+| 2026-10-19 | Enforced append-only invariant on `activity_log`: UPDATE, DELETE, and TRUNCATE prohibited via database triggers. |
+| 2026-10-19 | Unit 2 Security & Architecture Hardening: Direct writes to ledger tables are owner-only; actor columns cannot be forged (`created_by = auth.uid()`, `actor_id = auth.uid()`, `recorded_by = auth.uid()`); stock movement reasons `sale` and `void_return` are function-only; staff can read only their own profile row; every owner page calls `requireOwnerPage()` directly; and every unit includes write-path tests proving staff cannot mutate unauthorized tables. |
+| 2026-10-20 | Cache Policy & Dynamic Routing: Removed `cacheComponents` and `partialPrefetching` from `next.config.ts`. Enforced invariant 18: Never use `"use cache"` or any cross-request caching for data tied to a shop or user; all such reads are dynamic (`export const dynamic = 'force-dynamic'`). |
+| 2026-10-20 | Workflow Rule: "Show me before applying" means stop completely, show the complete SQL/code, and wait for the owner's explicit go before applying or executing. |
+| 2026-10-20 | Full 10-Table Write-Path Matrix: Extended `unit2_security_tests.sql` to test direct INSERT, UPDATE, and DELETE by staff users across all 10 tables (`shops`, `branches`, `profiles`, `products`, `stock_movements`, `sales`, `sale_items`, `stock_counts`, `stock_count_items`, `activity_log`). |
+| 2026-10-20 | Profile ID Immutability: Enforced via `validate_profile_mutation()` trigger (`id cannot be changed.`). Applied via migration `20261020083950_profile_id_immutable.sql`. |
+| 2026-10-20 | Shop-Scoped Composite Foreign Keys & No Cascade: Applied composite unique keys `(shop_id, id)` and composite foreign keys `(shop_id, referenced_id)` across all 15 tenant references via migration `20261020084634_shop_scoped_composite_foreign_keys.sql`. Prohibited `CASCADE` and `SET NULL` (default `NO ACTION` enforced). Deleting entities with history refused with `23503`. Documented as Invariants 19 & 20 in `context/2-areas/architecture.md`. |
+| 2026-10-21 | Staff Login & Password Lockdown (Unit 3): Staff authenticate using store code + username + password (mapped internally to hidden `username.storecode@staff.stokr.invalid`). In probe test (b), GoTrue rejected staff email modification with status 400 `Email address "probe.cloudhaven@staff.stokr.invalid" is invalid` (the error named the existing address). Forced password change enforced via must_change_password locking RLS helpers, begin_staff_password_reset() security definer RPC, and fail-closed complete_password_change(). |
+| 2026-10-21 | Functions-Only Write Paths & Future Revisit: Remove direct owner INSERT/UPDATE/DELETE on sales and sale_items in Units 5 and 6 (database functions only), and on stock_counts and stock_count_items in Unit 8; revisit email change if any email/recovery flow is ever added. |
+| 2026-10-21 | Pre-launch Auth Requirements: Before launch, configure custom SMTP provider and an owner forgot-password recovery flow. |
+| 2026-10-21 | Table Mutations Lockdown (Unit 3 Migration 2): Revoked DELETE on branches, products, stock_counts, and stock_count_items from authenticated; made store_code immutable by trigger; logged shop renames in activity_log; revoked UPDATE on sales from authenticated; restricted stock_counts insert. Applied via migration `20261021065454_lockdown_table_mutations_and_shops.sql`. |
+| 2026-10-21 | Session Invalidation & Staff Email Lockdown: Applied `20261021085218_session_invalidation_on_reset_and_deactivation.sql` (invalidating auth.sessions on password reset and staff deactivation) and `20261021085231_prevent_staff_email_change.sql` (trigger on auth.users preventing modification of staff email addresses). |
+| 2026-10-21 | Unit 3 App Implementation: Added strict `parseMoneyInput` in `lib/money.ts` (digits with at most 2 decimals, optional commas/peso sign, returns descriptive errors, never silently 0, selling price min 1 centavo, cost price min 0); replaced duplicated parseFloat blocks in product create and edit modals with inline errors; added sign-out button on `/change-password` page; enforced `server-only` on admin client; verified with comprehensive unit and real-session integration test suites. |
+| 2026-10-23 | Confirmed final app name is Stokr. Confirmed Invariant 13: never block a sale at zero or negative stock; record the sale and flag on the dashboard instead. |
+| 2026-11-10 | Unit 4 Stock Write Paths: Opening stock, restock (optional cost update) and adjustments (reason + note required) go only through database functions `record_bulk_opening_stock`, `record_restock`, `record_adjustment`; direct INSERT on `stock_movements` revoked from `authenticated`; one opening movement per shop/branch/product (`uq_stock_movements_opening_once`). Applied via migration `20261023085355_unit4_stock_functions_and_security.sql`. |

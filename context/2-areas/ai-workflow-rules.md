@@ -6,7 +6,7 @@ These rules are for the coding agent. They are not optional.
 The owner is the product owner and a junior developer who wants to learn and be proud of the result. Explain what you did in plain language. Keep summaries short. Never make product decisions for them: ask.
 
 ## At the start of every session
-1. Read `AGENTS.md`, then every file in `/context/` in this order: `project-overview.md`, `architecture.md`, `code-standards.md`, `ui-context.md`, `ai-workflow-rules.md`, `progress-tracker.md`.
+1. Follow the reading order in `AGENTS.md` (single source of truth).
 2. Open `progress-tracker.md` and find the **current unit**. Work only on that unit.
 3. Tell the owner in 2-3 sentences which unit you're on and what "done" looks like for it.
 
@@ -21,13 +21,14 @@ The owner is the product owner and a junior developer who wants to learn and be 
 ## When the spec is silent or unclear
 - **Stop and ask.** Do not guess about business rules, permissions, money, or stock.
 - Ask one clear question at a time and offer your recommended answer.
-- Once the owner decides, record the decision in `progress-tracker.md` under "Decisions log" before continuing. If it changes the spec, also update the relevant context file.
+- Once the owner decides, record the decision in `/context/2-areas/decisions-log.md` before continuing. If it changes the spec, also update the relevant context file.
 
 ## Before writing code for a unit
-1. Restate the unit's goal and acceptance criteria.
-2. List the files you plan to create or change.
-3. For anything touching the database, say which invariants in `architecture.md` apply.
-4. Wait for the owner's go-ahead if the plan involves schema changes or touching authentication.
+1. Create `1-projects/unit-N-<name>/CONTEXT.md` from `_templates/unit-contract.md`, filled from the tracker. Wait for the owner's OK, then set its status to `approved`.
+2. Restate the unit's goal and acceptance criteria.
+3. List the files you plan to create or change.
+4. For anything touching the database, say which invariants in `architecture.md` apply.
+5. Wait for the owner's go-ahead if the plan involves schema changes or touching authentication.
 
 ## While building
 - Follow `code-standards.md` and `ui-context.md` exactly.
@@ -59,9 +60,10 @@ A unit is done only when **all** of these pass:
 - Money shows as ₱ with two decimals
 
 ## After each unit
-1. Update `progress-tracker.md`: tick the unit, note what changed, list new open questions, and set the next unit as current.
-2. Make one clear git commit for the unit (message: `unit N: short description`).
-3. Give the owner a short plain-language summary: what now works, how to try it, and what's next.
+1. Update `1-projects/progress-tracker.md`: tick the unit, note what changed, list new open questions, set the next unit as current, and `git mv` the unit folder to `4-archive/`.
+2. Run `graphify --update` so the graph matches the finished unit.
+3. Make one clear git commit for the unit (message: `unit N: short description`).
+4. Give the owner a short plain-language summary: what now works, how to try it, and what's next.
 
 ## Communication style
 - Plain language, no jargon. If you must use a technical word, explain it in a few words.

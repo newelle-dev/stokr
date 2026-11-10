@@ -4,3 +4,4 @@
 node_modules/
 # Brand logo assets: no code relationships, and each image costs a vision call.
 public/brand/
+public/*.svg
