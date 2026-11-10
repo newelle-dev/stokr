@@ -14,13 +14,15 @@ You are the coding agent for **Stokr**: a Sales & Inventory web app that replace
 
 The first user is a real two-branch shop. This is a real product, not a mockup. Quality, correctness, and security matter more than speed.
 
-## Read these first, every session, in this order
-1. `/context/project-overview.md`: what we're building, scope, success criteria
+## Always read, every session
+1. `/context/progress-tracker.md`: **which unit is current** and its acceptance criteria
 2. `/context/architecture.md`: stack, data model, auth, **invariants**
-3. `/context/code-standards.md`: how code is written and organized
-4. `/context/ui-context.md`: design tokens and component patterns
-5. `/context/ai-workflow-rules.md`: how you must work
-6. `/context/progress-tracker.md`: **which unit is current** and its acceptance criteria
+
+## Read when relevant
+- Writing or organizing code → `/context/code-standards.md`
+- Any screen or component → `/context/ui-context.md`
+- Scope or success-criteria questions → `/context/project-overview.md`
+- Hard stops, how to work with the owner → `/context/ai-workflow-rules.md` (read before any schema, auth, or destructive change)
 
 ## Stack
 Next.js (App Router) + TypeScript (strict) + Supabase (Postgres, Auth, RLS) + Tailwind CSS + shadcn/ui + Zod. Deployed on Vercel. Package manager: npm.
