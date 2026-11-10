@@ -37,7 +37,10 @@ export default async function StaffLayout({
 
       {/* Main Content Area */}
       <main className="flex-1 p-4 max-w-lg mx-auto w-full">
-        <nav aria-label="Staff pages" className="mb-4 grid grid-cols-2 gap-2">
+        <nav
+          aria-label="Staff pages"
+          className={`mb-4 grid gap-2 ${user.role === 'owner' ? 'grid-cols-3' : 'grid-cols-2'}`}
+        >
           <Link
             href="/sell"
             className="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] text-sm font-medium text-[var(--foreground)] active:bg-[var(--muted)]"
@@ -50,6 +53,14 @@ export default async function StaffLayout({
           >
             My sales
           </Link>
+          {user.role === 'owner' && (
+            <Link
+              href="/dashboard"
+              className="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] text-sm font-medium text-[var(--foreground)] active:bg-[var(--muted)]"
+            >
+              Owner area
+            </Link>
+          )}
         </nav>
         {children}
       </main>

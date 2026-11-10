@@ -54,10 +54,9 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: 'Sales',
-    href: '#',
+    href: '/sales',
     icon: ShoppingCart,
-    enabled: false,
-    badge: 'Unit 5',
+    enabled: true,
   },
   {
     label: 'Reports',

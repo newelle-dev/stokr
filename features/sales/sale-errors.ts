@@ -12,6 +12,14 @@ const KNOWN_SALE_ERRORS: { match: string; code: string; message: string }[] = [
   { match: 'Invalid payment method', code: 'VALIDATION_ERROR', message: 'Choose Cash or GCash.' },
   { match: 'Invalid request id', code: 'VALIDATION_ERROR', message: 'Something went wrong with this sale. Please try again.' },
   { match: 'Conflict: this request id was already used', code: 'CONFLICT', message: 'This sale was already recorded.' },
+  { match: 'Only the owner can void', code: 'FORBIDDEN', message: 'Only the owner can void a sale.' },
+  { match: 'Only the owner can record a replacement', code: 'FORBIDDEN', message: 'Only the owner can record a replacement sale.' },
+  { match: 'Invalid reason', code: 'VALIDATION_ERROR', message: 'Enter a reason for the void (up to 200 characters).' },
+  { match: 'Sale not found', code: 'NOT_FOUND', message: 'That sale was not found.' },
+  { match: 'Original sale not found', code: 'NOT_FOUND', message: 'The original sale was not found.' },
+  { match: 'this sale is already voided', code: 'CONFLICT', message: 'This sale is already voided.' },
+  { match: 'only a voided sale can be replaced', code: 'CONFLICT', message: 'Only a voided sale can be replaced.' },
+  { match: 'this sale already has a replacement', code: 'CONFLICT', message: 'This sale already has a replacement.' },
   { match: 'Active shop membership required', code: 'FORBIDDEN', message: 'Your account cannot record sales right now.' },
 ];
 

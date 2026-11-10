@@ -92,6 +92,16 @@ export function getManilaDayRange(referenceDate: Date = new Date()): {
 }
 
 /**
+ * UTC range covering the Asia/Manila days from `from` to `to` (both YYYY-MM-DD, inclusive).
+ */
+export function getManilaRangeBetween(from: string, to: string): { startUtc: string; endUtc: string } {
+  return {
+    startUtc: new Date(`${from}T00:00:00.000+08:00`).toISOString(),
+    endUtc: new Date(`${to}T23:59:59.999+08:00`).toISOString(),
+  };
+}
+
+/**
  * Formats a timestamp into a human-friendly string in Asia/Manila.
  */
 export function formatManilaDateTime(

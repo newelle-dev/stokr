@@ -1,16 +1,19 @@
 'use client';
 
+import Link from 'next/link';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { MoneyText } from '@/components/shared/money-text';
 import type { RecordSaleResult } from '../actions';
 
 interface SaleDoneProps {
   result: RecordSaleResult;
   onNewSale: () => void;
+  /** When set (owner replacement sale), shows a link back here instead of "New sale". */
+  backHref?: string;
 }
 
-export function SaleDone({ result, onNewSale }: SaleDoneProps) {
+export function SaleDone({ result, onNewSale, backHref }: SaleDoneProps) {
   return (
     <div className="space-y-4 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--success)]/10">
@@ -30,9 +33,15 @@ export function SaleDone({ result, onNewSale }: SaleDoneProps) {
         </div>
       )}
 
-      <Button type="button" onClick={onNewSale} className="h-12 w-full text-base">
-        New sale
-      </Button>
+      {backHref ? (
+        <Link href={backHref} className={`${buttonVariants()} h-12 w-full text-base`}>
+          Back to sales
+        </Link>
+      ) : (
+        <Button type="button" onClick={onNewSale} className="h-12 w-full text-base">
+          New sale
+        </Button>
+      )}
     </div>
   );
 }

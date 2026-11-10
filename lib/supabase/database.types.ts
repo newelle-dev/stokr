@@ -842,12 +842,14 @@ export type Database = {
         Args: {
           p_branch_id: string
           p_client_request_id: string
+          p_corrects_sale_id?: string
           p_items: Json
           p_payment_method: string
         }
         Returns: Json
       }
       request_is_maintenance_mode: { Args: never; Returns: boolean }
+      void_sale: { Args: { p_reason: string; p_sale_id: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

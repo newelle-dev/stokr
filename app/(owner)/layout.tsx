@@ -51,7 +51,7 @@ export default async function OwnerLayout({
             <span className="text-xs text-[var(--muted-foreground)]">
               {user.fullName.split(' ')[0]}
             </span>
-            <SignOutButton />
+            <SignOutButton className="min-h-11 min-w-11" />
           </div>
         </header>
 

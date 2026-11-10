@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { recordSaleAction, type RecordSaleResult } from '../actions';
+import { recordReplacementSaleAction, recordSaleAction, type RecordSaleResult } from '../actions';
 import { cartItemCount, cartReducer, cartTotalCentavos, MAX_LINES } from '../cart';
 import type { SellProduct, SellScreenData } from '../queries';
 import type { PaymentMethod } from '../schemas';
@@ -14,7 +14,13 @@ import { SaleDone } from './sale-done';
 
 type View = 'pick' | 'review' | 'done';
 
-export function SellCounter({ data }: { data: SellScreenData }) {
+type SellCounterProps = {
+  data: SellScreenData;
+  /** Owner replacement mode: the sale is linked to this voided sale and the owner returns to /sales afterwards. */
+  correctsSaleId?: string;
+};
+
+export function SellCounter({ data, correctsSaleId }: SellCounterProps) {
   const [lines, dispatch] = React.useReducer(cartReducer, []);
   const [view, setView] = React.useState<View>('pick');
   const [paymentMethod, setPaymentMethod] = React.useState<PaymentMethod>('cash');
@@ -41,12 +47,15 @@ export function SellCounter({ data }: { data: SellScreenData }) {
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
-      const res = await recordSaleAction({
+      const input = {
         branchId,
         paymentMethod,
         items: lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
         clientRequestId: requestId,
-      });
+      };
+      const res = correctsSaleId
+        ? await recordReplacementSaleAction({ ...input, correctsSaleId })
+        : await recordSaleAction(input);
 
       if (!res.ok) {
         setErrorMessage(res.error.message);
@@ -73,7 +82,7 @@ export function SellCounter({ data }: { data: SellScreenData }) {
   }
 
   if (view === 'done' && result) {
-    return <SaleDone result={result} onNewSale={startNewSale} />;
+    return <SaleDone result={result} onNewSale={startNewSale} backHref={correctsSaleId ? '/sales' : undefined} />;
   }
 
   if (view === 'review' && lines.length > 0) {
@@ -123,7 +132,7 @@ export function SellCounter({ data }: { data: SellScreenData }) {
       <ProductPicker products={data.products} quantityById={quantityById} isFull={isFull} onAdd={handleAdd} />
 
       {itemCount > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-[var(--border)] bg-[var(--card)] p-4">
+        <div className={`fixed inset-x-0 z-20 ${correctsSaleId ? 'bottom-16 md:bottom-0' : 'bottom-0'} border-t border-[var(--border)] bg-[var(--card)] p-4`}>
           <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
             <div>
               <p className="text-sm text-[var(--muted-foreground)]">
