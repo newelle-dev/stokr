@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Link from 'next/link';
 import { requireStaffOrOwnerPage } from '@/lib/auth';
 import { SignOutButton } from '@/components/shared/sign-out-button';
 import { LogoMark } from '@/components/ui/logo';
@@ -30,12 +31,28 @@ export default async function StaffLayout({
           <div className="text-right text-xs">
             <div className="font-medium text-[var(--foreground)]">{user.fullName}</div>
           </div>
-          <SignOutButton />
+          <SignOutButton className="min-h-11 min-w-11" />
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-4 max-w-lg mx-auto w-full">{children}</main>
+      <main className="flex-1 p-4 max-w-lg mx-auto w-full">
+        <nav aria-label="Staff pages" className="mb-4 grid grid-cols-2 gap-2">
+          <Link
+            href="/sell"
+            className="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] text-sm font-medium text-[var(--foreground)] active:bg-[var(--muted)]"
+          >
+            Sell
+          </Link>
+          <Link
+            href="/my-sales"
+            className="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] text-sm font-medium text-[var(--foreground)] active:bg-[var(--muted)]"
+          >
+            My sales
+          </Link>
+        </nav>
+        {children}
+      </main>
     </div>
   );
 }

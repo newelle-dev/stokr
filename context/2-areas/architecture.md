@@ -72,7 +72,7 @@ Money is stored as whole centavos (integers). Timestamps are `timestamptz` (UTC)
   - Negative or zero stock from sales is flagged here too.
 
 ## What staff can and cannot see
-Staff never receive cost prices, profit, or other staff members' sales. Base tables holding cost data (`products`, `sales`, `sale_items`) allow reads for the owner only. Staff read through database views that leave cost columns out (`staff_products`, `my_sales`).
+Staff never receive cost prices, profit, or other staff members' sales. Base tables holding cost data (`products`, `sales`, `sale_items`) allow reads for the owner only. Staff read through database views that leave cost columns out (`staff_products`, `my_sales`, `my_sale_items`). `my_sale_items` shows the item lines of the staff member's own sales only.
 
 ## Invariants (never violate)
 1. Every business table has `shop_id` and RLS enabled. No table ships without policies.

@@ -624,6 +624,55 @@ export type Database = {
       }
     }
     Views: {
+      my_sale_items: {
+        Row: {
+          id: string | null
+          line_total_centavos: number | null
+          product_id: string | null
+          product_name: string | null
+          quantity: number | null
+          sale_id: string | null
+          shop_id: string | null
+          unit_price_centavos: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_shop_product_fkey"
+            columns: ["shop_id", "product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["shop_id", "id"]
+          },
+          {
+            foreignKeyName: "sale_items_shop_product_fkey"
+            columns: ["shop_id", "product_id"]
+            isOneToOne: false
+            referencedRelation: "staff_products"
+            referencedColumns: ["shop_id", "id"]
+          },
+          {
+            foreignKeyName: "sale_items_shop_sale_fkey"
+            columns: ["shop_id", "sale_id"]
+            isOneToOne: false
+            referencedRelation: "my_sales"
+            referencedColumns: ["shop_id", "id"]
+          },
+          {
+            foreignKeyName: "sale_items_shop_sale_fkey"
+            columns: ["shop_id", "sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["shop_id", "id"]
+          },
+        ]
+      }
       my_sales: {
         Row: {
           branch_id: string | null
@@ -786,6 +835,15 @@ export type Database = {
           p_note?: string
           p_product_id: string
           p_quantity: number
+        }
+        Returns: Json
+      }
+      record_sale: {
+        Args: {
+          p_branch_id: string
+          p_client_request_id: string
+          p_items: Json
+          p_payment_method: string
         }
         Returns: Json
       }

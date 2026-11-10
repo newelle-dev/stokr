@@ -6,8 +6,8 @@ tags: [para/project]
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 4 complete. Waiting for owner go-ahead to start Unit 5.
-- **Current unit:** Unit 4 (Stock) complete; next is Unit 5 (Record a sale)
+- **Phase:** Unit 5 built and passing automated checks. Waiting for the owner's phone check and sign-off.
+- **Current unit:** Unit 5 (Record a sale), awaiting sign-off. Unit 4 complete.
 - **Last updated:** 2026-11-10
 - **Next milestone:** friend's "run both" week after Unit 6
 
@@ -23,6 +23,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Selling at zero stock works and is flagged
   - `/my-sales` shows only that staff member's sales, no cost or profit
   - Revoke direct owner INSERT/UPDATE/DELETE on sales and sale_items in Units 5 and 6 (database functions only: `record_sale`, `void_sale`); revoke direct INSERT on `stock_movements` from `authenticated` once the database functions exist
+  - **Status:** built. Automated checks pass (typecheck, lint, 93 unit tests, build, 40 SQL checks on dev). Not yet done: owner's phone check and sign-off (phone checklist in `ai-workflow-rules.md`). Once signed off, tick this box and archive the unit folder.
 - [ ] **Unit 6: Sales list, void and correction** (about 2-3 days)
   - Owner sees all sales with filters (date, branch, staff, status)
   - Owner can void a sale with a reason; stock returns; the sale stays visible as voided; totals exclude it
@@ -65,6 +66,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 *(empty: add ideas here; do not build them until the owner approves)*
 
 ## Known limitations
+- Unit 5 open items: (1) other tables still give the logged-in role TRUNCATE, REFERENCES and TRIGGER (`branches`, `products`, `profiles`, `shops`, `stock_counts`, `stock_count_items`); `profiles` and `shops` are auth-related, so this needs owner approval. (2) The concurrent double-tap test has not been run with two sessions at once. (3) The sell screen creates sale ids with `crypto.randomUUID()`, which needs HTTPS: new sales fail on a phone testing plain-HTTP dev over the LAN. (4) `/my-sales` shows only the latest 100 sales. (5) Migrations `20261110120000` (revoke on sales and sale items) was applied in the SQL Editor, so it has no entry in the migration history.
 - Last-owner race condition: A theoretical race could occur if two owners concurrently attempt to deactivate/demote themselves at the exact same millisecond without an explicit table lock. Given Stokr shops have at most 1-2 owners, this edge case is acknowledged as a documented limitation.
 
 - `rls_security_tests.sql` sections 6.1-6.7 catch every error (`exception when others then null`), which also swallows their own FAIL, so those checks cannot fail. Immutability is genuinely proved by `unit2_security_tests.sql` (stock_movements UPDATE/DELETE blocked by trigger). Tighten or delete 6.1-6.7 when next touching that file.
