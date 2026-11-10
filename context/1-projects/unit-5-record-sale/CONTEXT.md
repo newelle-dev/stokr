@@ -1,11 +1,11 @@
 ---
 tags: [para/project, icm/contract]
 unit: 5
-status: draft
+status: approved
 ---
 # Unit 5: Record a sale
 
-DRAFT: waiting for owner approval. Tracker: [[progress-tracker]] · Rules: [[architecture]], [[ai-workflow-rules]]
+Approved by owner 2026-11-10 (contract only; build not started). Tracker: [[progress-tracker]] · Rules: [[architecture]], [[ai-workflow-rules]]
 
 ## Inputs
 - Acceptance criteria: Unit 5 in [[progress-tracker]] (source of truth).
