@@ -41,7 +41,7 @@ export function DashboardCards({ data }: { data: DashboardData }) {
               {data.lowStock.map((r) => (
                 <li key={`${r.branchId}:${r.productId}`} className={row}>
                   <div className="min-w-0">
-                    <p className="truncate text-base font-medium text-[var(--foreground)]">{r.name}</p>
+                    <p className="break-words text-base font-medium text-[var(--foreground)]">{r.name}</p>
                     {showBranch && <p className={muted}>{r.branchName}</p>}
                   </div>
                   <div className="flex shrink-0 items-center gap-2 text-sm">
