@@ -61,3 +61,8 @@ export function lowStock(products: ProductForStock[]): LowStockRow[] {
         a.name.localeCompare(b.name),
     );
 }
+
+/** A ?branch= that is not an active branch (stale bookmark, deactivated) falls back to all branches. */
+export function resolveBranchId(raw: string | undefined, branches: { id: string }[]): string | null {
+  return raw && branches.some((b) => b.id === raw) ? raw : null;
+}
