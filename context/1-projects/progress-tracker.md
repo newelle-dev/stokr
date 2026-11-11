@@ -6,9 +6,9 @@ tags: [para/project]
 **Update this file after every unit.** Keep it honest and short.
 
 ## Current status
-- **Phase:** Unit 6 done (owner sign-off, 2026-11-10). Unit 7 is next and not started.
-- **Current unit:** Unit 7 (Owner dashboard). Units 1-6 complete.
-- **Last updated:** 2026-11-10
+- **Phase:** Unit 7 done (owner sign-off, 2026-11-11). Unit 8 is next and not started.
+- **Current unit:** Unit 8 (Stock count and gap report). Units 1-7 complete.
+- **Last updated:** 2026-11-11
 - **Next milestone:** start the friend's "run both" week (app and notebook side by side)
 
 ## Build roadmap
@@ -30,7 +30,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Staff cannot edit or delete any sale (proved by a test)
   - Direct owner UPDATE and DELETE on `sales` and `sale_items` completely revoked from `authenticated` (voids via `void_sale` database function only)
 - [ ] **>> MILESTONE: start the friend's "run both" week (app and notebook side by side)**
-- [ ] **Unit 7: Owner dashboard** (about 3 days)
+- [x] **Unit 7: Owner dashboard** (about 3 days). Done 2026-11-11; owner sign-off. Contract archived in `4-archive/unit-7-owner-dashboard/`.
   - Shows, in order: today's sales and profit, low-stock list, sales per staff, missing stock
   - Branch filter works; "today" uses Asia/Manila time
   - Numbers match a hand calculation from the sales list
@@ -66,6 +66,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
 
 ## Known limitations
 - Unit 5 open items: (1) other tables still give the logged-in role TRUNCATE, REFERENCES and TRIGGER (`branches`, `products`, `profiles`, `shops`, `stock_counts`, `stock_count_items`); `profiles` and `shops` are auth-related, so this needs owner approval. (2) The concurrent double-tap test has not been run with two sessions at once. (3) The sell screen creates sale ids with `crypto.randomUUID()`, which needs HTTPS: new sales fail on a phone testing plain-HTTP dev over the LAN. (4) `/my-sales` shows only the latest 100 sales. (5) Migrations `20261110120000` (revoke on sales and sale items) was applied in the SQL Editor, so it has no entry in the migration history.
+- Unit 7 open items: (1) a sale in the last sub-millisecond before Manila midnight can fall in no day (shared date helper with `/sales`); (2) negative stock reads as "-2 left"; (3) dashboard reads of today's sales are summed in code (paged, 1000 per request), move to a database sum if volume grows; (4) missing stock card is empty until Unit 8.
 - Unit 6 open items: (1) migration `20261110140000_unit6_void_and_replacement` was applied in the SQL Editor; it needs a row in `supabase_migrations.schema_migrations` (insert version `20261110140000`, name `unit6_void_and_replacement`) if not already added. (2) Two owners voiding the same sale at the same instant is covered by a row lock in `void_sale` but has not been tested with two sessions. (3) The owner sales totals read every matching row (marked `shortcut:` in `features/sales/queries.ts`); move to a database sum if date ranges get large. (4) Strict `z.string().uuid()` in branches, products, stock and team schemas rejects the all-zero seed ids (e.g. `...0010`); sales schemas now use `z.guid()`. Real ids from `gen_random_uuid()` are fine. Decide whether to switch the other schemas to `guid()`.
 - Last-owner race condition: A theoretical race could occur if two owners concurrently attempt to deactivate/demote themselves at the exact same millisecond without an explicit table lock. Given Stokr shops have at most 1-2 owners, this edge case is acknowledged as a documented limitation.
 
