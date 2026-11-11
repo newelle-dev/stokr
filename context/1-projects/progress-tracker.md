@@ -7,7 +7,7 @@ tags: [para/project]
 
 ## Current status
 - **Phase:** Unit 8 done (owner sign-off, 2026-11-11). Unit 9 is next and not started.
-- **Current unit:** Unit 9 (still open). Unit 10 (owner magic-link sign-in and onboarding) closed for now on 2026-11-11. Next: Unit B, Google sign-in, once the owner sets up the Google account. Units 1-8 complete.
+- **Current unit:** Unit 9 (still open). Unit 10 (owner magic-link sign-in and onboarding) is closed; Unit B (Google sign-in) is built and merged to `main` on 2026-11-11, and was tested with a new owner account (onboarding worked end to end). Units 1-8 complete.
 - **Last updated:** 2026-11-11
 - **Next milestone:** start the friend's "run both" week (app and notebook side by side)
 
@@ -55,6 +55,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - New owner cannot see or change any other shop's rows (SQL test as a user from another shop)
   - Sign-in emails tested with the Resend account email; real-email test waits for the domain
   - Unit B (Google sign-in) follows after the owner approves the Google Cloud account
+- [x] **Unit B: Google sign-in** (done 2026-11-11). Owner tab has "Continue with Google". Google client set up by the owner. Tested: a new Google account reached onboarding and created a shop end to end. Open: Google sign-in works only for listed test users until the consent screen is published.
 
 ## Open questions
 | # | Question | Who answers | Blocks |
