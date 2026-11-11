@@ -1,7 +1,0 @@
-# Keep graphify focused on the app. Third-party skill docs are not project code.
-.agents/
-.claude/
-node_modules/
-# Brand logo assets: no code relationships, and each image costs a vision call.
-public/brand/
-public/*.svg

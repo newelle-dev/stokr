@@ -24,7 +24,6 @@ When relevant:
 - Hard stops, working with the owner, verification, after-unit steps, skills policy → `/context/2-areas/ai-workflow-rules.md` (read before any schema, auth, or destructive change)
 - Past decisions → `/context/2-areas/decisions-log.md`
 - Active unit contract → `/context/1-projects/unit-N-*/CONTEXT.md` (inputs, process, outputs, done-when)
-- Before grepping the codebase, check `graphify-out/GRAPH_REPORT.md` and use `graphify query "<question>"` if it exists (generated map, never the source of truth)
 - `/context/4-archive/` is history: skip unless asked.
 
 ## Stack and commands
