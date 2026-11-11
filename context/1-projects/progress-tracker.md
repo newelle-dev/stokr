@@ -7,7 +7,7 @@ tags: [para/project]
 
 ## Current status
 - **Phase:** Unit 8 done (owner sign-off, 2026-11-11). Unit 9 is next and not started.
-- **Current unit:** Unit 9 (Polish, phone testing, real data, trial fixes). Units 1-8 complete.
+- **Current unit:** Unit 10 (owner magic-link sign-in and onboarding, Unit A). Contract approved 2026-11-11; branch `feat/owner-magic-link-onboarding`. Unit 9 stays open alongside it. Units 1-8 complete.
 - **Last updated:** 2026-11-11
 - **Next milestone:** start the friend's "run both" week (app and notebook side by side)
 
@@ -47,6 +47,13 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Manual phone checklist passes on at least one iPhone-sized and one Android-sized screen
   - Pre-launch requirement: owner forgot-password flow is BUILT (2026-11-11, `/login/forgot`, `/login/callback`, `/reset-password`). **Launch blockers still open:** (1) buy a domain and verify it in Resend (sandbox only delivers to the Resend account email); (2) in Supabase: enable custom SMTP with Resend, and add the site URL + `/login/callback` to Auth > URL Configuration > Redirect URLs; (3) test one real reset email end to end
   - Pre-launch requirement: re-run npm audit before launch (7 production-side transitive findings via shadcn CLI deps); never use audit fix --force
+- [ ] **Unit 10: Owner magic-link sign-in and onboarding (Unit A)**. Contract: `1-projects/unit-10-owner-magic-link-onboarding/CONTEXT.md`. Plan: `docs/superpowers/plans/2026-11-11-owner-magic-link-onboarding.md`.
+  - Owners sign in with a magic link; no owner password after a proven magic-link sign-in
+  - Anyone can sign up as an owner; new owner sets up shop name, first branch, optional products on `/onboarding`
+  - Store code generated and shown once; new products start at zero stock
+  - New owner cannot see or change any other shop's rows (SQL test as a user from another shop)
+  - Sign-in emails tested with the Resend account email; real-email test waits for the domain
+  - Unit B (Google sign-in) follows after the owner approves the Google Cloud account
 
 ## Open questions
 | # | Question | Who answers | Blocks |

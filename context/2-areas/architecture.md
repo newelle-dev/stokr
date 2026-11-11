@@ -5,7 +5,7 @@
 |---|---|---|
 | Framework | Next.js (App Router) + TypeScript (strict) | Pin the current stable version at project start |
 | Database | Supabase Postgres | Row Level Security (RLS) on every table |
-| Auth | Supabase Auth, email + password | No public signup in v1 |
+| Auth | Supabase Auth: owners by magic link or Google; staff by store code + username + password | Owners can self-sign-up (see decisions-log, 2026-11-11). No owner passwords. |
 | Styling | Tailwind CSS + shadcn/ui | See ui-context.md |
 | Validation | Zod | Every server action validates its input |
 | Hosting | Vercel | Free plan to start; confirm limits before real customers depend on it |
@@ -23,11 +23,12 @@
 - A **shop** is one business. Every row in every business table carries `shop_id`.
 - A user belongs to exactly one shop (via `profiles.shop_id`).
 - RLS compares `shop_id` to the logged-in user's shop. App code never relies on filtering alone.
-- No public signup. The first shop and owner are created by a seed script or manually in the Supabase dashboard.
+- Owners self-sign-up (decisions-log, 2026-11-11). A new owner gets a new, empty shop through an onboarding page: shop name, first branch, optionally first products. The first shop can still be created by seed script for development.
+- Billing and paid services are out of scope.
 
 ## Auth model
 - Login:
-  - Owner logs in with email + password via Supabase Auth.
+  - Owner logs in with a magic link sent to their email, or with Google, via Supabase Auth. Owners have no password (decisions-log, 2026-11-11).
   - Staff log in using store code + username + password. The underlying email address (`username.store_code@staff.stokr.invalid`) is internal and hidden from the user.
 - Staff email is locked at the auth layer by a trigger on `auth.users` (`trg_prevent_staff_email_change`), preventing modification even via the admin API.
 - Role lives in `profiles.role`: `owner` or `staff`. Never use `user_metadata` for authorization (Invariant 21).
