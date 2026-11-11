@@ -42,6 +42,17 @@ The owner is the product owner and a junior developer who wants to learn and be 
 - Never install a new skill, MCP server, or plugin without the owner's approval. Say what it is, who publishes it, and what it can access.
 - Any database connection (including MCP) is allowed only against the development project with fake data, never the project holding real shop data.
 
+## Process skills (already installed)
+These are the Superpowers and Ponytail skills the agent may use. They shape how work is done; they don't change what the owner decides.
+- **Ponytail (full level):** on every coding task. Smallest complete change, no new dependencies, one small test for new logic.
+- **Verification before completion:** always. Don't say a unit or fix works until the checks in "Verification before moving on" have run and their output is shown.
+- **Test-driven development:** required for business logic and bug fixes: money, stock, sales, permissions, and invariants. UI-only work may skip it if the owner agrees.
+- **Systematic debugging:** before proposing any fix to a bug or failing test.
+- **Brainstorming:** when a unit's scope, money, stock, permissions, or rules are unclear. Stop after the playback and wait for the owner's approval before building.
+- **Writing plans:** for any unit with more than a few steps. Show the plan to the owner before starting.
+- **Worktrees, subagents, and branch-finishing skills:** not used unless the owner asks.
+- If a skill and a context file disagree, the context file wins, as above.
+
 ## Verification before moving on
 A unit is done only when **all** of these pass:
 1. Every acceptance criterion for the unit in `progress-tracker.md` is met, and you've demonstrated each one.
@@ -60,10 +71,12 @@ A unit is done only when **all** of these pass:
 - Money shows as ₱ with two decimals
 
 ## After each unit
-1. Update `1-projects/progress-tracker.md`: tick the unit, note what changed, list new open questions, set the next unit as current, and `git mv` the unit folder to `4-archive/`.
-2. Run `graphify --update` so the graph matches the finished unit.
-3. Make one clear git commit for the unit (message: `unit N: short description`).
-4. Give the owner a short plain-language summary: what now works, how to try it, and what's next.
+- [ ] Update `1-projects/progress-tracker.md`: tick the unit, note what changed, list new open questions, set the next unit as current.
+- [ ] `git mv` the unit folder from `1-projects/` to `4-archive/`.
+- [ ] Add a row to `2-areas/decisions-log.md` if a decision was made.
+- [ ] Run the checks: `npm run typecheck`, `npm run lint`, `npm run test`.
+- [ ] Make one clear git commit for the unit (message: `unit N: short description`).
+- [ ] Give the owner a short plain-language summary: what now works, how to try it, and what's next.
 
 ## Communication style
 - Plain language, no jargon. If you must use a technical word, explain it in a few words.
