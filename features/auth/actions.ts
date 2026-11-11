@@ -1,81 +1,24 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { cookies, headers } from 'next/headers';
+import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { errorResult, successResult, type ActionResult } from '@/lib/errors';
 import {
-  loginSchema,
   staffLoginSchema,
   changePasswordSchema,
-  forgotPasswordSchema,
   magicLinkSchema,
   type MagicLinkInput,
-  type ForgotPasswordInput,
-  type LoginInput,
   type StaffLoginInput,
   type ChangePasswordInput,
 } from './schemas';
 import type { UserRole } from '@/lib/supabase/database.types';
 import { getCurrentUser } from '@/lib/auth';
-import { RECOVERY_COOKIE } from './constants';
 
 export interface LoginResultData {
   role: UserRole;
   redirectTo: string;
   mustChangePassword: boolean;
-}
-
-/**
- * Signs in an owner with email and password.
- * Always returns a generic "Incorrect login details" error on any failure
- * to prevent user enumeration or state probing.
- */
-export async function loginAction(
-  rawInput: LoginInput
-): Promise<ActionResult<LoginResultData>> {
-  const parsed = loginSchema.safeParse(rawInput);
-  if (!parsed.success) {
-    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
-  }
-
-  const { email, password } = parsed.data;
-  const supabase = await createClient();
-
-  const { data: authData, error: authError } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-  if (authError || !authData.user) {
-    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
-  }
-
-  // Verify active profile in shop
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, shop_id, full_name, role, branch_id, is_active, must_change_password')
-    .eq('id', authData.user.id)
-    .single();
-
-  if (profileError || !profile || !profile.is_active) {
-    // Immediate lockout: revoke session and return generic error
-    await supabase.auth.signOut();
-    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
-  }
-
-  const role = profile.role as UserRole;
-  let redirectTo = role === 'owner' ? '/dashboard' : '/sell';
-  if (profile.must_change_password) {
-    redirectTo = '/change-password';
-  }
-
-  return successResult({
-    role,
-    redirectTo,
-    mustChangePassword: profile.must_change_password,
-  });
 }
 
 /**
@@ -234,55 +177,3 @@ export async function requestMagicLinkAction(
   return successResult(null);
 }
 
-/**
- * Emails a password-reset link. Always answers "ok" for a well-formed email,
- * whether or not the account exists, so nobody can probe for accounts.
- */
-export async function requestPasswordResetAction(
-  rawInput: ForgotPasswordInput
-): Promise<ActionResult<null>> {
-  const parsed = forgotPasswordSchema.safeParse(rawInput);
-  if (!parsed.success) {
-    return errorResult('VALIDATION_ERROR', 'Please enter a valid email address');
-  }
-
-  const h = await headers();
-  const origin = h.get('origin') ?? `https://${h.get('host')}`;
-  const supabase = await createClient();
-  // Supabase only honours redirectTo values on its allowed Redirect URLs list.
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${origin}/login/callback`,
-  });
-
-  return successResult(null);
-}
-
-/**
- * Sets a new password after the emailed link. Requires the short-lived recovery
- * cookie that /login/callback sets, so an ordinary signed-in session cannot use
- * this to skip the current-password check.
- */
-export async function resetPasswordAction(
-  rawInput: ChangePasswordInput
-): Promise<ActionResult<{ redirectTo: string }>> {
-  const parsed = changePasswordSchema.safeParse(rawInput);
-  if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    return errorResult('VALIDATION_ERROR', firstIssue ? firstIssue.message : 'Invalid password');
-  }
-
-  const jar = await cookies();
-  const user = await getCurrentUser();
-  if (!user || !jar.get(RECOVERY_COOKIE)) {
-    return errorResult('UNAUTHORIZED', 'This reset link has expired. Request a new one.');
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
-  if (error) {
-    return errorResult('AUTH_ERROR', error.message);
-  }
-
-  jar.delete(RECOVERY_COOKIE);
-  return successResult({ redirectTo: user.role === 'owner' ? '/dashboard' : '/sell' });
-}

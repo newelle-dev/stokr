@@ -1,14 +1,15 @@
 import { z } from 'zod';
 
-export const ownerLoginSchema = z.object({
+export const magicLinkSchema = z.object({
   email: z
     .string()
     .trim()
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .toLowerCase(),
-  password: z.string().min(1, 'Password is required'),
 });
+
+export type MagicLinkInput = z.infer<typeof magicLinkSchema>;
 
 export const staffLoginSchema = z.object({
   storeCode: z
@@ -31,8 +32,6 @@ export const staffLoginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export const loginSchema = ownerLoginSchema;
-export type LoginInput = z.infer<typeof loginSchema>;
 export type StaffLoginInput = z.infer<typeof staffLoginSchema>;
 
 export const changePasswordSchema = z
@@ -50,9 +49,3 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
-
-export const magicLinkSchema = ownerLoginSchema.pick({ email: true });
-export type MagicLinkInput = z.infer<typeof magicLinkSchema>;
-
-export const forgotPasswordSchema = ownerLoginSchema.pick({ email: true });
-export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

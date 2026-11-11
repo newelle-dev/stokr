@@ -4,15 +4,9 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@/lib/zod-resolver';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Eye, EyeOff, Store, Shield } from 'lucide-react';
-import {
-  loginSchema,
-  staffLoginSchema,
-  type LoginInput,
-  type StaffLoginInput,
-} from '../schemas';
-import { loginAction, staffLoginAction } from '../actions';
+import { staffLoginSchema, type StaffLoginInput } from '../schemas';
+import { staffLoginAction } from '../actions';
 import { MagicLinkForm } from './magic-link-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,40 +39,12 @@ export function LoginForm() {
     },
   });
 
-  // Owner Form
-  const ownerForm = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
   const onStaffSubmit = async (data: StaffLoginInput) => {
     setGenericError(null);
     setIsSubmitting(true);
 
     try {
       const result = await staffLoginAction(data);
-      if (!result.ok) {
-        setGenericError(result.error.message);
-        setIsSubmitting(false);
-        return;
-      }
-      router.push(result.data.redirectTo);
-      router.refresh();
-    } catch {
-      setGenericError('Incorrect login details');
-      setIsSubmitting(false);
-    }
-  };
-
-  const onOwnerSubmit = async (data: LoginInput) => {
-    setGenericError(null);
-    setIsSubmitting(true);
-
-    try {
-      const result = await loginAction(data);
       if (!result.ok) {
         setGenericError(result.error.message);
         setIsSubmitting(false);
@@ -110,7 +76,7 @@ export function LoginForm() {
         <CardDescription className="text-sm text-[var(--muted-foreground)]">
           {mode === 'staff'
             ? 'Enter your store code, username, and password'
-            : 'Enter your owner email and password'}
+            : 'Enter your owner email to get a sign-in link'}
         </CardDescription>
 
         {/* Mode Selector Tabs */}
@@ -237,78 +203,7 @@ export function LoginForm() {
             </Button>
           </form>
         ) : (
-          <div className="space-y-6">
           <MagicLinkForm />
-          <p className="text-center text-xs text-[var(--muted-foreground)]">
-            Or sign in with your password (removed once magic-link sign-in is proven)
-          </p>
-          <form onSubmit={ownerForm.handleSubmit(onOwnerSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-[var(--foreground)]">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                placeholder="owner@shop.local"
-                className="h-12 text-base"
-                disabled={isSubmitting}
-                {...ownerForm.register('email')}
-              />
-              {ownerForm.formState.errors.email && (
-                <p className="text-xs text-[var(--destructive)]">
-                  {ownerForm.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="ownerPassword" className="text-sm font-medium text-[var(--foreground)]">
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="ownerPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="••••••••••"
-                  className="h-12 pr-10 text-base"
-                  disabled={isSubmitting}
-                  {...ownerForm.register('password')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {ownerForm.formState.errors.password && (
-                <p className="text-xs text-[var(--destructive)]">
-                  {ownerForm.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="mt-2 h-12 w-full text-base font-semibold"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Signing in…' : 'Sign In as Owner'}
-            </Button>
-            <Link
-              href="/login/forgot"
-              className="flex h-11 items-center justify-center text-sm text-[var(--primary)] hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </form>
-          </div>
         )}
       </CardContent>
     </Card>
