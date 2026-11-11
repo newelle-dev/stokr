@@ -45,7 +45,7 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Loading, empty, and error states on every screen
   - Real products loaded; issues from the trial week fixed
   - Manual phone checklist passes on at least one iPhone-sized and one Android-sized screen
-  - Pre-launch requirement: configure custom SMTP provider and implement owner forgot-password recovery flow
+  - Pre-launch requirement: owner forgot-password flow is BUILT (2026-11-11, `/login/forgot`, `/login/callback`, `/reset-password`). **Launch blockers still open:** (1) buy a domain and verify it in Resend (sandbox only delivers to the Resend account email); (2) in Supabase: enable custom SMTP with Resend, and add the site URL + `/login/callback` to Auth > URL Configuration > Redirect URLs; (3) test one real reset email end to end
   - Pre-launch requirement: re-run npm audit before launch (7 production-side transitive findings via shadcn CLI deps); never use audit fix --force
 
 ## Open questions

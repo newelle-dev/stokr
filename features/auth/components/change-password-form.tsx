@@ -6,7 +6,7 @@ import { zodResolver } from '@/lib/zod-resolver';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, KeyRound } from 'lucide-react';
 import { changePasswordSchema, type ChangePasswordInput } from '../schemas';
-import { completePasswordChangeAction } from '../actions';
+import { completePasswordChangeAction, resetPasswordAction } from '../actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,11 +24,14 @@ import { SignOutButton } from '@/components/shared/sign-out-button';
 interface ChangePasswordFormProps {
   mustChangePassword: boolean;
   username?: string | null;
+  /** Emailed-link reset: no current password, resetPasswordAction, reset wording. */
+  reset?: boolean;
 }
 
 export function ChangePasswordForm({
   mustChangePassword,
   username,
+  reset = false,
 }: ChangePasswordFormProps) {
   const router = useRouter();
   const [genericError, setGenericError] = React.useState<string | null>(null);
@@ -55,7 +58,7 @@ export function ChangePasswordForm({
     setIsSubmitting(true);
 
     try {
-      const result = await completePasswordChangeAction(data);
+      const result = await (reset ? resetPasswordAction : completePasswordChangeAction)(data);
       if (!result.ok) {
         setGenericError(result.error.message);
         setIsSubmitting(false);
@@ -80,10 +83,12 @@ export function ChangePasswordForm({
           <KeyRound className="h-6 w-6" />
         </div>
         <CardTitle className="text-xl font-semibold tracking-tight text-[var(--foreground)]">
-          {mustChangePassword ? 'Create New Password' : 'Change Password'}
+          {reset ? 'Reset Password' : mustChangePassword ? 'Create New Password' : 'Change Password'}
         </CardTitle>
         <CardDescription className="text-sm text-[var(--muted-foreground)]">
-          {mustChangePassword
+          {reset
+            ? 'Choose a new password (at least 10 characters).'
+            : mustChangePassword
             ? `Welcome${username ? `, ${username}` : ''}! You must set a permanent password (at least 10 characters) before continuing.`
             : 'Enter your current password and your new password.'}
         </CardDescription>
@@ -100,7 +105,7 @@ export function ChangePasswordForm({
             </div>
           )}
 
-          {!mustChangePassword && (
+          {!mustChangePassword && !reset && (
             <div className="space-y-2">
               <Label htmlFor="currentPassword" className="text-sm font-medium text-[var(--foreground)]">
                 Current Password

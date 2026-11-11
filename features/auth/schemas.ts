@@ -50,3 +50,6 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const forgotPasswordSchema = ownerLoginSchema.pick({ email: true });
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@/lib/zod-resolver';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Eye, EyeOff, Store, Shield } from 'lucide-react';
 import {
   loginSchema,
@@ -294,6 +295,12 @@ export function LoginForm() {
             >
               {isSubmitting ? 'Signing in…' : 'Sign In as Owner'}
             </Button>
+            <Link
+              href="/login/forgot"
+              className="flex h-11 items-center justify-center text-sm text-[var(--primary)] hover:underline"
+            >
+              Forgot password?
+            </Link>
           </form>
         )}
       </CardContent>

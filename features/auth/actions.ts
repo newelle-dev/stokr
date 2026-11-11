@@ -1,18 +1,22 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { cookies, headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { errorResult, successResult, type ActionResult } from '@/lib/errors';
 import {
   loginSchema,
   staffLoginSchema,
   changePasswordSchema,
+  forgotPasswordSchema,
+  type ForgotPasswordInput,
   type LoginInput,
   type StaffLoginInput,
   type ChangePasswordInput,
 } from './schemas';
 import type { UserRole } from '@/lib/supabase/database.types';
 import { getCurrentUser } from '@/lib/auth';
+import { RECOVERY_COOKIE } from './constants';
 
 export interface LoginResultData {
   role: UserRole;
@@ -201,4 +205,58 @@ export async function logoutAction(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect('/login');
+}
+
+
+/**
+ * Emails a password-reset link. Always answers "ok" for a well-formed email,
+ * whether or not the account exists, so nobody can probe for accounts.
+ */
+export async function requestPasswordResetAction(
+  rawInput: ForgotPasswordInput
+): Promise<ActionResult<null>> {
+  const parsed = forgotPasswordSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    return errorResult('VALIDATION_ERROR', 'Please enter a valid email address');
+  }
+
+  const h = await headers();
+  const origin = h.get('origin') ?? `https://${h.get('host')}`;
+  const supabase = await createClient();
+  // Supabase only honours redirectTo values on its allowed Redirect URLs list.
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/login/callback`,
+  });
+
+  return successResult(null);
+}
+
+/**
+ * Sets a new password after the emailed link. Requires the short-lived recovery
+ * cookie that /login/callback sets, so an ordinary signed-in session cannot use
+ * this to skip the current-password check.
+ */
+export async function resetPasswordAction(
+  rawInput: ChangePasswordInput
+): Promise<ActionResult<{ redirectTo: string }>> {
+  const parsed = changePasswordSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    return errorResult('VALIDATION_ERROR', firstIssue ? firstIssue.message : 'Invalid password');
+  }
+
+  const jar = await cookies();
+  const user = await getCurrentUser();
+  if (!user || !jar.get(RECOVERY_COOKIE)) {
+    return errorResult('UNAUTHORIZED', 'This reset link has expired. Request a new one.');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
+  if (error) {
+    return errorResult('AUTH_ERROR', error.message);
+  }
+
+  jar.delete(RECOVERY_COOKIE);
+  return successResult({ redirectTo: user.role === 'owner' ? '/dashboard' : '/sell' });
 }
