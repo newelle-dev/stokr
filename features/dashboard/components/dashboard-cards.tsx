@@ -91,7 +91,7 @@ export function DashboardCards({ data }: { data: DashboardData }) {
         </CardHeader>
         <CardContent>
           {data.missingStock.length === 0 ? (
-            <p className={muted}>No stock count yet. Missing stock shows here after your first count.</p>
+            <p className={muted}>Nothing missing. Stock the latest count finds short shows here.</p>
           ) : (
             <ul className="divide-y divide-[var(--border)]">
               {data.missingStock.map((m) => (

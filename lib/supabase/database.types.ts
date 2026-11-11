@@ -486,28 +486,37 @@ export type Database = {
       }
       stock_counts: {
         Row: {
+          accepted_at: string | null
+          accepted_by: string | null
           branch_id: string
           counted_by: string
           created_at: string
           id: string
           note: string | null
           shop_id: string
+          status: string
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           branch_id: string
           counted_by: string
           created_at?: string
           id?: string
           note?: string | null
           shop_id: string
+          status?: string
         }
         Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           branch_id?: string
           counted_by?: string
           created_at?: string
           id?: string
           note?: string | null
           shop_id?: string
+          status?: string
         }
         Relationships: [
           {
@@ -809,6 +818,12 @@ export type Database = {
       }
     }
     Functions: {
+      accept_stock_count: { Args: { p_count_id: string }; Returns: Json }
+      cancel_stock_count: { Args: { p_count_id: string }; Returns: Json }
+      save_stock_count: {
+        Args: { p_branch_id: string; p_items: Json; p_note: string }
+        Returns: Json
+      }
       begin_staff_password_reset: {
         Args: { p_staff_id: string }
         Returns: undefined

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireOwnerPage } from '@/lib/auth';
 import { getManilaDateString, getManilaRangeBetween } from '@/lib/dates';
+import { getMissingStock } from '@/features/stock-count/queries';
 import { dashboardFilterSchema } from './schemas';
 import { fetchAllRows } from './paging';
 import {
@@ -107,7 +108,6 @@ export async function getOwnerDashboard(rawFilter?: unknown): Promise<DashboardD
     today: summarizeSales(saleRows),
     lowStock: lowStock(stockRows),
     staffTotals: salesPerStaff(saleRows),
-    // shortcut: Unit 8 fills this from the latest stock count; empty until counts exist
-    missingStock: [],
+    missingStock: await getMissingStock(supabase, user.shopId, branchId, branchName),
   };
 }
