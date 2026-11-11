@@ -75,7 +75,7 @@ A unit is done only when **all** of these pass:
 - [ ] `git mv` the unit folder from `1-projects/` to `4-archive/`.
 - [ ] Add a row to `2-areas/decisions-log.md` if a decision was made.
 - [ ] Run the checks: `npm run typecheck`, `npm run lint`, `npm run test`.
-- [ ] Make one clear git commit for the unit (message: `unit N: short description`).
+- [ ] Make one clear git commit for the unit (Conventional Commits, e.g. `feat(auth): add owner forgot-password flow`; no `Co-Authored-By` or other AI attribution line).
 - [ ] Give the owner a short plain-language summary: what now works, how to try it, and what's next.
 
 ## Communication style
