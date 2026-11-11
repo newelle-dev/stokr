@@ -1,7 +1,7 @@
 ---
 tags: [para/project, icm/contract]
 unit: 7
-status: approved   # draft -> approved -> in-progress -> verified -> done
+status: done   # draft -> approved -> in-progress -> verified -> done
 ---
 # Unit 7: Owner dashboard
 
@@ -21,11 +21,11 @@ Tracker: [[progress-tracker]] · Rules: [[architecture]], [[ai-workflow-rules]]
 5. Refresh every 30 seconds keeps the chosen branch (it is in the URL). No schema change, no new dependency. **Recommended: yes.**
 
 ## Process (read-only unit: no schema change, so no database hard stop)
-- [ ] 1. Pure summary functions + Vitest tests
-- [ ] 2. Filter schema + owner-only query (Manila day)
-- [ ] 3. Real-session test: staff cannot read owner numbers; owner sees own shop only
-- [ ] 4. UI (phone first): four cards, branch filter, 30-second refresh
-- [ ] 5. Verify: typecheck, lint, npm test, hand calculation against `/sales`, phone checklist
+- [x] 1. Pure summary functions + Vitest tests
+- [x] 2. Filter schema + owner-only query (Manila day)
+- [x] 3. Real-session test: staff cannot read owner numbers; owner sees own shop only
+- [x] 4. UI (phone first): four cards, branch filter, 30-second refresh
+- [x] 5. Verify: typecheck, lint, npm test, hand calculation against `/sales`, phone checklist
 
 ## Outputs (files created or changed)
 - New `features/dashboard/` (summary, schemas, queries, components, `__tests__`)
@@ -34,5 +34,5 @@ Tracker: [[progress-tracker]] · Rules: [[architecture]], [[ai-workflow-rules]]
 - Update [[progress-tracker]] and [[decisions-log]]
 
 ## Done when
-- [ ] Every acceptance criterion demonstrated
-- [ ] Owner has seen it working and says it's done
+- [x] Every acceptance criterion demonstrated
+- [x] Owner has seen it working and says it's done
