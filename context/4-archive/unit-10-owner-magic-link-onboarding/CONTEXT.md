@@ -1,7 +1,7 @@
 ---
 tags: [para/project, icm/contract]
 unit: 10
-status: approved   # draft -> approved -> in-progress -> verified -> done
+status: done   # draft -> approved -> in-progress -> verified -> done
 ---
 # Unit 10: Owner magic-link sign-in and onboarding (Unit A)
 
