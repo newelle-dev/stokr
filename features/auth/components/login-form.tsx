@@ -13,6 +13,7 @@ import {
   type StaffLoginInput,
 } from '../schemas';
 import { loginAction, staffLoginAction } from '../actions';
+import { MagicLinkForm } from './magic-link-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -236,6 +237,11 @@ export function LoginForm() {
             </Button>
           </form>
         ) : (
+          <div className="space-y-6">
+          <MagicLinkForm />
+          <p className="text-center text-xs text-[var(--muted-foreground)]">
+            Or sign in with your password (removed once magic-link sign-in is proven)
+          </p>
           <form onSubmit={ownerForm.handleSubmit(onOwnerSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-[var(--foreground)]">
@@ -302,6 +308,7 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </form>
+          </div>
         )}
       </CardContent>
     </Card>

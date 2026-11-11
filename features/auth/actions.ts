@@ -9,6 +9,8 @@ import {
   staffLoginSchema,
   changePasswordSchema,
   forgotPasswordSchema,
+  magicLinkSchema,
+  type MagicLinkInput,
   type ForgotPasswordInput,
   type LoginInput,
   type StaffLoginInput,
@@ -207,6 +209,30 @@ export async function logoutAction(): Promise<void> {
   redirect('/login');
 }
 
+
+/**
+ * Emails a magic sign-in link. Supabase errors are ignored on purpose, so the
+ * reply never reveals whether the account exists. shouldCreateUser lets a new
+ * owner sign up with the same link.
+ */
+export async function requestMagicLinkAction(
+  rawInput: MagicLinkInput
+): Promise<ActionResult<null>> {
+  const parsed = magicLinkSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    return errorResult('VALIDATION_ERROR', 'Please enter a valid email address');
+  }
+
+  const h = await headers();
+  const origin = h.get('origin') ?? `https://${h.get('host')}`;
+  const supabase = await createClient();
+  await supabase.auth.signInWithOtp({
+    email: parsed.data.email,
+    options: { emailRedirectTo: `${origin}/login/callback`, shouldCreateUser: true },
+  });
+
+  return successResult(null);
+}
 
 /**
  * Emails a password-reset link. Always answers "ok" for a well-formed email,
