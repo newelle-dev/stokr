@@ -1,7 +1,6 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { errorResult, successResult, type ActionResult } from '@/lib/errors';
 import {
@@ -166,12 +165,13 @@ export async function requestMagicLinkAction(
     return errorResult('VALIDATION_ERROR', 'Please enter a valid email address');
   }
 
-  const h = await headers();
-  const origin = h.get('origin') ?? `https://${h.get('host')}`;
+  // The return address comes from server config, never from the request headers.
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) throw new Error('SITE_URL is not set');
   const supabase = await createClient();
   await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: `${origin}/login/callback`, shouldCreateUser: true },
+    options: { emailRedirectTo: `${siteUrl}/login/callback`, shouldCreateUser: true },
   });
 
   return successResult(null);
