@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
@@ -12,7 +12,11 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: 'Stokr | Sales & Inventory',
   description: 'Fast phone-first sales and inventory tracking for vape shops',
+  icons: { apple: '/apple-touch-icon.png' },
+  appleWebApp: { capable: true, title: 'Stokr', statusBarStyle: 'black-translucent' },
 };
+
+export const viewport: Viewport = { themeColor: '#0B1210' };
 
 export default function RootLayout({
   children,
