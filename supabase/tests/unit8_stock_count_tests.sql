@@ -20,6 +20,7 @@ declare
   v_relx0 bigint;
   v_bacon0 bigint;
   v_moves0 bigint;
+  v_counts0 bigint;
 begin
   create function pg_temp.as_user(p_user uuid) returns void language plpgsql as $f$
   begin
@@ -66,6 +67,9 @@ begin
   v_bacon0 := pg_temp.stock(c_bacon);
   v_moves0 := (select count(*) from public.stock_movements where shop_id = c_shop);
 
+  -- dev already has real counts for this shop, so compare with a baseline, not zero
+  v_counts0 := (select count(*) from public.stock_counts where shop_id = c_shop);
+
   -- 1. Staff and logged-out users cannot save, accept or cancel
   v_r := pg_temp.try_save(c_staff, jsonb_build_array(jsonb_build_object('product_id', c_relx, 'counted_qty', 1)));
   if coalesce(v_r->>'error', '') not like 'Forbidden%' then raise exception 'FAIL: staff cannot save (%)', v_r; end if;
@@ -86,7 +90,7 @@ begin
   v_r := pg_temp.try_save(c_owner, jsonb_build_array(
     jsonb_build_object('product_id', '00000000-0000-0000-0000-00000000ffff', 'counted_qty', 1)));
   if v_r->>'error' is null then raise exception 'FAIL: unknown product rejected'; end if;
-  if exists (select 1 from public.stock_counts where shop_id = c_shop) then
+  if (select count(*) from public.stock_counts where shop_id = c_shop) <> v_counts0 then
     raise exception 'FAIL: rejected saves leave no count rows'; end if;
   v_n := v_n + 1;
 
