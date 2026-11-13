@@ -6,13 +6,14 @@ vi.mock('@/lib/auth', () => ({ getCurrentUser: vi.fn() }));
 const signInWithPassword = vi.fn();
 const signOut = vi.fn();
 let profileRow: { role: string; is_active: boolean } | null = null;
+let profileError: { message: string } | null = null;
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: { signInWithPassword, signOut },
     from: () => ({
       select: () => ({
-        eq: () => ({ maybeSingle: async () => ({ data: profileRow, error: null }) }),
+        eq: () => ({ maybeSingle: async () => ({ data: profileRow, error: profileError }) }),
       }),
     }),
   }),
@@ -27,7 +28,16 @@ describe('ownerLoginAction', () => {
     signInWithPassword.mockReset();
     signOut.mockReset();
     profileRow = null;
+    profileError = null;
     signInWithPassword.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+  });
+
+  it('signs out with the generic error when the profile lookup fails', async () => {
+    profileError = { message: 'connection reset' };
+    const result = await ownerLoginAction(input);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBe('Incorrect login details');
+    expect(signOut).toHaveBeenCalledOnce();
   });
 
   it('rejects a malformed email without calling Supabase', async () => {

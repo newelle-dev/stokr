@@ -4,8 +4,19 @@ const rpc = vi.fn();
 const getUser = vi.fn();
 const updateUser = vi.fn();
 
+let profileRow: { id: string } | null = null;
+let profileError: { message: string } | null = null;
+
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: async () => ({ auth: { getUser, updateUser }, rpc }),
+  createClient: async () => ({
+    auth: { getUser, updateUser },
+    rpc,
+    from: () => ({
+      select: () => ({
+        eq: () => ({ maybeSingle: async () => ({ data: profileRow, error: profileError }) }),
+      }),
+    }),
+  }),
 }));
 
 import { createShopAction } from '@/features/onboarding/actions';
@@ -22,8 +33,27 @@ describe('createShopAction', () => {
     rpc.mockReset();
     getUser.mockReset();
     updateUser.mockReset();
+    profileRow = null;
+    profileError = null;
     getUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     updateUser.mockResolvedValue({ error: null });
+  });
+
+  it('does not touch the password when the user already has a profile', async () => {
+    profileRow = { id: 'u1' };
+    const result = await createShopAction(valid);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe('ALREADY_ONBOARDED');
+    expect(updateUser).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it('stops without changing the password when the profile lookup fails', async () => {
+    profileError = { message: 'connection reset' };
+    const result = await createShopAction(valid);
+    expect(result.ok).toBe(false);
+    expect(updateUser).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it('rejects invalid input without calling Supabase', async () => {

@@ -29,6 +29,21 @@ export async function createShopAction(
     return errorResult('UNAUTHORIZED', 'Please sign in again to set up your shop.');
   }
 
+  // Only a user with no profile may set up a shop. Check before touching the
+  // password: this action is callable by any signed-in user, and a voluntary
+  // password change elsewhere requires the current password.
+  const { data: existingProfile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userData.user.id)
+    .maybeSingle();
+  if (profileError) {
+    return errorResult('DB_ERROR', 'Could not set up your shop. Please try again.');
+  }
+  if (existingProfile) {
+    return errorResult('ALREADY_ONBOARDED', 'This account already has a shop.');
+  }
+
   // Password first: if shop creation then fails, a retry hits the same-password
   // error below, which is safe to ignore. The other order could leave a shop
   // behind with the temporary password still active.

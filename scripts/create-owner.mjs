@@ -61,4 +61,8 @@ if (createError) {
 
 console.log(`${action} ${email}`);
 console.log(`Temporary password (shown once): ${password}`);
-console.log('Send it to the owner privately. They set their own password at first sign-in.');
+console.log(
+  action === 'Created'
+    ? 'Send it to the owner privately. They set their own password at first sign-in.'
+    : 'Send it to the owner privately. If they already have a shop, ask them to change it on the change-password page; it stays valid until they do.'
+);

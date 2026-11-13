@@ -172,11 +172,16 @@ export async function ownerLoginAction(
     return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('role, is_active')
     .eq('id', authData.user.id)
     .maybeSingle();
+
+  if (profileError) {
+    await supabase.auth.signOut();
+    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
+  }
 
   if (!profile) return successResult({ redirectTo: '/onboarding' });
 
