@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { requireStaffOrOwnerPage } from '@/lib/auth';
-import { SignOutButton } from '@/components/shared/sign-out-button';
 import { AppHeader } from '@/components/shell/app-header';
 import { BottomTabBar } from '@/components/shell/bottom-tab-bar';
 import { PullToRefresh } from '@/components/shell/pull-to-refresh';
-import { staffTabsFor } from '@/lib/nav';
+import { staffTabsFor, profileHref } from '@/lib/nav';
 
 export default async function StaffLayout({
   children,
@@ -15,16 +14,7 @@ export default async function StaffLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--background)]">
-      <AppHeader
-        right={
-          <>
-            <span className="max-w-24 truncate text-xs font-medium text-[var(--foreground)]">
-              {user.fullName.split(' ')[0]}
-            </span>
-            <SignOutButton className="min-h-11 min-w-11" />
-          </>
-        }
-      />
+      <AppHeader profileHref={profileHref(user.role)} initial={user.fullName.charAt(0)} />
       <PullToRefresh />
 
       {/* Main Content Area, with room for the bottom tab bar */}

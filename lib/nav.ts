@@ -11,7 +11,10 @@ export type NavIcon =
   | 'products'
   | 'team'
   | 'settings'
-  | 'reports';
+  | 'reports'
+  | 'count'
+  | 'opening'
+  | 'profile';
 
 export interface NavItem {
   label: string;
@@ -23,14 +26,35 @@ export const OWNER_TABS: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   { label: 'Sales', href: '/sales', icon: 'sales' },
   { label: 'Stock', href: '/stock', icon: 'stock' },
+  { label: 'More', href: '/more', icon: 'more' },
 ];
 
-export const MORE_ITEMS: NavItem[] = [
-  { label: 'Sell', href: '/sell', icon: 'sell' },
-  { label: 'Products', href: '/products', icon: 'products' },
-  { label: 'Team', href: '/team', icon: 'team' },
-  { label: 'Settings', href: '/settings', icon: 'settings' },
+export interface MoreItem extends NavItem {
+  description: string;
+}
+
+export const MORE_SECTIONS: { title: string; items: MoreItem[] }[] = [
+  {
+    title: 'Store operations',
+    items: [
+      { label: 'Sell', href: '/sell', icon: 'sell', description: 'Record a sale at the counter' },
+      { label: 'Products', href: '/products', icon: 'products', description: 'Your catalog, prices and categories' },
+      { label: 'Stock count', href: '/stock/count', icon: 'count', description: 'Count shelves and fix differences' },
+      { label: 'Opening stock', href: '/stock/opening', icon: 'opening', description: 'Enter starting quantities per branch' },
+    ],
+  },
+  {
+    title: 'Store management',
+    items: [
+      { label: 'Settings', href: '/settings', icon: 'settings', description: 'Shop details, branches and store code' },
+      { label: 'Team & staff', href: '/team', icon: 'team', description: 'Add staff and manage their access' },
+    ],
+  },
 ];
+
+export function profileHref(role: 'owner' | 'staff'): string {
+  return role === 'owner' ? '/profile' : '/me';
+}
 
 export const SIDEBAR_ITEMS: (NavItem & { enabled: boolean; badge?: string })[] = [
   { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', enabled: true },
@@ -60,19 +84,26 @@ export function isActive(pathname: string, href: string): boolean {
   return path === href || path.startsWith(href + '/');
 }
 
-const MORE_ROUTES = ['/products', '/team', '/settings'];
+const MORE_ROUTES = ['/more', '/products', '/team', '/settings'];
 
 export function isMoreActive(pathname: string): boolean {
   return MORE_ROUTES.some((route) => isActive(pathname, route));
 }
 
+// The More tab is highlighted on the More page and the pages opened from it.
+export function isTabActive(pathname: string, href: string): boolean {
+  return href === '/more' ? isMoreActive(pathname) : isActive(pathname, href);
+}
+
 // Fixed parent per sub-page, so back works after a refresh or deep link (no history needed).
 const SUB_PAGES: { prefix: string; parent: string; title: string }[] = [
-  { prefix: '/products', parent: '/dashboard', title: 'Products' },
-  { prefix: '/team', parent: '/dashboard', title: 'Team' },
-  { prefix: '/settings', parent: '/dashboard', title: 'Settings' },
-  { prefix: '/stock/opening', parent: '/stock', title: 'Opening stock' },
-  { prefix: '/stock/count', parent: '/stock', title: 'Stock count' },
+  { prefix: '/products', parent: '/more', title: 'Products' },
+  { prefix: '/team', parent: '/more', title: 'Team & staff' },
+  { prefix: '/settings', parent: '/more', title: 'Settings' },
+  { prefix: '/stock/opening', parent: '/more', title: 'Opening stock' },
+  { prefix: '/stock/count', parent: '/more', title: 'Stock count' },
+  { prefix: '/profile', parent: '/dashboard', title: 'Profile' },
+  { prefix: '/me', parent: '/sell', title: 'Profile' },
   { prefix: '/sales/replace', parent: '/sales', title: 'Replacement sale' },
 ];
 
@@ -84,8 +115,17 @@ export function parentRoute(pathname: string): string | null {
   return subPage(pathname)?.parent ?? null;
 }
 
-export function pageTitle(pathname: string): string | null {
-  return subPage(pathname)?.title ?? null;
+const TOP_TITLES: Record<string, string> = {
+  '/dashboard': 'Dashboard',
+  '/sales': 'Sales',
+  '/stock': 'Stock',
+  '/more': 'More',
+  '/sell': 'Sell',
+  '/my-sales': 'My sales',
+};
+
+export function headerTitle(pathname: string): string | null {
+  return subPage(pathname)?.title ?? TOP_TITLES[normalize(pathname)] ?? null;
 }
 
 const PULL_REFRESH_ROUTES = ['/dashboard', '/sales', '/my-sales', '/stock'];

@@ -236,7 +236,7 @@ export function StockTable({
         </div>
 
         {/* Right: Action Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="hidden items-center gap-2 shrink-0 md:flex">
           <Link href="/stock/opening">
             <Button variant="outline" className="h-11 px-3.5 text-xs sm:text-sm font-medium">
               <Boxes className="mr-1.5 h-4 w-4 text-[var(--muted-foreground)]" />

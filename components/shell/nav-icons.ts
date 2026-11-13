@@ -9,6 +9,9 @@ import {
   Users,
   Settings,
   BarChart3,
+  ClipboardCheck,
+  PackagePlus,
+  User,
 } from 'lucide-react';
 import type { NavIcon } from '@/lib/nav';
 
@@ -24,4 +27,7 @@ export const NAV_ICONS: Record<NavIcon, React.ComponentType<{ className?: string
   team: Users,
   settings: Settings,
   reports: BarChart3,
+  count: ClipboardCheck,
+  opening: PackagePlus,
+  profile: User,
 };

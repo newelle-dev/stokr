@@ -8,7 +8,7 @@ import { AppHeader } from '@/components/shell/app-header';
 import { BottomTabBar } from '@/components/shell/bottom-tab-bar';
 import { PullToRefresh } from '@/components/shell/pull-to-refresh';
 import { SwipeBack } from '@/components/shell/swipe-back';
-import { OWNER_TABS, MORE_ITEMS } from '@/lib/nav';
+import { OWNER_TABS, profileHref } from '@/lib/nav';
 
 export default async function OwnerLayout({
   children,
@@ -48,7 +48,7 @@ export default async function OwnerLayout({
       <div className="flex flex-1 flex-col md:pl-64 min-w-0">
         {/* Mobile Top Header (hidden on desktop) */}
         <div className="md:hidden">
-          <AppHeader />
+          <AppHeader profileHref={profileHref(user.role)} initial={user.fullName.charAt(0)} />
         </div>
         <PullToRefresh />
         <SwipeBack />
@@ -59,12 +59,7 @@ export default async function OwnerLayout({
         </main>
 
         {/* Mobile Bottom Tab Bar: Dashboard, Sales, Stock, More */}
-        <BottomTabBar
-          tabs={OWNER_TABS}
-          moreItems={MORE_ITEMS}
-          signOut={<SignOutButton className="min-h-11 w-full" />}
-          hideOnDesktop
-        />
+        <BottomTabBar tabs={OWNER_TABS} hideOnDesktop />
       </div>
     </div>
   );
