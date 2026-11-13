@@ -20,7 +20,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Owner Dashboard" description={`Welcome back, ${user.fullName}.`} />
+      <PageHeader title="Dashboard" description={`Welcome back, ${user.fullName}.`} />
       <BranchFilter branches={data.branches} selectedBranchId={data.selectedBranchId} />
       <AutoRefresh />
       <DashboardCards data={data} />
