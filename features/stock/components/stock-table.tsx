@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Boxes,
-  ClipboardCheck,
   AlertTriangle,
   PackagePlus,
   SlidersHorizontal,
@@ -241,12 +240,6 @@ export function StockTable({
             <Button variant="outline" className="h-11 px-3.5 text-xs sm:text-sm font-medium">
               <Boxes className="mr-1.5 h-4 w-4 text-[var(--muted-foreground)]" />
               Opening Stock
-            </Button>
-          </Link>
-          <Link href="/stock/count">
-            <Button variant="outline" className="h-11 px-3.5 text-xs sm:text-sm font-medium">
-              <ClipboardCheck className="mr-1.5 h-4 w-4 text-[var(--muted-foreground)]" />
-              Count
             </Button>
           </Link>
           <Button

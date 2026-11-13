@@ -1,9 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MoneyText } from '@/components/shared/money-text';
@@ -77,13 +76,6 @@ export function CountScreen({ data }: { data: StockCountPageData }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link
-          href="/stock"
-          className="inline-flex min-h-11 items-center gap-1 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Stock
-        </Link>
         <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Stock count</h1>
         <p className="text-sm text-[var(--muted-foreground)]">
           Count what is on the shelf. Saving shows the gap against expected stock; stock only changes when you accept.
