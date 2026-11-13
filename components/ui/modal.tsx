@@ -49,9 +49,18 @@ export function Modal({
         <Dialog.Backdrop
           className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in"
         />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Phones: bottom sheet. md and up (and the temporary-password dialog): centered. */}
+        <div
+          className={`fixed inset-0 z-50 flex justify-center ${
+            isTempPasswordDisplayed ? 'items-center p-4' : 'items-end p-0 md:items-center md:p-4'
+          }`}
+        >
           <Dialog.Popup
-            className="relative z-10 w-full max-w-lg overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-xl animate-in zoom-in-95 outline-none"
+            className={`relative z-10 w-full max-w-lg overflow-y-auto border border-[var(--border)] bg-[var(--card)] p-6 shadow-xl outline-none ${
+              isTempPasswordDisplayed
+                ? 'max-h-[90dvh] rounded-[var(--radius-xl)] animate-in zoom-in-95'
+                : 'max-h-[90dvh] rounded-t-[var(--radius-xl)] border-b-0 pb-[calc(1.5rem+env(safe-area-inset-bottom))] animate-in slide-in-from-bottom md:rounded-[var(--radius-xl)] md:border-b md:pb-6 md:zoom-in-95 md:slide-in-from-bottom-0'
+            }`}
           >
             <div className="flex items-start justify-between pb-4">
               <div className="space-y-1">
