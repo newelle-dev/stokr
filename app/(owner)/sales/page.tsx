@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/shell/page-header';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { requireOwnerPage } from '@/lib/auth';
@@ -49,10 +50,10 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Sales</h1>
-        <Link href="/sell" className={`${buttonVariants()} h-11 px-4`}>New sale</Link>
-      </div>
+      <PageHeader
+        title="Sales"
+        action={<Link href="/sell" className={`${buttonVariants()} h-11 px-4`}>New sale</Link>}
+      />
 
       <form method="get" className="grid grid-cols-2 gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 md:grid-cols-6">
         <label className="space-y-1 text-sm font-medium">

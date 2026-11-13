@@ -146,3 +146,13 @@
   --success: #4ADE80;
   --warning: #FBBF24;
 }
+/* App feel on phones: no pull-to-refresh bounce from the browser, no grey tap flash. */
+@layer base {
+  body {
+    overscroll-behavior-y: contain;
+  }
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

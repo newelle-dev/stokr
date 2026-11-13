@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/shell/page-header';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { requireOwnerPage } from '@/lib/auth';
@@ -33,11 +34,15 @@ export default async function ReplaceSalePage({ params }: { params: Promise<{ sa
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Replacement sale</h1>
-      <p className="text-sm text-[var(--muted-foreground)]">
-        Replaces a voided sale of <MoneyText centavos={original.totalCentavos} className="font-semibold text-[var(--foreground)]" />.
-        The original seller{original.soldByName ? ` (${original.soldByName})` : ''} stays on the sale; you are recorded as the one who entered it.
-      </p>
+      <PageHeader
+        title="Replacement sale"
+        description={
+          <>
+            Replaces a voided sale of <MoneyText centavos={original.totalCentavos} className="font-semibold text-[var(--foreground)]" />.
+            The original seller{original.soldByName ? ` (${original.soldByName})` : ''} stays on the sale; you are recorded as the one who entered it.
+          </>
+        }
+      />
       <SellCounter data={{ ...data, homeBranchId: original.branchId }} correctsSaleId={original.id} />
     </div>
   );

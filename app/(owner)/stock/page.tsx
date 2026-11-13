@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/shell/page-header';
 import * as React from 'react';
 import { requireOwnerPage } from '@/lib/auth';
 import { getStockOverview } from '@/features/stock/queries';
@@ -18,15 +19,10 @@ export default async function StockPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
-          Inventory & Stock
-        </h1>
-        <p className="text-sm text-[var(--muted-foreground)]">
-          Real-time stock on hand calculated from append-only ledger movements. Restock arrivals,
-          adjust inventory, and flag depleted items.
-        </p>
-      </div>
+      <PageHeader
+        title="Inventory & Stock"
+        description="Real-time stock on hand calculated from append-only ledger movements. Restock arrivals, adjust inventory, and flag depleted items."
+      />
 
       <StockTable
         initialItems={stockData.items}

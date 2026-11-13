@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: 'Stokr', statusBarStyle: 'black-translucent' },
 };
 
-export const viewport: Viewport = { themeColor: '#0B1210' };
+export const viewport: Viewport = { themeColor: '#0B1210', viewportFit: 'cover' };
 
 export default function RootLayout({
   children,

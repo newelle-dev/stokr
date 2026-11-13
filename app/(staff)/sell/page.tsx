@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/shell/page-header';
 import { getSellScreenData } from '@/features/sales/queries';
 import { SellCounter } from '@/features/sales/components/sell-counter';
 
@@ -13,7 +14,7 @@ export default async function SellPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Sell</h1>
+      <PageHeader title="Sell" />
       <SellCounter data={data} />
     </div>
   );

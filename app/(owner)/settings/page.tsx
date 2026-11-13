@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/shell/page-header';
 import { Metadata } from 'next';
 import { requireOwnerPage } from '@/lib/auth';
 import { getOwnerBranches } from '@/features/branches/queries';
@@ -18,14 +19,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
-          Settings
-        </h1>
-        <p className="text-sm text-[var(--muted-foreground)]">
-          Configure your shop details and physical branch locations.
-        </p>
-      </div>
+      <PageHeader title="Settings" description="Configure your shop details and physical branch locations." />
 
       {/* Store Identity Card */}
       <StoreCodeCard shopName={shopName} storeCode={storeCode} />

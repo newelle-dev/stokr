@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/shell/page-header';
 import { getMySales } from '@/features/sales/queries';
 import { formatManilaDateTime } from '@/lib/dates';
 import { MoneyText } from '@/components/shared/money-text';
@@ -16,7 +17,7 @@ export default async function MySalesPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">My sales</h1>
+      <PageHeader title="My sales" />
 
       {sales.length === 0 ? (
         <p className="rounded-[var(--radius-lg)] border border-[var(--border)] p-4 text-sm text-[var(--muted-foreground)]">
