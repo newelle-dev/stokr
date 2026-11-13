@@ -47,7 +47,7 @@ export default async function OwnerLayout({
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col md:pl-64 min-w-0">
         {/* Mobile Top Header (hidden on desktop) */}
-        <div className="md:hidden">
+        <div className="sticky top-0 z-10 md:hidden">
           <AppHeader profileHref={profileHref(user.role)} initial={user.fullName.charAt(0)} />
         </div>
         <PullToRefresh />
