@@ -24,7 +24,7 @@ describe('tabs', () => {
     expect(MORE_SECTIONS[0].items.map((i) => i.href)).toEqual([
       '/sell', '/products', '/stock/count', '/stock/opening',
     ]);
-    expect(MORE_SECTIONS[1].items.map((i) => i.href)).toEqual(['/branches', '/team']);
+    expect(MORE_SECTIONS[1].items.map((i) => i.href)).toEqual(['/branches', '/team', '/setup']);
     expect(MORE_SECTIONS[2].items.map((i) => i.href)).toEqual(['/about', '/help']);
     MORE_SECTIONS.flatMap((s) => s.items).forEach((i) => expect(i.description.length).toBeGreaterThan(0));
   });
@@ -75,6 +75,7 @@ describe('parentRoute', () => {
     ['/products', '/more'],
     ['/team', '/more'],
     ['/branches', '/more'],
+    ['/setup', '/more'],
     ['/about', '/more'],
     ['/help', '/more'],
     ['/stock/opening', '/more'],
@@ -108,6 +109,7 @@ describe('headerTitle', () => {
     ['/products', 'Products'],
     ['/team', 'Team & staff'],
     ['/branches', 'Branches'],
+    ['/setup', 'Set up shop'],
     ['/about', 'About Stokr'],
     ['/help', 'Help'],
     ['/stock/opening', 'Opening stock'],
@@ -134,7 +136,7 @@ describe('gesture permissions', () => {
     },
   );
 
-  it.each(['/products', '/team', '/branches', '/about', '/help'])('swipe-back on %s', (p) => {
+  it.each(['/products', '/team', '/branches', '/setup', '/about', '/help'])('swipe-back on %s', (p) => {
     expect(canSwipeBack(p)).toBe(true);
   });
 
