@@ -3,7 +3,10 @@ import Link from 'next/link';
 import { requireOwnerPage } from '@/lib/auth';
 import { SignOutButton } from '@/components/shared/sign-out-button';
 import { Logo } from '@/components/ui/logo';
-import { OwnerDesktopSidebar, OwnerMobileTabBar } from '@/components/owner/owner-nav';
+import { OwnerDesktopSidebar } from '@/components/owner/owner-nav';
+import { AppHeader } from '@/components/shell/app-header';
+import { BottomTabBar } from '@/components/shell/bottom-tab-bar';
+import { OWNER_TABS, MORE_ITEMS } from '@/lib/nav';
 
 export default async function OwnerLayout({
   children,
@@ -42,26 +45,22 @@ export default async function OwnerLayout({
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col md:pl-64 min-w-0">
         {/* Mobile Top Header (hidden on desktop) */}
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--card)]/95 backdrop-blur-md px-4 md:hidden">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Logo height={20} width={115} />
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--muted-foreground)]">
-              {user.fullName.split(' ')[0]}
-            </span>
-            <SignOutButton className="min-h-11 min-w-11" />
-          </div>
-        </header>
+        <div className="md:hidden">
+          <AppHeader />
+        </div>
 
         {/* Content Body with bottom padding for mobile tab bar */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl w-full mx-auto pb-24 md:pb-8">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl w-full mx-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8">
           {children}
         </main>
 
-        {/* Mobile Bottom Tab Bar */}
-        <OwnerMobileTabBar />
+        {/* Mobile Bottom Tab Bar: Dashboard, Sales, Stock, More */}
+        <BottomTabBar
+          tabs={OWNER_TABS}
+          moreItems={MORE_ITEMS}
+          signOut={<SignOutButton className="min-h-11 w-full" />}
+          hideOnDesktop
+        />
       </div>
     </div>
   );
