@@ -18,7 +18,7 @@ export type NavIcon =
   | 'about'
   | 'branches'
   | 'help'
-  | 'setup';
+  | 'shop';
 
 export interface NavItem {
   label: string;
@@ -52,7 +52,7 @@ export const MORE_SECTIONS: { title: string; items: MoreItem[] }[] = [
     items: [
       { label: 'Branches', href: '/branches', icon: 'branches', description: 'Branch locations and the store code' },
       { label: 'Team & staff', href: '/team', icon: 'team', description: 'Add staff and manage their access' },
-      { label: 'Set up shop', href: '/setup', icon: 'setup', description: 'Checklist for getting a new shop ready' },
+      { label: 'Shop details', href: '/shop', icon: 'shop', description: 'Shop name and the staff store code' },
     ],
   },
   {
@@ -96,7 +96,7 @@ export function isActive(pathname: string, href: string): boolean {
   return path === href || path.startsWith(href + '/');
 }
 
-const MORE_ROUTES = ['/more', '/products', '/team', '/branches', '/setup', '/about', '/help'];
+const MORE_ROUTES = ['/more', '/products', '/team', '/branches', '/shop', '/about', '/help'];
 
 export function isMoreActive(pathname: string): boolean {
   return MORE_ROUTES.some((route) => isActive(pathname, route));
@@ -112,7 +112,7 @@ const SUB_PAGES: { prefix: string; parent: string; title: string }[] = [
   { prefix: '/products', parent: '/more', title: 'Products' },
   { prefix: '/team', parent: '/more', title: 'Team & staff' },
   { prefix: '/branches', parent: '/more', title: 'Branches' },
-  { prefix: '/setup', parent: '/more', title: 'Set up shop' },
+  { prefix: '/shop', parent: '/more', title: 'Shop details' },
   { prefix: '/about', parent: '/more', title: 'About Stokr' },
   { prefix: '/help', parent: '/more', title: 'Help' },
   { prefix: '/stock/opening', parent: '/more', title: 'Opening stock' },
@@ -151,7 +151,7 @@ export function canPullRefresh(pathname: string): boolean {
 }
 
 // Read-only sub-pages only: swiping back must never discard typed input.
-const SWIPE_BACK_ROUTES = ['/products', '/team', '/branches', '/setup', '/about', '/help'];
+const SWIPE_BACK_ROUTES = ['/products', '/team', '/branches', '/shop', '/about', '/help'];
 
 export function canSwipeBack(pathname: string): boolean {
   return SWIPE_BACK_ROUTES.includes(normalize(pathname));
