@@ -19,3 +19,9 @@ export function isSwipeBack(startX: number, startY: number, endX: number, endY: 
     Math.abs(endY - startY) < MAX_VERTICAL_DRIFT_PX
   );
 }
+
+// Any open dialog or sheet (including the one-time temporary-password dialog) owns the touch:
+// a stray edge swipe or pull must never navigate away from it or discard typed input.
+export function dialogIsOpen(doc: { querySelector(selector: string): unknown }): boolean {
+  return doc.querySelector('[role="dialog"]') !== null;
+}

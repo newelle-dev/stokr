@@ -4,7 +4,7 @@ import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
 import { canPullRefresh } from '@/lib/nav';
-import { pullProgress } from '@/lib/gestures';
+import { pullProgress, dialogIsOpen } from '@/lib/gestures';
 
 // Pull down at the top of a read-only list to re-read the server data (same as the page's own reads).
 export function PullToRefresh() {
@@ -21,7 +21,8 @@ export function PullToRefresh() {
     if (!enabled) return;
 
     const onStart = (e: TouchEvent) => {
-      startY.current = window.scrollY <= 0 ? e.touches[0].clientY : null;
+      startY.current =
+        window.scrollY <= 0 && !dialogIsOpen(document) ? e.touches[0].clientY : null;
       latest.current = 0;
     };
     const onMove = (e: TouchEvent) => {

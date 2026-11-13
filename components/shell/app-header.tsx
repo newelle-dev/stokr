@@ -13,7 +13,8 @@ export function AppHeader({ right }: { right?: React.ReactNode }) {
   const title = pageTitle(pathname);
 
   return (
-    <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+    <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--card)]/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <div className="flex h-14 items-center justify-between gap-2 px-4">
       {parent ? (
         <div className="flex min-w-0 items-center gap-1">
           <Link
@@ -31,6 +32,7 @@ export function AppHeader({ right }: { right?: React.ReactNode }) {
         </Link>
       )}
       {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}
+      </div>
     </header>
   );
 }

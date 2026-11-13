@@ -15,7 +15,16 @@ export default async function StaffLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--background)]">
-      <AppHeader right={<SignOutButton className="min-h-11 min-w-11" />} />
+      <AppHeader
+        right={
+          <>
+            <span className="max-w-24 truncate text-xs font-medium text-[var(--foreground)]">
+              {user.fullName.split(' ')[0]}
+            </span>
+            <SignOutButton className="min-h-11 min-w-11" />
+          </>
+        }
+      />
       <PullToRefresh />
 
       {/* Main Content Area, with room for the bottom tab bar */}

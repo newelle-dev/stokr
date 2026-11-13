@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { PULL_THRESHOLD_PX, pullProgress, isSwipeBack } from '@/lib/gestures';
+import { PULL_THRESHOLD_PX, pullProgress, isSwipeBack, dialogIsOpen } from '@/lib/gestures';
+
+describe('dialogIsOpen', () => {
+  it('is true when the page holds an open dialog', () => {
+    const doc = { querySelector: (sel: string) => (sel.includes('dialog') ? {} : null) };
+    expect(dialogIsOpen(doc)).toBe(true);
+  });
+
+  it('is false when no dialog is open', () => {
+    expect(dialogIsOpen({ querySelector: () => null })).toBe(false);
+  });
+});
 
 describe('pullProgress', () => {
   it('is half way after half the threshold', () => {

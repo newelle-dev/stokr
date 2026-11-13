@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { canSwipeBack, parentRoute } from '@/lib/nav';
-import { isSwipeBack } from '@/lib/gestures';
+import { isSwipeBack, dialogIsOpen } from '@/lib/gestures';
 
 // Swipe right from the left edge on read-only sub-pages. Never mounted behaviour on forms or the sell screen.
 export function SwipeBack() {
@@ -18,7 +18,10 @@ export function SwipeBack() {
     if (!enabled || !parent) return;
 
     const onStart = (e: TouchEvent) => {
-      start.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      start.current =
+        e.touches.length === 1 && !dialogIsOpen(document)
+          ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+          : null;
     };
     const onEnd = (e: TouchEvent) => {
       const s = start.current;
