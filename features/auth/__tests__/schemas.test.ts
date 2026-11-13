@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { magicLinkSchema, staffLoginSchema, changePasswordSchema } from '../schemas';
+import { ownerLoginSchema, newPasswordSchema, staffLoginSchema, changePasswordSchema } from '../schemas';
 
-describe('magicLinkSchema', () => {
+describe('ownerLoginSchema', () => {
   it('accepts a valid email and lowercases it', () => {
-    const result = magicLinkSchema.safeParse({ email: '  Owner@Stokr.Local  ' });
+    const result = ownerLoginSchema.safeParse({ email: '  Owner@Stokr.Local  ', password: 'x' });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.email).toBe('owner@stokr.local');
@@ -11,11 +11,24 @@ describe('magicLinkSchema', () => {
   });
 
   it('rejects an invalid email format', () => {
-    expect(magicLinkSchema.safeParse({ email: 'not-an-email' }).success).toBe(false);
+    expect(ownerLoginSchema.safeParse({ email: 'not-an-email', password: 'x' }).success).toBe(false);
   });
 
   it('rejects an empty email', () => {
-    expect(magicLinkSchema.safeParse({ email: '' }).success).toBe(false);
+    expect(ownerLoginSchema.safeParse({ email: '', password: 'x' }).success).toBe(false);
+  });
+
+  it('rejects an empty password', () => {
+    expect(ownerLoginSchema.safeParse({ email: 'owner@stokr.local', password: '' }).success).toBe(false);
+  });
+});
+
+describe('newPasswordSchema', () => {
+  it('accepts 10 and 72 characters, rejects 9 and 73', () => {
+    expect(newPasswordSchema.safeParse('a'.repeat(10)).success).toBe(true);
+    expect(newPasswordSchema.safeParse('a'.repeat(72)).success).toBe(true);
+    expect(newPasswordSchema.safeParse('a'.repeat(9)).success).toBe(false);
+    expect(newPasswordSchema.safeParse('a'.repeat(73)).success).toBe(false);
   });
 });
 

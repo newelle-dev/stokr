@@ -6,8 +6,8 @@ import { errorResult, successResult, type ActionResult } from '@/lib/errors';
 import {
   staffLoginSchema,
   changePasswordSchema,
-  magicLinkSchema,
-  type MagicLinkInput,
+  ownerLoginSchema,
+  type OwnerLoginInput,
   type StaffLoginInput,
   type ChangePasswordInput,
 } from './schemas';
@@ -153,27 +153,38 @@ export async function logoutAction(): Promise<void> {
 
 
 /**
- * Emails a magic sign-in link. Supabase errors are ignored on purpose, so the
- * reply never reveals whether the account exists. shouldCreateUser lets a new
- * owner sign up with the same link.
+ * Signs in an owner with email and password. Every failure (bad input, wrong
+ * password, unknown email, inactive profile, a staff account) returns the same
+ * generic error. A signed-in user with no profile yet is a new owner and goes
+ * to onboarding.
  */
-export async function requestMagicLinkAction(
-  rawInput: MagicLinkInput
-): Promise<ActionResult<null>> {
-  const parsed = magicLinkSchema.safeParse(rawInput);
+export async function ownerLoginAction(
+  rawInput: OwnerLoginInput
+): Promise<ActionResult<{ redirectTo: string }>> {
+  const parsed = ownerLoginSchema.safeParse(rawInput);
   if (!parsed.success) {
-    return errorResult('VALIDATION_ERROR', 'Please enter a valid email address');
+    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
   }
 
-  // The return address comes from server config, never from the request headers.
-  const siteUrl = process.env.SITE_URL;
-  if (!siteUrl) throw new Error('SITE_URL is not set');
   const supabase = await createClient();
-  await supabase.auth.signInWithOtp({
-    email: parsed.data.email,
-    options: { emailRedirectTo: `${siteUrl}/login/callback`, shouldCreateUser: true },
-  });
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword(parsed.data);
+  if (authError || !authData.user) {
+    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
+  }
 
-  return successResult(null);
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, is_active')
+    .eq('id', authData.user.id)
+    .maybeSingle();
+
+  if (!profile) return successResult({ redirectTo: '/onboarding' });
+
+  if (!profile.is_active || profile.role !== 'owner') {
+    await supabase.auth.signOut();
+    return errorResult('INVALID_CREDENTIALS', 'Incorrect login details');
+  }
+
+  return successResult({ redirectTo: '/dashboard' });
 }
 

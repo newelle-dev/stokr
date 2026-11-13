@@ -1,15 +1,22 @@
 import { z } from 'zod';
 
-export const magicLinkSchema = z.object({
+export const ownerLoginSchema = z.object({
   email: z
     .string()
     .trim()
     .min(1, 'Email is required')
+    .max(254, 'Email is too long')
     .email('Please enter a valid email address')
     .toLowerCase(),
+  password: z.string().min(1, 'Password is required'),
 });
 
-export type MagicLinkInput = z.infer<typeof magicLinkSchema>;
+export type OwnerLoginInput = z.infer<typeof ownerLoginSchema>;
+
+export const newPasswordSchema = z
+  .string()
+  .min(10, 'Password must be at least 10 characters')
+  .max(72, 'Password cannot exceed 72 characters');
 
 export const staffLoginSchema = z.object({
   storeCode: z
@@ -37,10 +44,7 @@ export type StaffLoginInput = z.infer<typeof staffLoginSchema>;
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().optional(),
-    newPassword: z
-      .string()
-      .min(10, 'Password must be at least 10 characters')
-      .max(72, 'Password cannot exceed 72 characters'),
+    newPassword: newPasswordSchema,
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

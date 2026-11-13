@@ -7,8 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Store, Shield } from 'lucide-react';
 import { staffLoginSchema, type StaffLoginInput } from '../schemas';
 import { staffLoginAction } from '../actions';
-import { MagicLinkForm } from './magic-link-form';
-import { GoogleSignInButton } from './google-sign-in-button';
+import { OwnerLoginForm } from './owner-login-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -77,7 +76,7 @@ export function LoginForm() {
         <CardDescription className="text-sm text-[var(--muted-foreground)]">
           {mode === 'staff'
             ? 'Enter your store code, username, and password'
-            : 'Enter your owner email to get a sign-in link'}
+            : 'Enter your owner email and password'}
         </CardDescription>
 
         {/* Mode Selector Tabs */}
@@ -204,15 +203,7 @@ export function LoginForm() {
             </Button>
           </form>
         ) : (
-          <div className="space-y-6">
-            <MagicLinkForm />
-            <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
-              <span className="h-px flex-1 bg-[var(--border)]" />
-              <span>or</span>
-              <span className="h-px flex-1 bg-[var(--border)]" />
-            </div>
-            <GoogleSignInButton />
-          </div>
+          <OwnerLoginForm />
         )}
       </CardContent>
     </Card>
