@@ -132,7 +132,7 @@ export function SellCounter({ data, correctsSaleId }: SellCounterProps) {
       <ProductPicker products={data.products} quantityById={quantityById} isFull={isFull} onAdd={handleAdd} />
 
       {itemCount > 0 && (
-        <div className={`fixed inset-x-0 z-20 ${correctsSaleId ? 'bottom-16 md:bottom-0' : 'bottom-0'} border-t border-[var(--border)] bg-[var(--card)] p-4`}>
+        <div className={`fixed inset-x-0 z-20 bottom-[calc(4rem+env(safe-area-inset-bottom))] ${correctsSaleId ? 'md:bottom-0' : ''} border-t border-[var(--border)] bg-[var(--card)] p-4`}>
           <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
             <div>
               <p className="text-sm text-[var(--muted-foreground)]">
