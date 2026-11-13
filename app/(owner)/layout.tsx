@@ -6,6 +6,8 @@ import { Logo } from '@/components/ui/logo';
 import { OwnerDesktopSidebar } from '@/components/owner/owner-nav';
 import { AppHeader } from '@/components/shell/app-header';
 import { BottomTabBar } from '@/components/shell/bottom-tab-bar';
+import { PullToRefresh } from '@/components/shell/pull-to-refresh';
+import { SwipeBack } from '@/components/shell/swipe-back';
 import { OWNER_TABS, MORE_ITEMS } from '@/lib/nav';
 
 export default async function OwnerLayout({
@@ -48,6 +50,8 @@ export default async function OwnerLayout({
         <div className="md:hidden">
           <AppHeader />
         </div>
+        <PullToRefresh />
+        <SwipeBack />
 
         {/* Content Body with bottom padding for mobile tab bar */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl w-full mx-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8">
