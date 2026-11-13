@@ -156,3 +156,19 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* Short page transition. Off when the device asks for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: page-enter 180ms ease-out;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
