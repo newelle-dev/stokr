@@ -3,6 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const rpc = vi.fn();
 const getUser = vi.fn();
 const updateUser = vi.fn();
+const cookieSet = vi.fn();
+const redirect = vi.fn();
+
+vi.mock('next/headers', () => ({
+  cookies: async () => ({ set: cookieSet }),
+}));
+vi.mock('next/navigation', () => ({ redirect: (to: string) => redirect(to) }));
 
 let profileRow: { id: string } | null = null;
 let profileError: { message: string } | null = null;
@@ -19,7 +26,8 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }));
 
-import { createShopAction } from '@/features/onboarding/actions';
+import { createShopAction, dismissStoreCodeAction } from '@/features/onboarding/actions';
+import { STORE_CODE_COOKIE } from '@/features/onboarding/constants';
 
 const valid = {
   shopName: 'Cloud Haven',
@@ -108,6 +116,32 @@ describe('createShopAction', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe('AUTH_ERROR');
     expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it('keeps the new store code in a short-lived httpOnly cookie for the onboarding page', async () => {
+    rpc.mockResolvedValue({ data: 'abc123', error: null });
+    await createShopAction(valid);
+    expect(cookieSet).toHaveBeenCalledWith(
+      STORE_CODE_COOKIE,
+      'abc123',
+      expect.objectContaining({ httpOnly: true, path: '/onboarding', maxAge: 600 })
+    );
+  });
+
+  it('does not set the cookie when onboarding fails', async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: 'already_onboarded' } });
+    await createShopAction(valid);
+    expect(cookieSet).not.toHaveBeenCalled();
+  });
+
+  it('clears the store code cookie and goes to the dashboard when dismissed', async () => {
+    await dismissStoreCodeAction();
+    expect(cookieSet).toHaveBeenCalledWith(
+      STORE_CODE_COOKIE,
+      '',
+      expect.objectContaining({ maxAge: 0, path: '/onboarding' })
+    );
+    expect(redirect).toHaveBeenCalledWith('/dashboard');
   });
 
   it('maps a second onboarding attempt to a plain message', async () => {

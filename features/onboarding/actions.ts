@@ -1,6 +1,9 @@
 'use server';
 
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { STORE_CODE_COOKIE, STORE_CODE_MAX_AGE_SECONDS } from './constants';
 import { errorResult, successResult, type ActionResult } from '@/lib/errors';
 import { onboardingSchema, type OnboardingInput } from './schemas';
 
@@ -76,5 +79,22 @@ export async function createShopAction(
     return errorResult('DB_ERROR', 'Could not set up your shop. Please try again.');
   }
 
+  // The onboarding page re-runs after this action and would send a new owner to the
+  // dashboard, so the code is kept in a short-lived cookie that only the server reads.
+  (await cookies()).set(STORE_CODE_COOKIE, String(storeCode), {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/onboarding',
+    maxAge: STORE_CODE_MAX_AGE_SECONDS,
+  });
   return successResult({ redirectTo: '/dashboard', storeCode: String(storeCode) });
+}
+
+/**
+ * Called when the owner has written the store code down. Clears the cookie and goes to the dashboard.
+ */
+export async function dismissStoreCodeAction(): Promise<void> {
+  (await cookies()).set(STORE_CODE_COOKIE, '', { path: '/onboarding', maxAge: 0 });
+  redirect('/dashboard');
 }

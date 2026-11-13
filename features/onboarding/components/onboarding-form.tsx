@@ -1,17 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { onboardingSchema, type OnboardingInput } from '../schemas';
-import { createShopAction } from '../actions';
+import { createShopAction, dismissStoreCodeAction } from '../actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-export function OnboardingForm() {
-  const router = useRouter();
+export function OnboardingForm({ initialStoreCode = null }: { initialStoreCode?: string | null }) {
   const [shopName, setShopName] = React.useState('');
   const [branchName, setBranchName] = React.useState('');
   const [newPassword, setNewPassword] = React.useState('');
@@ -19,7 +17,7 @@ export function OnboardingForm() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [storeCode, setStoreCode] = React.useState<string | null>(null);
+  const [storeCode, setStoreCode] = React.useState<string | null>(initialStoreCode);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -61,7 +59,7 @@ export function OnboardingForm() {
           <p className="text-sm text-[var(--muted-foreground)]">
             This is the only time this code is shown.
           </p>
-          <Button className="h-12 w-full text-base font-semibold" onClick={() => router.push('/dashboard')}>
+          <Button className="h-12 w-full text-base font-semibold" onClick={() => dismissStoreCodeAction()}>
             Go to dashboard
           </Button>
         </CardContent>
