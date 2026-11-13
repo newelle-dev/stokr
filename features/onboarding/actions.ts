@@ -10,8 +10,8 @@ export interface CreateShopResultData {
 }
 
 /**
- * Creates the signed-in user's shop, first branch, owner profile and optional
- * products through the create_shop_for_new_owner database function.
+ * Sets the signed-in user's new password, then creates their shop, first branch
+ * and owner profile through the create_shop_for_new_owner database function.
  * Input is validated here and again by the function (trust boundary).
  */
 export async function createShopAction(
@@ -29,6 +29,20 @@ export async function createShopAction(
     return errorResult('UNAUTHORIZED', 'Please sign in again to set up your shop.');
   }
 
+  // Password first: if shop creation then fails, a retry hits the same-password
+  // error below, which is safe to ignore. The other order could leave a shop
+  // behind with the temporary password still active.
+  const { error: passwordError } = await supabase.auth.updateUser({
+    password: parsed.data.newPassword,
+  });
+  const isSamePassword =
+    passwordError &&
+    (passwordError.message.toLowerCase().includes('different from the old password') ||
+      (passwordError as { code?: string }).code === 'same_password');
+  if (passwordError && !isSamePassword) {
+    return errorResult('AUTH_ERROR', 'Could not set your password. Please try again.');
+  }
+
   // shortcut: untyped rpc until lib/supabase/database.types.ts is regenerated after the migration is applied; then use supabase.rpc directly
   const rpcUntyped = supabase.rpc.bind(supabase) as unknown as (
     fn: string,
@@ -37,13 +51,7 @@ export async function createShopAction(
   const { data: storeCode, error } = await rpcUntyped('create_shop_for_new_owner', {
     p_shop_name: parsed.data.shopName,
     p_branch_name: parsed.data.branchName,
-    p_products: parsed.data.products.map((product) => ({
-      name: product.name,
-      category: product.category,
-      sellingPrice: product.sellingPrice,
-      costPrice: product.costPrice,
-      lowStockThreshold: product.lowStockThreshold,
-    })),
+    p_products: [],
   });
 
   if (error) {
