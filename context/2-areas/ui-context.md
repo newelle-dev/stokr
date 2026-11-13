@@ -68,8 +68,11 @@ Rules:
 - **Confirmation:** voiding a sale, accepting a stock count, and disabling a staff account always need an explicit confirm step.
 
 ## Layout patterns
-- **Staff layout (phone):** top bar with branch name and user menu; a bottom tab bar with `Sell` and `My sales`.
-- **Owner layout:** bottom tab bar on phone (Dashboard, Sales, Stock, More). On tablet and desktop, a left sidebar with all owner pages.
+- **App shell (built 2026-11-13, see `docs/superpowers/specs/2026-11-13-mobile-app-feel-design.md`):** one top bar and one bottom tab bar, defined in `lib/nav.ts` and rendered by `components/shell/`. Main screens show the logo; sub-pages show a back arrow (to a fixed parent page) and the page title. Page titles inside pages use `PageHeader`.
+- **Staff layout (phone):** top bar with a sign-out button; bottom tab bar with `Sell` and `My sales`. An owner using this view also sees an `Owner` tab (to the dashboard); staff never do.
+- **Owner layout:** bottom tab bar on phone (Dashboard, Sales, Stock, More). More is a bottom sheet with Sell, Products, Team, Settings and Sign out. On tablet and desktop, a left sidebar with all owner pages.
+- **Dialogs:** `Modal` is a bottom sheet on phones and a centered dialog from `md` up. The temporary-password dialog is always centered and cannot be dismissed by tapping outside.
+- **Gestures (no money or form screens):** pull-to-refresh on Dashboard, Sales, My sales and Stock only; swipe-back from the left edge on Products, Team and Settings only; a short fade between pages, off under reduced motion.
 - **Sell screen:**
   - Search box at the top; product list or grid below (large tappable rows with name and price).
   - A sticky bottom bar shows item count and total with a **Review sale** button.
