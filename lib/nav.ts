@@ -99,12 +99,13 @@ export function isActive(pathname: string, href: string): boolean {
 const MORE_ROUTES = ['/more', '/products', '/team', '/branches', '/shop', '/about', '/help'];
 
 export function isMoreActive(pathname: string): boolean {
-  return MORE_ROUTES.some((route) => isActive(pathname, route));
+  return MORE_ROUTES.some((route) => isActive(pathname, route)) || parentRoute(pathname) === '/more';
 }
 
-// The More tab is highlighted on the More page and the pages opened from it.
+// On a More page only the More tab is highlighted, even for sub-pages whose path starts like a tab (/stock/count).
 export function isTabActive(pathname: string, href: string): boolean {
-  return href === '/more' ? isMoreActive(pathname) : isActive(pathname, href);
+  if (href === '/more') return isMoreActive(pathname);
+  return !isMoreActive(pathname) && isActive(pathname, href);
 }
 
 // Fixed parent per sub-page, so back works after a refresh or deep link (no history needed).

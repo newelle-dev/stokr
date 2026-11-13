@@ -64,6 +64,11 @@ describe('isActive', () => {
     expect(isMoreActive('/more')).toBe(true);
     expect(isTabActive('/team', '/more')).toBe(true);
     expect(isTabActive('/stock', '/stock')).toBe(true);
+    // Stock count and opening stock are opened from More, so More is the active tab there.
+    expect(isTabActive('/stock/count', '/stock')).toBe(false);
+    expect(isTabActive('/stock/opening', '/stock')).toBe(false);
+    expect(isTabActive('/stock/count', '/more')).toBe(true);
+    expect(isTabActive('/stock/opening', '/more')).toBe(true);
     expect(isMoreActive('/team')).toBe(true);
     expect(isMoreActive('/products')).toBe(true);
     expect(isMoreActive('/dashboard')).toBe(false);

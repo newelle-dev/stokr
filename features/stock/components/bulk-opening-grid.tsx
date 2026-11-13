@@ -7,7 +7,6 @@ import {
   Boxes,
   CheckCircle2,
   AlertTriangle,
-  ArrowLeft,
   Save,
   Lock,
 } from 'lucide-react';
@@ -138,16 +137,7 @@ export function BulkOpeningGrid({ rows, branches }: BulkOpeningGridProps) {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/stock"
-              className="inline-flex items-center gap-1 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Back to Stock</span>
-            </Link>
-          </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-[var(--foreground)]">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
             Bulk Opening Stock
           </h1>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
