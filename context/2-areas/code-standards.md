@@ -23,7 +23,7 @@ There is **no `src/` directory.** The App Router lives in the root `app/` folder
     (owner)/stock-count/
     (owner)/team/
     (owner)/activity/
-    (owner)/settings/
+    (owner)/branches/
     layout.tsx
   features/
     <feature>/

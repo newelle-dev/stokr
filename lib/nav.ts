@@ -14,7 +14,10 @@ export type NavIcon =
   | 'reports'
   | 'count'
   | 'opening'
-  | 'profile';
+  | 'profile'
+  | 'about'
+  | 'branches'
+  | 'help';
 
 export interface NavItem {
   label: string;
@@ -46,8 +49,15 @@ export const MORE_SECTIONS: { title: string; items: MoreItem[] }[] = [
   {
     title: 'Store management',
     items: [
-      { label: 'Settings', href: '/settings', icon: 'settings', description: 'Shop details, branches and store code' },
+      { label: 'Branches', href: '/branches', icon: 'branches', description: 'Branch locations and the store code' },
       { label: 'Team & staff', href: '/team', icon: 'team', description: 'Add staff and manage their access' },
+    ],
+  },
+  {
+    title: 'Support',
+    items: [
+      { label: 'About Stokr', href: '/about', icon: 'about', description: 'What Stokr is and how it works' },
+      { label: 'Help', href: '/help', icon: 'help', description: 'How to sell, count stock and add staff' },
     ],
   },
 ];
@@ -60,7 +70,7 @@ export const SIDEBAR_ITEMS: (NavItem & { enabled: boolean; badge?: string })[] =
   { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', enabled: true },
   { label: 'Products', href: '/products', icon: 'products', enabled: true },
   { label: 'Team', href: '/team', icon: 'team', enabled: true },
-  { label: 'Settings', href: '/settings', icon: 'settings', enabled: true },
+  { label: 'Branches', href: '/branches', icon: 'branches', enabled: true },
   { label: 'Stock', href: '/stock', icon: 'stock', enabled: true },
   { label: 'Sales', href: '/sales', icon: 'sales', enabled: true },
   { label: 'Reports', href: '#', icon: 'reports', enabled: false, badge: 'Unit 5' },
@@ -84,7 +94,7 @@ export function isActive(pathname: string, href: string): boolean {
   return path === href || path.startsWith(href + '/');
 }
 
-const MORE_ROUTES = ['/more', '/products', '/team', '/settings'];
+const MORE_ROUTES = ['/more', '/products', '/team', '/branches', '/about', '/help'];
 
 export function isMoreActive(pathname: string): boolean {
   return MORE_ROUTES.some((route) => isActive(pathname, route));
@@ -99,7 +109,9 @@ export function isTabActive(pathname: string, href: string): boolean {
 const SUB_PAGES: { prefix: string; parent: string; title: string }[] = [
   { prefix: '/products', parent: '/more', title: 'Products' },
   { prefix: '/team', parent: '/more', title: 'Team & staff' },
-  { prefix: '/settings', parent: '/more', title: 'Settings' },
+  { prefix: '/branches', parent: '/more', title: 'Branches' },
+  { prefix: '/about', parent: '/more', title: 'About Stokr' },
+  { prefix: '/help', parent: '/more', title: 'Help' },
   { prefix: '/stock/opening', parent: '/more', title: 'Opening stock' },
   { prefix: '/stock/count', parent: '/more', title: 'Stock count' },
   { prefix: '/profile', parent: '/dashboard', title: 'Profile' },
@@ -136,7 +148,7 @@ export function canPullRefresh(pathname: string): boolean {
 }
 
 // Read-only sub-pages only: swiping back must never discard typed input.
-const SWIPE_BACK_ROUTES = ['/products', '/team', '/settings'];
+const SWIPE_BACK_ROUTES = ['/products', '/team', '/branches', '/about', '/help'];
 
 export function canSwipeBack(pathname: string): boolean {
   return SWIPE_BACK_ROUTES.includes(normalize(pathname));

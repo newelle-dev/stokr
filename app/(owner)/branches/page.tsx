@@ -9,17 +9,17 @@ import { StoreCodeCard } from './store-code-card';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Settings & Branches | Stokr',
-  description: 'Manage shop details and branch locations',
+  title: 'Branches | Stokr',
+  description: 'Manage branch locations and the store code',
 };
 
-export default async function SettingsPage() {
+export default async function BranchesPage() {
   await requireOwnerPage();
   const { branches, storeCode, shopName } = await getOwnerBranches();
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Settings" description="Configure your shop details and physical branch locations." />
+      <PageHeader title="Branches" description="Your physical branch locations and the staff store code." />
 
       {/* Store Identity Card */}
       <StoreCodeCard shopName={shopName} storeCode={storeCode} />

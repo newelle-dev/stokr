@@ -164,7 +164,7 @@ export async function createStaffAction(
   }
 
   revalidatePath('/team');
-  revalidatePath('/settings');
+  revalidatePath('/branches');
 
   return successResult({
     fullName,
@@ -292,7 +292,7 @@ export async function deactivateStaffAction(
       `[CRITICAL] Failed to ban auth user during staff deactivation. StaffId: ${parsed.data.staffId}. Error: ${banErr.message}`
     );
     revalidatePath('/team');
-    revalidatePath('/settings');
+    revalidatePath('/branches');
     return errorResult(
       'AUTH_ERROR',
       'Staff profile was deactivated but failed to invalidate login session. Please contact support.'
@@ -300,7 +300,7 @@ export async function deactivateStaffAction(
   }
 
   revalidatePath('/team');
-  revalidatePath('/settings');
+  revalidatePath('/branches');
 
   return successResult({ id: parsed.data.staffId });
 }
@@ -346,7 +346,7 @@ export async function reassignStaffBranchAction(
   }
 
   revalidatePath('/team');
-  revalidatePath('/settings');
+  revalidatePath('/branches');
 
   return successResult({
     id: parsed.data.staffId,

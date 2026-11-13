@@ -20,11 +20,12 @@ describe('tabs', () => {
   });
 
   it('More page groups Store operations and Store management', () => {
-    expect(MORE_SECTIONS.map((s) => s.title)).toEqual(['Store operations', 'Store management']);
+    expect(MORE_SECTIONS.map((s) => s.title)).toEqual(['Store operations', 'Store management', 'Support']);
     expect(MORE_SECTIONS[0].items.map((i) => i.href)).toEqual([
       '/sell', '/products', '/stock/count', '/stock/opening',
     ]);
-    expect(MORE_SECTIONS[1].items.map((i) => i.href)).toEqual(['/settings', '/team']);
+    expect(MORE_SECTIONS[1].items.map((i) => i.href)).toEqual(['/branches', '/team']);
+    expect(MORE_SECTIONS[2].items.map((i) => i.href)).toEqual(['/about', '/help']);
     MORE_SECTIONS.flatMap((s) => s.items).forEach((i) => expect(i.description.length).toBeGreaterThan(0));
   });
 
@@ -35,7 +36,7 @@ describe('tabs', () => {
 
   it('desktop sidebar keeps its seven entries with Reports disabled', () => {
     expect(SIDEBAR_ITEMS.map((t) => t.label)).toEqual([
-      'Dashboard', 'Products', 'Team', 'Settings', 'Stock', 'Sales', 'Reports',
+      'Dashboard', 'Products', 'Team', 'Branches', 'Stock', 'Sales', 'Reports',
     ]);
     expect(SIDEBAR_ITEMS.find((t) => t.label === 'Reports')?.enabled).toBe(false);
   });
@@ -73,7 +74,9 @@ describe('parentRoute', () => {
   it.each([
     ['/products', '/more'],
     ['/team', '/more'],
-    ['/settings', '/more'],
+    ['/branches', '/more'],
+    ['/about', '/more'],
+    ['/help', '/more'],
     ['/stock/opening', '/more'],
     ['/stock/count', '/more'],
     ['/stock/count/', '/more'],
@@ -104,7 +107,9 @@ describe('headerTitle', () => {
     ['/me', 'Profile'],
     ['/products', 'Products'],
     ['/team', 'Team & staff'],
-    ['/settings', 'Settings'],
+    ['/branches', 'Branches'],
+    ['/about', 'About Stokr'],
+    ['/help', 'Help'],
     ['/stock/opening', 'Opening stock'],
     ['/stock/count', 'Stock count'],
     ['/sales/replace/abc', 'Replacement sale'],
@@ -129,7 +134,7 @@ describe('gesture permissions', () => {
     },
   );
 
-  it.each(['/products', '/team', '/settings'])('swipe-back on %s', (p) => {
+  it.each(['/products', '/team', '/branches', '/about', '/help'])('swipe-back on %s', (p) => {
     expect(canSwipeBack(p)).toBe(true);
   });
 

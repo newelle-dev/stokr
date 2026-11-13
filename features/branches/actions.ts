@@ -53,7 +53,7 @@ export async function createBranchAction(
     return errorResult('DB_ERROR', 'Failed to create branch. Please try again.');
   }
 
-  revalidatePath('/settings');
+  revalidatePath('/branches');
   revalidatePath('/team');
 
   return successResult({
@@ -101,7 +101,7 @@ export async function renameBranchAction(
     return errorResult('DB_ERROR', 'Failed to rename branch. Please try again.');
   }
 
-  revalidatePath('/settings');
+  revalidatePath('/branches');
   revalidatePath('/team');
 
   return successResult({
@@ -168,7 +168,7 @@ export async function deactivateBranchAction(
     return errorResult('DB_ERROR', 'Failed to deactivate branch. Please try again.');
   }
 
-  revalidatePath('/settings');
+  revalidatePath('/branches');
   revalidatePath('/team');
 
   return successResult({ id: parsed.data.id });
@@ -198,7 +198,7 @@ export async function reactivateBranchAction(
     return errorResult('DB_ERROR', 'Failed to reactivate branch. Please try again.');
   }
 
-  revalidatePath('/settings');
+  revalidatePath('/branches');
   revalidatePath('/team');
 
   return successResult({ id: parsed.data.id });

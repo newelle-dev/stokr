@@ -112,7 +112,7 @@ export function StaffList({
           role="alert"
           className="rounded-[var(--radius-md)] border border-[var(--warning)]/50 bg-[var(--warning)]/10 p-3.5 text-sm text-[var(--foreground)]"
         >
-          You must have at least one active branch before adding staff members. Please configure branches in Settings.
+          You must have at least one active branch before adding staff members. Please configure branches in Branches.
         </div>
       )}
 
