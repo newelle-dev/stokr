@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { requireStaffOrOwnerPage } from '@/lib/auth';
 import { AppHeader } from '@/components/shell/app-header';
+import { BackLink } from '@/components/shell/back-link';
 import { BottomTabBar } from '@/components/shell/bottom-tab-bar';
 import { PullToRefresh } from '@/components/shell/pull-to-refresh';
 import { staffTabsFor, profileHref } from '@/lib/nav';
@@ -19,6 +20,7 @@ export default async function StaffLayout({
 
       {/* Main Content Area, with room for the bottom tab bar */}
       <main className="mx-auto w-full max-w-lg flex-1 p-4 pb-[calc(5rem+env(safe-area-inset-bottom))]">
+        <BackLink />
         {children}
       </main>
 
