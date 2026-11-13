@@ -9,7 +9,7 @@ tags: [para/project]
 - **Phase:** Units 1-8 done (owner sign-off, 2026-11-11). Unit 9 is started, not done.
 - **SQL tests passed on dev (2026-11-12, SQL Editor, "Run without RLS"):** Unit 5 `unit5_record_sale_tests.sql` (40 checks), Unit 6 `unit6_void_and_replacement_tests.sql` (38 checks), Unit 8 `unit8_stock_count_tests.sql` (29 checks). Unit 8 test was fixed first: it assumed the seed shop had no count rows, but dev has two real counts from 2026-11-11; it now compares against a baseline.
 - **Manual checks not yet recorded (2026-11-12):** Unit 6 phone check; Unit 7 hand calculation vs `/sales`; two-session concurrency tests (sales double tap, stock accept); Unit 9 phone checklist and install test.
-- **Current unit:** Unit 9 (still open). Unit 10 (owner magic-link sign-in and onboarding) is closed; Unit B (Google sign-in) is built and merged to `main` on 2026-11-11, and was tested with a new owner account (onboarding worked end to end). Units 1-8 complete.
+- **Current unit:** Unit 11 (owner email + password sign-in, started 2026-11-13; contract `1-projects/unit-11-owner-email-password/CONTEXT.md`). Unit 9 stays open. Unit 10 (owner magic-link sign-in and onboarding) is closed; Unit B (Google sign-in) is built and merged to `main` on 2026-11-11, and was tested with a new owner account (onboarding worked end to end). Units 1-8 complete.
 - **Last updated:** 2026-11-12 (status re-checked against code by subagents; see Unit 9 and Unit 10 notes)
 - **Supabase:** this repo has one Supabase project ("Stokr"). Older notes that say "dev" or "production" both mean this project. A separate production project is not set up; decide before launch.
 - **Next milestone:** start the friend's "run both" week (app and notebook side by side)
@@ -62,6 +62,13 @@ Each unit must meet its acceptance criteria and the verification steps in `ai-wo
   - Sign-in emails tested with the Resend account email; real-email test waits for the domain
   - Unit B (Google sign-in) follows after the owner approves the Google Cloud account
 - [x] **Unit B: Google sign-in** (done 2026-11-11). Owner tab has "Continue with Google". Google client set up by the owner. Tested: a new Google account reached onboarding and created a shop end to end. Open: Google sign-in works only for listed test users until the consent screen is published.
+
+- [ ] **Unit 11: Owner email + password sign-in** (started 2026-11-13). Replaces the magic link and Google sign-in (decisions-log, 2026-11-13). Plan: `docs/superpowers/plans/2026-11-13-owner-email-password-login.md`.
+  - Owner signs in with email and password; staff login unchanged
+  - Owner accounts are created by hand with `scripts/create-owner.mjs`; no self-signup
+  - First sign-in goes to onboarding: shop name, first branch, new password (no products step)
+  - Google, magic link and `/login/callback` removed from the app
+  - Demo owner with sample data for portfolio visitors
 
 ## Open questions
 | # | Question | Who answers | Blocks |

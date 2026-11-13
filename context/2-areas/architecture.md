@@ -5,7 +5,7 @@
 |---|---|---|
 | Framework | Next.js (App Router) + TypeScript (strict) | Pin the current stable version at project start |
 | Database | Supabase Postgres | Row Level Security (RLS) on every table |
-| Auth | Supabase Auth: owners by magic link or Google; staff by store code + username + password | Owners can self-sign-up (see decisions-log, 2026-11-11). No owner passwords. |
+| Auth | Supabase Auth: owners by email + password; staff by store code + username + password | Owner accounts are created by hand (script or dashboard); no public signup until a domain exists (decisions-log, 2026-11-13). |
 | Styling | Tailwind CSS + shadcn/ui | See ui-context.md |
 | Validation | Zod | Every server action validates its input |
 | Hosting | Vercel | Free plan to start; confirm limits before real customers depend on it |
@@ -28,7 +28,7 @@
 
 ## Auth model
 - Login:
-  - Owner logs in with a magic link sent to their email, or with Google, via Supabase Auth. Owners have no password (decisions-log, 2026-11-11).
+  - Owner logs in with email + password via Supabase Auth. The product owner creates the account with `scripts/create-owner.mjs` (temporary password); the new owner sets their own password during onboarding. No forgot-password email: the product owner resets it with the same script (decisions-log, 2026-11-13).
   - Staff log in using store code + username + password. The underlying email address (`username.store_code@staff.stokr.invalid`) is internal and hidden from the user.
 - Staff email is locked at the auth layer by a trigger on `auth.users` (`trg_prevent_staff_email_change`), preventing modification even via the admin API.
 - Role lives in `profiles.role`: `owner` or `staff`. Never use `user_metadata` for authorization (Invariant 21).
