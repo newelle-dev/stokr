@@ -46,7 +46,7 @@ export function StoreCodeCard({ shopName, storeCode }: StoreCodeCardProps) {
             variant="ghost"
             size="sm"
             onClick={handleCopy}
-            className="h-8 gap-1.5 px-2.5 text-xs font-medium text-[var(--primary)] hover:bg-[var(--primary)]/10"
+            className="h-11 gap-1.5 px-3 text-sm font-medium lg:h-8 lg:px-2.5 lg:text-xs text-[var(--primary)] hover:bg-[var(--primary)]/10"
           >
             {copied ? (
               <>

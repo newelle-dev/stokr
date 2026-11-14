@@ -2,16 +2,25 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { buttonVariants, Button } from '@/components/ui/button';
 import { MoneyText } from '@/components/shared/money-text';
+import { ListRow, RowList } from '@/components/shell/list-row';
+import { RowActionSheet } from '@/components/shell/row-action-sheet';
 import { formatManilaDateTime } from '@/lib/dates';
 import type { OwnerSale } from '../queries';
 import { VoidSaleModal } from './void-sale-modal';
 
 const PAYMENT_LABELS: Record<string, string> = { cash: 'Cash', gcash: 'GCash' };
 
+function itemsSummary(sale: OwnerSale): string {
+  return sale.items.map((item) => `${item.quantity} × ${item.productName}`).join(', ');
+}
+
 export function OwnerSalesList({ sales }: { sales: OwnerSale[] }) {
+  const router = useRouter();
   const [voiding, setVoiding] = React.useState<OwnerSale | null>(null);
+  const [sheetSale, setSheetSale] = React.useState<OwnerSale | null>(null);
 
   if (sales.length === 0) {
     return (
@@ -21,9 +30,57 @@ export function OwnerSalesList({ sales }: { sales: OwnerSale[] }) {
     );
   }
 
+  const sheetActions = (sale: OwnerSale) => {
+    const actions = [];
+    if (sale.status !== 'voided') {
+      actions.push({
+        label: 'Void sale',
+        destructive: true,
+        onSelect: () => setVoiding(sale),
+      });
+    }
+    if (sale.status === 'voided' && !sale.replacedBySaleId) {
+      actions.push({
+        label: 'Record replacement',
+        onSelect: () => router.push(`/sales/replace/${sale.id}`),
+      });
+    }
+    return actions;
+  };
+
   return (
     <>
-      <ul className="space-y-3">
+      {/* Phone and tablet: rows that open an action sheet (below lg) */}
+      <RowList>
+        {sales.map((sale) => {
+          const isVoided = sale.status === 'voided';
+          return (
+            <ListRow
+              key={sale.id}
+              muted={isVoided}
+              onClick={() => setSheetSale(sale)}
+              title={
+                <span className={isVoided ? 'line-through' : ''}>
+                  <MoneyText centavos={sale.totalCentavos} />
+                </span>
+              }
+              detail={`${formatManilaDateTime(sale.createdAt)} · ${sale.branchName} · ${sale.soldByName || 'Unknown'}`}
+              trailing={
+                <span
+                  className={`text-xs font-semibold ${
+                    isVoided ? 'text-[var(--destructive)]' : 'text-[var(--success)]'
+                  }`}
+                >
+                  {isVoided ? 'Voided' : 'Completed'}
+                </span>
+              }
+            />
+          );
+        })}
+      </RowList>
+
+      {/* Tablet and desktop: full cards with buttons (lg and up) */}
+      <ul className="hidden lg:block space-y-3">
         {sales.map((sale) => {
           const isVoided = sale.status === 'voided';
           return (
@@ -108,6 +165,24 @@ export function OwnerSalesList({ sales }: { sales: OwnerSale[] }) {
           );
         })}
       </ul>
+
+      {/* Phone: row actions */}
+      <RowActionSheet
+        title={sheetSale ? `${PAYMENT_LABELS[sheetSale.paymentMethod] ?? sheetSale.paymentMethod} sale` : 'Sale'}
+        description={
+          sheetSale
+            ? [
+                itemsSummary(sheetSale),
+                sheetSale.status === 'voided' && sheetSale.voidReason ? `Reason: ${sheetSale.voidReason}` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')
+            : undefined
+        }
+        isOpen={!!sheetSale}
+        onClose={() => setSheetSale(null)}
+        actions={sheetSale ? sheetActions(sheetSale) : []}
+      />
 
       <VoidSaleModal sale={voiding} onClose={() => setVoiding(null)} />
     </>

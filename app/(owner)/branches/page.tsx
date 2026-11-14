@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/shell/page-header';
+import { PageBody } from '@/components/shell/page-body';
 import { Metadata } from 'next';
 import { requireOwnerPage } from '@/lib/auth';
 import { getOwnerBranches } from '@/features/branches/queries';
@@ -14,15 +15,17 @@ export const metadata: Metadata = {
 export default async function BranchesPage() {
   await requireOwnerPage();
   const { branches } = await getOwnerBranches();
+  const activeCount = branches.filter((b) => b.isActive).length;
 
   return (
-    <div className="space-y-8">
-      <PageHeader title="Branches" description="Your physical branch locations." />
-
-      {/* Branches Section */}
-      <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-xs">
+    <div className="space-y-6">
+      <PageHeader
+        title="Branches"
+        description={`${activeCount} active. Your physical branch locations and store points.`}
+      />
+      <PageBody>
         <BranchList branches={branches} />
-      </div>
+      </PageBody>
     </div>
   );
 }
