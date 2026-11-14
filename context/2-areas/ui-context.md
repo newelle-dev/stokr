@@ -74,7 +74,7 @@ Rules:
 - **Dialogs:** `Modal` is a bottom sheet on phones and a centered dialog from `md` up. The temporary-password dialog is always centered and cannot be dismissed by tapping outside.
 - **Gestures (no money or form screens):** pull-to-refresh on Dashboard, Sales, My sales and Stock only; swipe-back from the left edge on Products, Team, Branches, Shop details, About and Help only; a short fade between pages, off under reduced motion.
 - **Sell screen:**
-  - Search box at the top; product list or grid below (large tappable rows with name and price).
+  - Search box at the top, then category chips (All, Liquid, Device, Cartridge, Other; 44px, scroll sideways if they do not fit). The chips and search combine. Product list below (large tappable rows with name and price).
   - A sticky bottom bar shows item count and total with a **Review sale** button.
   - Review step: items with quantity steppers, Cash / GCash toggle. The total, **Back** and **Confirm sale** sit in a fixed bar above the tab bar so Confirm is always under the thumb.
   - A product already in the sale shows a − / + stepper in its row (same row height, so the list never shifts); the big page title is hidden because the top bar already shows it.

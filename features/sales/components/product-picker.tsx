@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { MoneyText } from '@/components/shared/money-text';
 import { formatMoney } from '@/lib/money';
 import type { SellProduct } from '../queries';
+import { CATEGORY_FILTERS, filterProducts, type CategoryFilter } from '../product-filter';
 
 interface ProductPickerProps {
   products: SellProduct[];
@@ -17,6 +18,7 @@ interface ProductPickerProps {
 
 export function ProductPicker({ products, quantityById, isFull, onAdd, onSetQuantity }: ProductPickerProps) {
   const [query, setQuery] = React.useState('');
+  const [category, setCategory] = React.useState<CategoryFilter>('all');
 
   if (products.length === 0) {
     return (
@@ -26,8 +28,7 @@ export function ProductPicker({ products, quantityById, isFull, onAdd, onSetQuan
     );
   }
 
-  const needle = query.trim().toLowerCase();
-  const shown = needle ? products.filter((p) => p.name.toLowerCase().includes(needle)) : products;
+  const shown = filterProducts(products, category, query);
 
   return (
     <div className="space-y-3">
@@ -39,6 +40,27 @@ export function ProductPicker({ products, quantityById, isFull, onAdd, onSetQuan
         onChange={(e) => setQuery(e.target.value)}
         className="h-12 text-base"
       />
+
+      <div role="group" aria-label="Filter by category" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {CATEGORY_FILTERS.map((f) => {
+          const active = category === f.value;
+          return (
+            <button
+              key={f.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setCategory(f.value)}
+              className={`min-h-11 shrink-0 rounded-[var(--radius-full)] border px-4 text-sm font-medium transition-colors ${
+                active
+                  ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] active:bg-[var(--muted)]'
+              }`}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
 
       {isFull && (
         <p className="text-sm text-[var(--warning)]">
@@ -104,7 +126,9 @@ export function ProductPicker({ products, quantityById, isFull, onAdd, onSetQuan
           );
         })}
         {shown.length === 0 && (
-          <li className="text-sm text-[var(--muted-foreground)]">No products match &ldquo;{query}&rdquo;.</li>
+          <li className="text-sm text-[var(--muted-foreground)]">
+            No products match{query.trim() ? <> &ldquo;{query}&rdquo;</> : ' in this category'}.
+          </li>
         )}
       </ul>
     </div>
