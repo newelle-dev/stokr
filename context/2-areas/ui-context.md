@@ -76,7 +76,9 @@ Rules:
 - **Sell screen:**
   - Search box at the top; product list or grid below (large tappable rows with name and price).
   - A sticky bottom bar shows item count and total with a **Review sale** button.
-  - Review step: items with quantity steppers, Cash / GCash toggle, **Confirm sale** button.
+  - Review step: items with quantity steppers, Cash / GCash toggle. The total, **Back** and **Confirm sale** sit in a fixed bar above the tab bar so Confirm is always under the thumb.
+  - A product already in the sale shows a − / + stepper in its row (same row height, so the list never shifts); the big page title is hidden because the top bar already shows it.
+- **My sales (staff):** grouped by Asia/Manila day (Today, Yesterday, then dates). Each day shows the count and Total / Cash / GCash of that person's own completed sales only. Rows are compact (amount, time, item count, payment); voided sales are struck through with a "Voided" label; tapping a row opens a details sheet with no actions.
   - Success: a clear confirmation and a one-tap **New sale** button.
   - Tapping a product adds one; tapping again adds another. A recorded sale must take only a few taps for a typical purchase.
 - **Dashboard:** a stack of cards in this order: Today's sales and profit, Low stock, Sales per staff, Missing stock. A branch filter sits at the top (All branches by default).

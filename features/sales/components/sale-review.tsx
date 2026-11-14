@@ -13,6 +13,8 @@ interface SaleReviewProps {
   paymentMethod: PaymentMethod;
   errorMessage: string | null;
   isSubmitting: boolean;
+  /** Position classes for the fixed action bar, shared with the cart bar so both sit above the tab bar. */
+  barClassName: string;
   onPaymentChange: (method: PaymentMethod) => void;
   onSetQuantity: (productId: string, quantity: number) => void;
   onBack: () => void;
@@ -27,13 +29,14 @@ export function SaleReview({
   paymentMethod,
   errorMessage,
   isSubmitting,
+  barClassName,
   onPaymentChange,
   onSetQuantity,
   onBack,
   onConfirm,
 }: SaleReviewProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-48">
       <ul className="space-y-2">
         {lines.map((line) => (
           <li
@@ -90,33 +93,36 @@ export function SaleReview({
         </div>
       </div>
 
-      <div className="flex items-baseline justify-between border-t border-[var(--border)] pt-4">
-        <span className="text-base font-semibold text-[var(--foreground)]">Total</span>
-        <MoneyText centavos={total} className="text-3xl font-bold text-[var(--foreground)]" />
-      </div>
-
-      {errorMessage && (
-        <div
-          role="alert"
-          className="flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--destructive)]"
-        >
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>{errorMessage}</span>
+      {/* Fixed at the bottom so Confirm is always under the thumb, with the total and any error beside it. */}
+      <div className={`fixed inset-x-0 z-20 border-t border-[var(--border)] bg-[var(--card)] p-4 ${barClassName}`}>
+        <div className="mx-auto max-w-lg space-y-3">
+          {errorMessage && (
+            <div
+              role="alert"
+              className="flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--destructive)]"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between">
+            <span className="text-base font-semibold text-[var(--foreground)]">Total</span>
+            <MoneyText centavos={total} className="text-3xl font-bold text-[var(--foreground)]" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button type="button" variant="outline" disabled={isSubmitting} onClick={onBack} className="h-12 text-base">
+              Back
+            </Button>
+            <Button
+              type="button"
+              disabled={isSubmitting || lines.length === 0}
+              onClick={onConfirm}
+              className="h-12 text-base"
+            >
+              {isSubmitting ? 'Recording…' : 'Confirm sale'}
+            </Button>
+          </div>
         </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-2">
-        <Button type="button" variant="outline" disabled={isSubmitting} onClick={onBack} className="h-12 text-base">
-          Back
-        </Button>
-        <Button
-          type="button"
-          disabled={isSubmitting || lines.length === 0}
-          onClick={onConfirm}
-          className="h-12 text-base"
-        >
-          {isSubmitting ? 'Recording…' : 'Confirm sale'}
-        </Button>
       </div>
     </div>
   );

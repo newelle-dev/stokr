@@ -35,6 +35,8 @@ export function SellCounter({ data, correctsSaleId }: SellCounterProps) {
   const itemCount = cartItemCount(lines);
   const quantityById = Object.fromEntries(lines.map((l) => [l.productId, l.quantity]));
   const isFull = lines.length >= MAX_LINES;
+  // Cart bar and review bar sit above the tab bar; in owner replacement mode there is no tab bar from md up.
+  const barClassName = `bottom-[calc(4rem+env(safe-area-inset-bottom))] ${correctsSaleId ? 'md:bottom-0' : ''}`;
 
   function handleAdd(product: SellProduct) {
     dispatch({ type: 'add', productId: product.id, name: product.name, priceCentavos: product.priceCentavos });
@@ -93,6 +95,7 @@ export function SellCounter({ data, correctsSaleId }: SellCounterProps) {
         paymentMethod={paymentMethod}
         errorMessage={errorMessage}
         isSubmitting={isSubmitting}
+        barClassName={barClassName}
         onPaymentChange={setPaymentMethod}
         onSetQuantity={(productId, quantity) => dispatch({ type: 'set', productId, quantity })}
         onBack={() => setView('pick')}
@@ -104,15 +107,15 @@ export function SellCounter({ data, correctsSaleId }: SellCounterProps) {
   return (
     <div className="space-y-4 pb-28">
       {data.isOwner && data.branches.length > 0 && (
-        <div className="space-y-1.5">
-          <label htmlFor="sale-branch" className="text-sm font-medium text-[var(--foreground)]">
+        <div className="flex items-center gap-3">
+          <label htmlFor="sale-branch" className="shrink-0 text-sm font-medium text-[var(--foreground)]">
             Branch
           </label>
           <select
             id="sale-branch"
             value={branchId}
             onChange={(e) => setBranchId(e.target.value)}
-            className="flex h-12 w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--background)] px-3 text-base text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            className="flex h-11 min-w-0 flex-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--background)] px-3 text-base text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           >
             {data.branches.map((b) => (
               <option key={b.id} value={b.id}>
@@ -129,10 +132,16 @@ export function SellCounter({ data, correctsSaleId }: SellCounterProps) {
         </p>
       )}
 
-      <ProductPicker products={data.products} quantityById={quantityById} isFull={isFull} onAdd={handleAdd} />
+      <ProductPicker
+        products={data.products}
+        quantityById={quantityById}
+        isFull={isFull}
+        onAdd={handleAdd}
+        onSetQuantity={(productId, quantity) => dispatch({ type: 'set', productId, quantity })}
+      />
 
       {itemCount > 0 && (
-        <div className={`fixed inset-x-0 z-20 bottom-[calc(4rem+env(safe-area-inset-bottom))] ${correctsSaleId ? 'md:bottom-0' : ''} border-t border-[var(--border)] bg-[var(--card)] p-4`}>
+        <div className={`fixed inset-x-0 z-20 ${barClassName} border-t border-[var(--border)] bg-[var(--card)] p-4`}>
           <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
             <div>
               <p className="text-sm text-[var(--muted-foreground)]">

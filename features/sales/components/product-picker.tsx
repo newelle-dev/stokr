@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
 import { MoneyText } from '@/components/shared/money-text';
+import { formatMoney } from '@/lib/money';
 import type { SellProduct } from '../queries';
 
 interface ProductPickerProps {
@@ -10,9 +11,11 @@ interface ProductPickerProps {
   quantityById: Record<string, number>;
   isFull: boolean;
   onAdd: (product: SellProduct) => void;
+  /** Sets a line's quantity; below 1 removes the line. Lets the cashier fix a wrong tap without leaving the list. */
+  onSetQuantity: (productId: string, quantity: number) => void;
 }
 
-export function ProductPicker({ products, quantityById, isFull, onAdd }: ProductPickerProps) {
+export function ProductPicker({ products, quantityById, isFull, onAdd, onSetQuantity }: ProductPickerProps) {
   const [query, setQuery] = React.useState('');
 
   if (products.length === 0) {
@@ -46,27 +49,57 @@ export function ProductPicker({ products, quantityById, isFull, onAdd }: Product
       <ul className="space-y-2">
         {shown.map((p) => {
           const count = quantityById[p.id] ?? 0;
+          const inCart = count > 0;
+          // The row keeps the same height with or without a quantity, so the list never shifts under the cashier's thumb.
           return (
             <li key={p.id}>
-              <button
-                type="button"
-                onClick={() => onAdd(p)}
-                disabled={isFull && count === 0}
-                className="flex min-h-14 w-full items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-left active:bg-[var(--muted)] disabled:opacity-50"
+              <div
+                className={`flex min-h-14 items-center rounded-[var(--radius-lg)] border bg-[var(--card)] ${
+                  inCart ? 'border-[var(--primary)]/60' : 'border-[var(--border)]'
+                }`}
               >
-                <span className="min-w-0">
-                  <span className="block truncate font-medium text-[var(--foreground)]">{p.name}</span>
-                  <span className="block text-sm capitalize text-[var(--muted-foreground)]">{p.category}</span>
-                </span>
-                <span className="flex shrink-0 items-center gap-2">
-                  {count > 0 && (
-                    <span className="rounded-full bg-[var(--primary)] px-2.5 py-0.5 text-sm font-semibold text-[var(--primary-foreground)]">
-                      ×{count}
+                <button
+                  type="button"
+                  onClick={() => onAdd(p)}
+                  disabled={isFull && !inCart}
+                  className="flex min-h-14 min-w-0 flex-1 items-center justify-between gap-3 rounded-l-[var(--radius-lg)] px-4 py-3 text-left active:bg-[var(--muted)] disabled:opacity-50"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium text-[var(--foreground)]">{p.name}</span>
+                    <span className="block truncate text-sm text-[var(--muted-foreground)]">
+                      <span className="capitalize">{p.category}</span>
+                      {inCart && <> · {formatMoney(p.priceCentavos)}</>}
                     </span>
+                  </span>
+                  {!inCart && (
+                    <MoneyText centavos={p.priceCentavos} className="shrink-0 text-base font-semibold text-[var(--foreground)]" />
                   )}
-                  <MoneyText centavos={p.priceCentavos} className="text-base font-semibold text-[var(--foreground)]" />
-                </span>
-              </button>
+                </button>
+
+                {inCart && (
+                  <div className="flex shrink-0 items-center gap-1 pr-2">
+                    <button
+                      type="button"
+                      aria-label={`Take one ${p.name}`}
+                      onClick={() => onSetQuantity(p.id, count - 1)}
+                      className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] text-lg active:bg-[var(--muted)]"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center text-base font-semibold tabular-nums" aria-label={`${count} in the sale`}>
+                      {count}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={`Add one ${p.name}`}
+                      onClick={() => onSetQuantity(p.id, count + 1)}
+                      className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] text-lg active:bg-[var(--muted)]"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+              </div>
             </li>
           );
         })}
