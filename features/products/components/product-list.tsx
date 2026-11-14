@@ -8,6 +8,9 @@ import { toggleProductActiveAction } from '../actions';
 import { MoneyText } from '@/components/shared/money-text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Fab } from '@/components/shell/fab';
+import { ListRow, RowList } from '@/components/shell/list-row';
+import { RowActionSheet } from '@/components/shell/row-action-sheet';
 import { CreateProductModal } from './create-product-modal';
 import { EditProductModal } from './edit-product-modal';
 
@@ -29,6 +32,7 @@ export function ProductList({ products }: ProductListProps) {
   const [showInactive, setShowInactive] = React.useState(false);
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [editingProduct, setEditingProduct] = React.useState<ProductItem | null>(null);
+  const [sheetProduct, setSheetProduct] = React.useState<ProductItem | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
 
@@ -66,25 +70,18 @@ export function ProductList({ products }: ProductListProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
-            Product Catalog ({products.filter((p) => p.isActive).length} Active)
-          </h2>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Manage your shop&apos;s master catalog with cost and selling prices.
-          </p>
-        </div>
+    <div className="space-y-6 pb-20 lg:pb-0">
+      {/* Add button for tablets and desktop; phones use the floating + */}
+      <div className="hidden lg:flex justify-end">
         <Button
           onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-1.5 self-start sm:self-auto font-medium"
+          className="flex items-center gap-1.5 font-medium"
         >
           <Plus className="h-4 w-4" />
           <span>Add Product</span>
         </Button>
       </div>
+      <Fab label="Add product" onClick={() => setIsCreateOpen(true)} />
 
       {actionError && (
         <div
@@ -105,14 +102,14 @@ export function ProductList({ products }: ProductListProps) {
               placeholder="Search products by name…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 pl-9 text-sm"
+              className="h-11 pl-9 text-base"
             />
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setShowInactive(!showInactive)}
-              className={`rounded-[var(--radius-md)] border px-3 py-2 text-xs font-medium transition-colors ${
+              className={`min-h-11 rounded-[var(--radius-md)] border px-3 py-2 text-sm font-medium transition-colors ${
                 showInactive
                   ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]'
                   : 'border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
@@ -130,7 +127,7 @@ export function ProductList({ products }: ProductListProps) {
               key={tab.value}
               type="button"
               onClick={() => setSelectedCategory(tab.value)}
-              className={`rounded-[var(--radius-full)] px-3 py-1.5 transition-colors whitespace-nowrap ${
+              className={`min-h-11 rounded-[var(--radius-full)] px-4 py-2 text-sm transition-colors whitespace-nowrap ${
                 selectedCategory === tab.value
                   ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
                   : 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
@@ -166,8 +163,8 @@ export function ProductList({ products }: ProductListProps) {
         </div>
       ) : (
         <>
-          {/* Desktop Table View */}
-          <div className="hidden md:block rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-xs">
+          {/* Desktop Table View (lg and up) */}
+          <div className="hidden lg:block rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-xs">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-[var(--border)] bg-[var(--muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
                 <tr>
@@ -275,92 +272,74 @@ export function ProductList({ products }: ProductListProps) {
             </table>
           </div>
 
-          {/* Mobile Card View (stacked cards per ui-context.md) */}
-          <div className="grid gap-3 md:hidden">
+          {/* Phone and tablet: rows that open an action sheet (below lg) */}
+          <RowList>
             {filteredProducts.map((p) => {
               const isBelowCost = p.sellingPriceCentavos < p.costPriceCentavos;
+              const category = p.category.charAt(0).toUpperCase() + p.category.slice(1);
               return (
-                <div
+                <ListRow
                   key={p.id}
-                  className={`flex flex-col justify-between rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-2xs ${
-                    !p.isActive ? 'opacity-70 bg-[var(--muted)]/20' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-semibold text-[var(--foreground)] text-base">
-                        {p.name}
-                      </h4>
-                      <span className="text-xs capitalize text-[var(--muted-foreground)]">
-                        {p.category}
-                      </span>
-                    </div>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-[var(--radius-full)] px-2 py-0.5 text-xs font-medium shrink-0 ${
-                        p.isActive
-                          ? 'bg-[var(--success)]/10 text-[var(--success)]'
-                          : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
-                      }`}
-                    >
-                      {p.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-
-                  {isBelowCost && (
-                    <div className="mt-2 inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--destructive)]/10 px-2 py-1 text-xs font-semibold text-[var(--destructive)]">
-                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                      <span>Selling below cost price</span>
-                    </div>
-                  )}
-
-                  <div className="mt-3 grid grid-cols-3 gap-2 rounded-[var(--radius-md)] bg-[var(--muted)]/40 p-2 text-xs">
-                    <div>
-                      <span className="text-[var(--muted-foreground)] block">Cost</span>
-                      <MoneyText centavos={p.costPriceCentavos} className="font-medium text-[var(--foreground)]" />
-                    </div>
-                    <div>
-                      <span className="text-[var(--muted-foreground)] block">Selling</span>
+                  muted={!p.isActive}
+                  onClick={() => setSheetProduct(p)}
+                  title={p.name}
+                  detail={`${category} · Alert at ${p.lowStockThreshold}`}
+                  trailing={
+                    <div className="flex flex-col items-end gap-1">
                       <MoneyText
                         centavos={p.sellingPriceCentavos}
-                        className={isBelowCost ? 'font-bold text-[var(--destructive)]' : 'font-semibold text-[var(--foreground)]'}
+                        className={isBelowCost ? "font-bold text-[var(--destructive)]" : "font-semibold text-[var(--foreground)]"}
                       />
+                      {isBelowCost && (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--destructive)]">
+                          <AlertTriangle className="h-3 w-3" />
+                          <span>Below cost</span>
+                        </span>
+                      )}
+                      {!p.isActive && (
+                        <span className="text-xs font-medium text-[var(--muted-foreground)]">Inactive</span>
+                      )}
                     </div>
-                    <div>
-                      <span className="text-[var(--muted-foreground)] block">Low Alert</span>
-                      <span className="font-mono text-[var(--foreground)]">{p.lowStockThreshold} units</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-end gap-1 border-t border-[var(--border)]/60 pt-2.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingProduct(p)}
-                      className="h-8 gap-1 text-xs"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                      <span>Edit</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={isProcessing}
-                      onClick={() => handleToggleActive(p.id, p.isActive)}
-                      className={`h-8 gap-1 text-xs ${
-                        p.isActive
-                          ? 'text-[var(--destructive)] hover:text-[var(--destructive)] hover:bg-[var(--destructive)]/10'
-                          : 'text-[var(--success)] hover:text-[var(--success)] hover:bg-[var(--success)]/10'
-                      }`}
-                    >
-                      {p.isActive ? 'Deactivate' : 'Reactivate'}
-                    </Button>
-                  </div>
-                </div>
+                  }
+                />
               );
             })}
-          </div>
+          </RowList>
         </>
       )}
+
+      {/* Phone: row actions */}
+      <RowActionSheet
+        title={sheetProduct?.name ?? 'Product'}
+        description={sheetProduct ? (sheetProduct.isActive ? 'Active product' : 'Inactive product') : undefined}
+        isOpen={!!sheetProduct}
+        onClose={() => setSheetProduct(null)}
+        actions={
+          sheetProduct
+            ? [
+                {
+                  label: 'Edit',
+                  icon: Edit2,
+                  onSelect: () => setEditingProduct(sheetProduct),
+                },
+                sheetProduct.isActive
+                  ? {
+                      label: 'Deactivate',
+                      icon: Ban,
+                      destructive: true,
+                      disabled: isProcessing,
+                      onSelect: () => handleToggleActive(sheetProduct.id, true),
+                    }
+                  : {
+                      label: 'Reactivate',
+                      icon: CheckCircle2,
+                      disabled: isProcessing,
+                      onSelect: () => handleToggleActive(sheetProduct.id, false),
+                    },
+              ]
+            : []
+        }
+      />
 
       {/* Modals */}
       <CreateProductModal
