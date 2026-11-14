@@ -5,7 +5,7 @@ import { dashboardFilterSchema } from '../schemas';
 describe('dashboardFilterSchema', () => {
   it('accepts no filter and a guid branch id, rejects a non-guid', () => {
     expect(dashboardFilterSchema.parse({})).toEqual({});
-    const id = '00000000-0000-0000-0000-000000000010';
+    const id = '00000000-0000-4000-8000-000000000010';
     expect(dashboardFilterSchema.parse({ branchId: id })).toEqual({ branchId: id });
     expect(() => dashboardFilterSchema.parse({ branchId: 'abc' })).toThrow();
   });

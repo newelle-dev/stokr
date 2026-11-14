@@ -29,9 +29,9 @@ GRANT ALL ON SEQUENCE test_unit4_green_results_id_seq TO authenticated, anon, pu
 
 DO $$
 declare
-  v_shop_id uuid := '00000000-0000-0000-0000-000000000001';
-  v_owner_id uuid := '00000000-0000-0000-0000-000000000100';
-  v_staff_id uuid := '00000000-0000-0000-0000-000000000200';
+  v_shop_id uuid := '00000000-0000-4000-8000-000000000001';
+  v_owner_id uuid := '00000000-0000-4000-8000-000000000100';
+  v_staff_id uuid := '00000000-0000-4000-8000-000000000200';
   v_other_shop_id uuid := '22222222-2222-2222-2222-222222222222';
   v_other_shop_branch_id uuid := '22222222-2222-2222-2222-222222220001';
   v_other_shop_product_id uuid := '22222222-2222-2222-2222-222200000001';

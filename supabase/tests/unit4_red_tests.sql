@@ -19,9 +19,9 @@ GRANT ALL ON SEQUENCE test_unit4_red_results_id_seq TO authenticated, anon, publ
 
 DO $$
 declare
-  v_shop_id uuid := '00000000-0000-0000-0000-000000000001';
-  v_owner_id uuid := '00000000-0000-0000-0000-000000000100';
-  v_staff_id uuid := '00000000-0000-0000-0000-000000000200';
+  v_shop_id uuid := '00000000-0000-4000-8000-000000000001';
+  v_owner_id uuid := '00000000-0000-4000-8000-000000000100';
+  v_staff_id uuid := '00000000-0000-4000-8000-000000000200';
   v_staff_branch_id uuid;
   v_other_branch_id uuid;
   v_product_id uuid;

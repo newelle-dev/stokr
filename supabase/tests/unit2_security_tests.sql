@@ -89,11 +89,11 @@ select branch_b_id, shop_b_id, 'Branch Beta' from u2_test_params on conflict do 
 
 -- 3. Seed Auth Users
 insert into auth.users (id, instance_id, email, aud, role)
-select owner_a_id, '00000000-0000-0000-0000-000000000000', 'owner_a@test.local', 'authenticated', 'authenticated' from u2_test_params on conflict do nothing;
+select owner_a_id, '00000000-0000-4000-8000-000000000000', 'owner_a@test.local', 'authenticated', 'authenticated' from u2_test_params on conflict do nothing;
 insert into auth.users (id, instance_id, email, aud, role)
-select staff_a_id, '00000000-0000-0000-0000-000000000000', 'staff_a@test.local', 'authenticated', 'authenticated' from u2_test_params on conflict do nothing;
+select staff_a_id, '00000000-0000-4000-8000-000000000000', 'staff_a@test.local', 'authenticated', 'authenticated' from u2_test_params on conflict do nothing;
 insert into auth.users (id, instance_id, email, aud, role)
-select owner_b_id, '00000000-0000-0000-0000-000000000000', 'owner_b@test.local', 'authenticated', 'authenticated' from u2_test_params on conflict do nothing;
+select owner_b_id, '00000000-0000-4000-8000-000000000000', 'owner_b@test.local', 'authenticated', 'authenticated' from u2_test_params on conflict do nothing;
 
 -- 4. Seed Profiles
 insert into public.profiles (id, shop_id, full_name, role, branch_id, is_active)

@@ -94,13 +94,13 @@ async function main() {
 
   // Test 5: Owner tries to INSERT staff profile with must_change_password = false
   console.log('\n--- Test 5: Owner INSERT staff profile with must_change_password = false ---');
-  const dummyStaffId = '00000000-0000-0000-0000-000000000999';
+  const dummyStaffId = '00000000-0000-4000-8000-000000000999';
   const { error: insertErr } = await ownerClient
     .from('profiles')
     .insert({
       id: dummyStaffId,
-      shop_id: '00000000-0000-0000-0000-000000000001',
-      branch_id: '00000000-0000-0000-0000-000000000010',
+      shop_id: '00000000-0000-4000-8000-000000000001',
+      branch_id: '00000000-0000-4000-8000-000000000010',
       role: 'staff',
       full_name: 'Reject Staff Test',
       username: 'rejectstafftest',

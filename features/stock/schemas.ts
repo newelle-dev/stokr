@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { ADJUSTMENT_REASONS } from './types';
 
 export const bulkOpeningStockItemSchema = z.object({
-  branchId: z.string().uuid('Invalid branch identifier'),
-  productId: z.string().uuid('Invalid product identifier'),
+  branchId: z.uuid('Invalid branch identifier'),
+  productId: z.uuid('Invalid product identifier'),
   quantity: z
     .number()
     .int('Quantity must be an integer')
@@ -20,8 +20,8 @@ export const bulkOpeningStockSchema = z.object({
 export type BulkOpeningStockInput = z.infer<typeof bulkOpeningStockSchema>;
 
 export const restockInputSchema = z.object({
-  branchId: z.string().uuid('Please select a branch'),
-  productId: z.string().uuid('Please select a product'),
+  branchId: z.uuid('Please select a branch'),
+  productId: z.uuid('Please select a product'),
   quantity: z
     .number()
     .int('Quantity must be an integer')
@@ -46,8 +46,8 @@ export type RestockInput = z.infer<typeof restockInputSchema>;
 export const adjustmentReasonEnum = z.enum(ADJUSTMENT_REASONS);
 
 export const adjustmentInputSchema = z.object({
-  branchId: z.string().uuid('Please select a branch'),
-  productId: z.string().uuid('Please select a product'),
+  branchId: z.uuid('Please select a branch'),
+  productId: z.uuid('Please select a product'),
   quantityChange: z
     .number()
     .int('Adjustment quantity must be a whole integer')

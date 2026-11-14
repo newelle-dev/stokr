@@ -5,18 +5,18 @@
 -- Annex branch ...0020, products ...0301-0304, and the staff d0f1cbb8-... who must still change password.
 do $$
 declare
-  c_shop   constant uuid := '00000000-0000-0000-0000-000000000001';
-  c_owner  constant uuid := '00000000-0000-0000-0000-000000000100';
-  c_staff  constant uuid := '00000000-0000-0000-0000-000000000200';
+  c_shop   constant uuid := '00000000-0000-4000-8000-000000000001';
+  c_owner  constant uuid := '00000000-0000-4000-8000-000000000100';
+  c_staff  constant uuid := '00000000-0000-4000-8000-000000000200';
   c_locked constant uuid := 'd0f1cbb8-60d7-40f0-af20-032f28ae7b8e';
-  c_main   constant uuid := '00000000-0000-0000-0000-000000000010';
-  c_annex  constant uuid := '00000000-0000-0000-0000-000000000020';
-  c_relx   constant uuid := '00000000-0000-0000-0000-000000000301';
-  c_zero   constant uuid := '00000000-0000-0000-0000-0000000000f5'; -- test product created below, never has stock
-  c_bacon  constant uuid := '00000000-0000-0000-0000-000000000304';
-  c_shop2  constant uuid := '00000000-0000-0000-0000-0000000000f1';
-  c_branch2 constant uuid := '00000000-0000-0000-0000-0000000000f2';
-  c_owner2 constant uuid := '00000000-0000-0000-0000-0000000000f4';
+  c_main   constant uuid := '00000000-0000-4000-8000-000000000010';
+  c_annex  constant uuid := '00000000-0000-4000-8000-000000000020';
+  c_relx   constant uuid := '00000000-0000-4000-8000-000000000301';
+  c_zero   constant uuid := '00000000-0000-4000-8000-0000000000f5'; -- test product created below, never has stock
+  c_bacon  constant uuid := '00000000-0000-4000-8000-000000000304';
+  c_shop2  constant uuid := '00000000-0000-4000-8000-0000000000f1';
+  c_branch2 constant uuid := '00000000-0000-4000-8000-0000000000f2';
+  c_owner2 constant uuid := '00000000-0000-4000-8000-0000000000f4';
   v_r jsonb;
   v_sale uuid;
   v_n integer := 0;
@@ -195,7 +195,7 @@ begin
     where shop_id = c_shop and branch_id = c_main and product_id = c_relx;
   v_r := pg_temp.try_sale(c_staff, c_main, 'cash', jsonb_build_array(
     jsonb_build_object('product_id', c_relx, 'quantity', 1),
-    jsonb_build_object('product_id', '00000000-0000-0000-0000-00000000ffff', 'quantity', 1)), 'u5-atomic');
+    jsonb_build_object('product_id', '00000000-0000-4000-8000-00000000ffff', 'quantity', 1)), 'u5-atomic');
   if v_r->>'error' is null then raise exception 'FAIL: bad line makes the sale fail'; end if;
   v_n := v_n + 1;
   select coalesce(sum(quantity_change), 0) into v_after from public.stock_movements

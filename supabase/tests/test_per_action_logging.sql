@@ -11,8 +11,8 @@ CREATE TEMP TABLE test_log_results (
 
 DO $$
 declare
-  v_shop_id uuid := '00000000-0000-0000-0000-000000000001';
-  v_owner_id uuid := '00000000-0000-0000-0000-000000000100';
+  v_shop_id uuid := '00000000-0000-4000-8000-000000000001';
+  v_owner_id uuid := '00000000-0000-4000-8000-000000000100';
   v_branch_id uuid;
   v_branch_2_id uuid;
   v_new_branch_id uuid;

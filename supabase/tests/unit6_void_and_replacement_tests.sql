@@ -6,14 +6,14 @@
 -- staff ...0200 at Main ...0010, Annex ...0020, products ...0301 Relx and ...0304 Bacon).
 do $$
 declare
-  c_shop   constant uuid := '00000000-0000-0000-0000-000000000001';
-  c_owner  constant uuid := '00000000-0000-0000-0000-000000000100';
-  c_staff  constant uuid := '00000000-0000-0000-0000-000000000200';
-  c_main   constant uuid := '00000000-0000-0000-0000-000000000010';
-  c_relx   constant uuid := '00000000-0000-0000-0000-000000000301';
-  c_bacon  constant uuid := '00000000-0000-0000-0000-000000000304';
-  c_shop2  constant uuid := '00000000-0000-0000-0000-0000000000f1';
-  c_owner2 constant uuid := '00000000-0000-0000-0000-0000000000f4';
+  c_shop   constant uuid := '00000000-0000-4000-8000-000000000001';
+  c_owner  constant uuid := '00000000-0000-4000-8000-000000000100';
+  c_staff  constant uuid := '00000000-0000-4000-8000-000000000200';
+  c_main   constant uuid := '00000000-0000-4000-8000-000000000010';
+  c_relx   constant uuid := '00000000-0000-4000-8000-000000000301';
+  c_bacon  constant uuid := '00000000-0000-4000-8000-000000000304';
+  c_shop2  constant uuid := '00000000-0000-4000-8000-0000000000f1';
+  c_owner2 constant uuid := '00000000-0000-4000-8000-0000000000f4';
   v_r jsonb;
   v_a uuid;
   v_b uuid;
@@ -44,15 +44,15 @@ begin
   returns jsonb language plpgsql as $f$
   begin
     perform pg_temp.as_user(p_user);
-    return public.record_sale('00000000-0000-0000-0000-000000000010'::uuid, 'cash', p_items, p_req, p_corrects);
+    return public.record_sale('00000000-0000-4000-8000-000000000010'::uuid, 'cash', p_items, p_req, p_corrects);
   exception when others then
     return jsonb_build_object('error', sqlerrm);
   end $f$;
 
   create function pg_temp.stock(p_product uuid) returns bigint language sql as $f$
     select coalesce(sum(quantity_change), 0) from public.stock_movements
-    where shop_id = '00000000-0000-0000-0000-000000000001'
-      and branch_id = '00000000-0000-0000-0000-000000000010' and product_id = p_product $f$;
+    where shop_id = '00000000-0000-4000-8000-000000000001'
+      and branch_id = '00000000-0000-4000-8000-000000000010' and product_id = p_product $f$;
 
   -- Test stock at Main (as the owner)
   perform pg_temp.as_user(c_owner);
@@ -129,7 +129,7 @@ begin
   v_n := v_n + 1;
 
   -- 6. Unknown sale; other shop's owner cannot void our sale
-  v_r := pg_temp.try_void(c_owner, '00000000-0000-0000-0000-00000000ffff', 'x');
+  v_r := pg_temp.try_void(c_owner, '00000000-0000-4000-8000-00000000ffff', 'x');
   if coalesce(v_r->>'error', '') not like 'Sale not found%' then raise exception 'FAIL: unknown sale (%)', v_r; end if;
   v_n := v_n + 1;
   insert into public.shops (id, name, store_code) values (c_shop2, 'U6 Other Shop', 'u6other');

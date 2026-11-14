@@ -80,19 +80,19 @@ on conflict (id) do nothing;
 
 -- Insert Auth Users
 insert into auth.users (id, instance_id, email, aud, role)
-select owner_a_id, '00000000-0000-0000-0000-000000000000', 'owner_a@test.local', 'authenticated', 'authenticated' from test_params
+select owner_a_id, '00000000-0000-4000-8000-000000000000', 'owner_a@test.local', 'authenticated', 'authenticated' from test_params
 on conflict (id) do nothing;
 
 insert into auth.users (id, instance_id, email, aud, role)
-select staff_a1_id, '00000000-0000-0000-0000-000000000000', 'staff_a1@test.local', 'authenticated', 'authenticated' from test_params
+select staff_a1_id, '00000000-0000-4000-8000-000000000000', 'staff_a1@test.local', 'authenticated', 'authenticated' from test_params
 on conflict (id) do nothing;
 
 insert into auth.users (id, instance_id, email, aud, role)
-select staff_a2_id, '00000000-0000-0000-0000-000000000000', 'staff_a2@test.local', 'authenticated', 'authenticated' from test_params
+select staff_a2_id, '00000000-0000-4000-8000-000000000000', 'staff_a2@test.local', 'authenticated', 'authenticated' from test_params
 on conflict (id) do nothing;
 
 insert into auth.users (id, instance_id, email, aud, role)
-select owner_b_id, '00000000-0000-0000-0000-000000000000', 'owner_b@test.local', 'authenticated', 'authenticated' from test_params
+select owner_b_id, '00000000-0000-4000-8000-000000000000', 'owner_b@test.local', 'authenticated', 'authenticated' from test_params
 on conflict (id) do nothing;
 
 -- Insert Profiles

@@ -79,7 +79,7 @@ describe('Real Session Staff Isolation (Live DB)', () => {
       .from('profiles')
       .update({
         role: 'owner',
-        shop_id: '00000000-0000-0000-0000-999999999999',
+        shop_id: '00000000-0000-4000-8000-999999999999',
         branch_id: null,
         is_active: false,
       })
@@ -102,9 +102,9 @@ describe('Real Session Staff Isolation (Live DB)', () => {
     expect(verifyError).toBeNull();
     expect(verifiedProfile).toEqual({
       id: creds.staff.id,
-      shop_id: '00000000-0000-0000-0000-000000000001',
+      shop_id: '00000000-0000-4000-8000-000000000001',
       role: 'staff',
-      branch_id: '00000000-0000-0000-0000-000000000010',
+      branch_id: '00000000-0000-4000-8000-000000000010',
       is_active: true,
     });
   });
@@ -125,7 +125,7 @@ describe('Real Session Staff Isolation (Live DB)', () => {
     // Owner attempts to modify a profile's id
     const { error: updateError } = await ownerClient
       .from('profiles')
-      .update({ id: '00000000-0000-0000-0000-999999999999' })
+      .update({ id: '00000000-0000-4000-8000-999999999999' })
       .eq('id', creds.staff.id);
 
     expect(updateError).not.toBeNull();

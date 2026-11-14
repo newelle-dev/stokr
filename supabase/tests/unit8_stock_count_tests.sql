@@ -6,14 +6,14 @@
 -- staff ...0200 at Main ...0010, products ...0301 Relx and ...0304 Bacon).
 do $$
 declare
-  c_shop   constant uuid := '00000000-0000-0000-0000-000000000001';
-  c_owner  constant uuid := '00000000-0000-0000-0000-000000000100';
-  c_staff  constant uuid := '00000000-0000-0000-0000-000000000200';
-  c_main   constant uuid := '00000000-0000-0000-0000-000000000010';
-  c_relx   constant uuid := '00000000-0000-0000-0000-000000000301';
-  c_bacon  constant uuid := '00000000-0000-0000-0000-000000000304';
-  c_shop2  constant uuid := '00000000-0000-0000-0000-0000000000f1';
-  c_owner2 constant uuid := '00000000-0000-0000-0000-0000000000f4';
+  c_shop   constant uuid := '00000000-0000-4000-8000-000000000001';
+  c_owner  constant uuid := '00000000-0000-4000-8000-000000000100';
+  c_staff  constant uuid := '00000000-0000-4000-8000-000000000200';
+  c_main   constant uuid := '00000000-0000-4000-8000-000000000010';
+  c_relx   constant uuid := '00000000-0000-4000-8000-000000000301';
+  c_bacon  constant uuid := '00000000-0000-4000-8000-000000000304';
+  c_shop2  constant uuid := '00000000-0000-4000-8000-0000000000f1';
+  c_owner2 constant uuid := '00000000-0000-4000-8000-0000000000f4';
   v_r jsonb;
   v_count uuid;
   v_n integer := 0;
@@ -32,7 +32,7 @@ begin
   create function pg_temp.try_save(p_user uuid, p_items jsonb) returns jsonb language plpgsql as $f$
   begin
     perform pg_temp.as_user(p_user);
-    return public.save_stock_count('00000000-0000-0000-0000-000000000010'::uuid, 'u8 test', p_items);
+    return public.save_stock_count('00000000-0000-4000-8000-000000000010'::uuid, 'u8 test', p_items);
   exception when others then
     return jsonb_build_object('error', sqlerrm);
   end $f$;
@@ -55,8 +55,8 @@ begin
 
   create function pg_temp.stock(p_product uuid) returns bigint language sql as $f$
     select coalesce(sum(quantity_change), 0) from public.stock_movements
-    where shop_id = '00000000-0000-0000-0000-000000000001'
-      and branch_id = '00000000-0000-0000-0000-000000000010' and product_id = p_product $f$;
+    where shop_id = '00000000-0000-4000-8000-000000000001'
+      and branch_id = '00000000-0000-4000-8000-000000000010' and product_id = p_product $f$;
 
   -- Known stock at Main: Relx 10 more, Bacon 5 more than whatever is there
   perform pg_temp.as_user(c_owner);
@@ -88,7 +88,7 @@ begin
     jsonb_build_object('product_id', c_relx, 'counted_qty', 2)));
   if v_r->>'error' is null then raise exception 'FAIL: duplicate product rejected'; end if;
   v_r := pg_temp.try_save(c_owner, jsonb_build_array(
-    jsonb_build_object('product_id', '00000000-0000-0000-0000-00000000ffff', 'counted_qty', 1)));
+    jsonb_build_object('product_id', '00000000-0000-4000-8000-00000000ffff', 'counted_qty', 1)));
   if v_r->>'error' is null then raise exception 'FAIL: unknown product rejected'; end if;
   if (select count(*) from public.stock_counts where shop_id = c_shop) <> v_counts0 then
     raise exception 'FAIL: rejected saves leave no count rows'; end if;
