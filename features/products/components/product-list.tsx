@@ -121,7 +121,7 @@ export function ProductList({ products }: ProductListProps) {
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CATEGORY_TABS.map((tab) => (
             <button
               key={tab.value}
