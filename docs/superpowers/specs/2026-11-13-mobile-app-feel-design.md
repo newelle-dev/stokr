@@ -53,7 +53,7 @@ My calls (owner can change):
 
 More calls, added after the builder check:
 - **Route map (owner).** Dashboard tab: `/dashboard`. Sales tab: `/sales` (all-staff list), with `/sales/replace/[saleId]` as its sub-page. Stock tab: `/stock`, with `/stock/opening` and `/stock/count` as sub-pages. More sheet: Sell (the staff sell screen), Products, Team, Settings, Sign out. Reports is not a real route yet, so it is hidden on phones until it exists (and the "Unit 5" desktop placeholder is untouched).
-- **Owner in the staff view.** The bar shows Sell, My sales and a third tab, **Owner**, which goes to `/dashboard`. Staff accounts never get that tab; it is shown only when `role === 'owner'`, and the owner pages still guard themselves.
+- **Owner in the staff view (superseded 2026-11-14).** Owners now get the same bar as staff: Sell, My sales and **Profile** (`/me`). Owners reach the dashboard from the Dashboard button in the top bar on Sell pages. Decided by the product owner; see the decisions log.
 - **Modals.** All `Modal` uses become bottom sheets on phones, including void confirmations. The temporary-password dialog stays a centered dialog on phones, with no drag-to-close and the existing outside-tap and escape block. Sheets with form fields do not close on drag.
 - **Unsaved input.** Swipe-back is on read-only sub-pages only (Settings, Products, Team). It is **off** on form pages (Stock count, Stock opening, Replace sale) and on the sell screen, so no half-entered data can be lost by a swipe. Their back arrow stays and works as a normal tap.
 - **Back target.** The back arrow goes to a fixed parent route per page (a small map), not `router.back()`, so it works after a refresh or a deep link in the installed app.
