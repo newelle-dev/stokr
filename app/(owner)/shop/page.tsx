@@ -2,10 +2,12 @@ import { PageHeader } from '@/components/shell/page-header';
 import { StoreCodeCard } from '@/components/shared/store-code-card';
 import { ShopNameForm } from '@/features/shop/components/shop-name-form';
 import { getOwnerBranches } from '@/features/branches/queries';
+import { requireOwnerPage } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ShopDetailsPage() {
+  await requireOwnerPage();
   const { shopName, storeCode } = await getOwnerBranches();
 
   return (

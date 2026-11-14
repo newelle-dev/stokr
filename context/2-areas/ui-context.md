@@ -80,7 +80,8 @@ Rules:
   - Success: a clear confirmation and a one-tap **New sale** button.
   - Tapping a product adds one; tapping again adds another. A recorded sale must take only a few taps for a typical purchase.
 - **Dashboard:** a stack of cards in this order: Today's sales and profit, Low stock, Sales per staff, Missing stock. A branch filter sits at the top (All branches by default).
-- **Tables on phones:** collapse to stacked cards, never horizontal scroll.
+- **Lists on phones and tablets (below `lg`, 1024px):** rows that open a bottom action sheet (`ListRow`, `RowList`, `RowActionSheet` in `components/shell/`). The main add action is a floating "+" (`Fab`) above the tab bar, never per-row buttons. From `lg` up, tables and card buttons stay as they were. Never horizontal scroll.
+- **Shared page pieces:** `PageHeader` for every owner page title; `PageBody` for the body (plain below `lg`, the card look from `lg`). Inputs and the store code copy button are 44px below `lg`.
 - **Max content width:** 1100px centered on large screens.
 
 ## Tone of text
