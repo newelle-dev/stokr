@@ -19,6 +19,8 @@ import { RestockModal } from './restock-modal';
 import { AdjustmentModal } from './adjustment-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ListRow, RowList } from '@/components/shell/list-row';
+import { RowActionSheet } from '@/components/shell/row-action-sheet';
 import { formatMoney } from '@/lib/money';
 
 interface StockTableProps {
@@ -49,6 +51,7 @@ export function StockTable({
   const [restockModalOpen, setRestockModalOpen] = React.useState(false);
   const [adjustModalOpen, setAdjustModalOpen] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState<StockOverviewItem | null>(null);
+  const [sheetItem, setSheetItem] = React.useState<StockOverviewItem | null>(null);
 
   // Derived products list for modals
   const productsForModals = React.useMemo(() => {
@@ -235,7 +238,7 @@ export function StockTable({
         </div>
 
         {/* Right: Action Buttons */}
-        <div className="hidden items-center gap-2 shrink-0 md:flex">
+        <div className="hidden items-center gap-2 shrink-0 lg:flex">
           <Link href="/stock/opening">
             <Button variant="outline" className="h-11 px-3.5 text-xs sm:text-sm font-medium">
               <Boxes className="mr-1.5 h-4 w-4 text-[var(--muted-foreground)]" />
@@ -296,8 +299,8 @@ export function StockTable({
         </div>
       ) : (
         <>
-          {/* Desktop Table (hidden on mobile) */}
-          <div className="hidden md:block rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+          {/* Desktop Table (lg and up) */}
+          <div className="hidden lg:block rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--muted)]/50 text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
@@ -398,102 +401,60 @@ export function StockTable({
             </div>
           </div>
 
-          {/* Mobile Stacked Card View (360px+) */}
-          <div className="grid grid-cols-1 gap-3 md:hidden">
+          {/* Phone and tablet: rows that open an action sheet (below lg) */}
+          <RowList>
             {filteredItems.map((item) => {
-              const cardKey = `${item.branchId}:${item.productId}`;
+              const rowKey = `${item.branchId}:${item.productId}`;
+              const stockClass = item.isNegativeStock
+                ? "text-[var(--destructive)]"
+                : item.isLowStock
+                ? "text-[var(--warning)]"
+                : item.isOutOfStock
+                ? "text-[var(--muted-foreground)]"
+                : "text-[var(--foreground)]";
+              const statusLabel = item.isNegativeStock
+                ? "Negative"
+                : item.isOutOfStock
+                ? "Out of stock"
+                : item.isLowStock
+                ? "Low stock"
+                : "Healthy";
               return (
-                <div
-                  key={cardKey}
-                  className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-semibold text-[var(--foreground)] leading-snug">
-                        {item.productName}
-                      </h4>
-                      <p className="text-xs text-[var(--muted-foreground)]">
-                        {item.branchName} • <span className="capitalize">{item.category}</span>
-                      </p>
-                    </div>
-
-                    {item.isNegativeStock ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--destructive)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--destructive)]">
-                        <ShieldAlert className="h-3 w-3" />
-                        Negative
-                      </span>
-                    ) : item.isOutOfStock ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--muted-foreground)]">
-                        Out of stock
-                      </span>
-                    ) : item.isLowStock ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--warning)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--warning)]">
-                        <AlertTriangle className="h-3 w-3" />
-                        Low Stock
-                      </span>
-                    ) : (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--success)]/10 px-2 py-0.5 text-xs font-medium text-[var(--success)]">
-                        Healthy
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 border-y border-[var(--border)]/60 py-2.5 text-xs">
-                    <div>
-                      <span className="text-[var(--muted-foreground)] block">Stock</span>
-                      <span
-                        className={`text-lg font-bold font-mono tabular-nums ${
-                          item.isNegativeStock
-                            ? 'text-[var(--destructive)]'
-                            : item.isLowStock
-                            ? 'text-[var(--warning)]'
-                            : item.isOutOfStock
-                            ? 'text-[var(--muted-foreground)]'
-                            : 'text-[var(--foreground)]'
-                        }`}
-                      >
+                <ListRow
+                  key={rowKey}
+                  onClick={() => setSheetItem(item)}
+                  title={item.productName}
+                  detail={`${item.branchName} · ${item.category} · ${formatMoney(item.sellingPriceCentavos)}`}
+                  trailing={
+                    <div className="flex flex-col items-end">
+                      <span className={`font-mono text-lg font-bold tabular-nums ${stockClass}`}>
                         {item.stockOnHand}
                       </span>
+                      <span className="text-xs font-medium text-[var(--muted-foreground)]">{statusLabel}</span>
                     </div>
-                    <div>
-                      <span className="text-[var(--muted-foreground)] block">Price</span>
-                      <span className="font-mono font-medium text-[var(--foreground)]">
-                        {formatMoney(item.sellingPriceCentavos)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[var(--muted-foreground)] block">Cost</span>
-                      <span className="font-mono text-[var(--muted-foreground)]">
-                        {formatMoney(item.costPriceCentavos)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => openAdjust(item)}
-                      className="h-11 text-xs font-medium"
-                    >
-                      <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
-                      Adjust
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => openRestock(item)}
-                      className="h-11 text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)]"
-                    >
-                      <PackagePlus className="mr-1.5 h-3.5 w-3.5" />
-                      Restock
-                    </Button>
-                  </div>
-                </div>
+                  }
+                />
               );
             })}
-          </div>
+          </RowList>
         </>
       )}
+
+      {/* Phone and tablet: row actions */}
+      <RowActionSheet
+        title={sheetItem?.productName ?? 'Stock item'}
+        description={sheetItem ? `${sheetItem.branchName} · ${sheetItem.stockOnHand} on hand` : undefined}
+        isOpen={!!sheetItem}
+        onClose={() => setSheetItem(null)}
+        actions={
+          sheetItem
+            ? [
+                { label: 'Adjust stock', icon: SlidersHorizontal, onSelect: () => openAdjust(sheetItem) },
+                { label: 'Restock', icon: PackagePlus, onSelect: () => openRestock(sheetItem) },
+              ]
+            : []
+        }
+      />
 
       {/* Modals */}
       <RestockModal
