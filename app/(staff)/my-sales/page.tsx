@@ -1,7 +1,8 @@
+import Link from 'next/link';
 import { PageHeader } from '@/components/shell/page-header';
+import { buttonVariants } from '@/components/ui/button';
 import { getMySales } from '@/features/sales/queries';
-import { formatManilaDateTime } from '@/lib/dates';
-import { MoneyText } from '@/components/shared/money-text';
+import { MySalesList } from '@/features/sales/components/my-sales-list';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,8 +10,6 @@ export const metadata = {
   title: 'My sales | Stokr',
   description: 'Sales you recorded.',
 };
-
-const PAYMENT_LABELS: Record<string, string> = { cash: 'Cash', gcash: 'GCash' };
 
 export default async function MySalesPage() {
   const sales = await getMySales();
@@ -20,43 +19,14 @@ export default async function MySalesPage() {
       <PageHeader title="My sales" />
 
       {sales.length === 0 ? (
-        <p className="rounded-[var(--radius-lg)] border border-[var(--border)] p-4 text-sm text-[var(--muted-foreground)]">
-          No sales yet. Record your first sale on the Sell page.
-        </p>
+        <div className="space-y-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] p-6 text-center">
+          <p className="text-sm text-[var(--muted-foreground)]">No sales yet. Record your first sale on the Sell page.</p>
+          <Link href="/sell" className={`${buttonVariants()} h-12 px-6 text-base`}>
+            Go to Sell
+          </Link>
+        </div>
       ) : (
-        <ul className="space-y-3">
-          {sales.map((sale) => (
-            <li
-              key={sale.id}
-              className="space-y-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4"
-            >
-              <div className="flex items-center justify-between gap-2 text-sm">
-                <time dateTime={sale.createdAt} className="text-[var(--muted-foreground)]">
-                  {formatManilaDateTime(sale.createdAt)}
-                </time>
-                <span className="rounded-[var(--radius-sm)] bg-[var(--muted)] px-2 py-0.5 text-xs font-medium text-[var(--foreground)]">
-                  {PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod}
-                </span>
-              </div>
-
-              <ul className="space-y-1 text-sm">
-                {sale.items.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between gap-2">
-                    <span className="min-w-0 truncate text-[var(--foreground)]">
-                      {item.productName} × {item.quantity}
-                    </span>
-                    <MoneyText centavos={item.lineTotalCentavos} className="shrink-0 text-[var(--foreground)]" />
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex items-center justify-between border-t border-[var(--border)] pt-2">
-                <span className="text-sm font-semibold text-[var(--foreground)]">Total</span>
-                <MoneyText centavos={sale.totalCentavos} className="text-base font-bold text-[var(--foreground)]" />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <MySalesList sales={sales} />
       )}
     </div>
   );

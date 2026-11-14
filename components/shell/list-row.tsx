@@ -3,9 +3,10 @@
 import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-export function RowList({ children }: { children: React.ReactNode }) {
+// Owner pages show rows below lg only (tables take over); staff pages have no table, so they pass alwaysVisible.
+export function RowList({ children, alwaysVisible = false }: { children: React.ReactNode; alwaysVisible?: boolean }) {
   return (
-    <div className="lg:hidden overflow-hidden divide-y divide-[var(--border)] rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-xs">
+    <div className={`${alwaysVisible ? '' : 'lg:hidden '}overflow-hidden divide-y divide-[var(--border)] rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-xs`}>
       {children}
     </div>
   );
