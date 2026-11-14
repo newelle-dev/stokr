@@ -7,7 +7,6 @@ export type NavIcon =
   | 'more'
   | 'sell'
   | 'mySales'
-  | 'owner'
   | 'products'
   | 'team'
   | 'settings'
@@ -52,7 +51,6 @@ export const MORE_SECTIONS: { title: string; items: MoreItem[] }[] = [
     items: [
       { label: 'Branches', href: '/branches', icon: 'branches', description: 'Branch locations and the store code' },
       { label: 'Team & staff', href: '/team', icon: 'team', description: 'Add staff and manage their access' },
-      { label: 'Shop details', href: '/shop', icon: 'shop', description: 'Shop name and the staff store code' },
     ],
   },
   {
@@ -64,10 +62,6 @@ export const MORE_SECTIONS: { title: string; items: MoreItem[] }[] = [
   },
 ];
 
-export function profileHref(role: 'owner' | 'staff'): string {
-  return role === 'owner' ? '/profile' : '/me';
-}
-
 export const SIDEBAR_ITEMS: (NavItem & { enabled: boolean; badge?: string })[] = [
   { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', enabled: true },
   { label: 'Products', href: '/products', icon: 'products', enabled: true },
@@ -78,14 +72,22 @@ export const SIDEBAR_ITEMS: (NavItem & { enabled: boolean; badge?: string })[] =
   { label: 'Reports', href: '#', icon: 'reports', enabled: false, badge: 'Unit 5' },
 ];
 
-export function staffTabsFor(role: 'owner' | 'staff'): NavItem[] {
-  const tabs: NavItem[] = [
-    { label: 'Sell', href: '/sell', icon: 'sell' },
-    { label: 'My sales', href: '/my-sales', icon: 'mySales' },
-  ];
-  if (role === 'owner') tabs.push({ label: 'Owner', href: '/dashboard', icon: 'owner' });
-  return tabs;
-}
+// Pages the phone reaches through More. Tablets (md to lg) have the sidebar and no tab bar, so the sidebar lists these too.
+export const TABLET_EXTRA_ITEMS: NavItem[] = [
+  { label: 'Sell', href: '/sell', icon: 'sell' },
+  { label: 'Stock count', href: '/stock/count', icon: 'count' },
+  { label: 'Opening stock', href: '/stock/opening', icon: 'opening' },
+  { label: 'Shop details', href: '/shop', icon: 'shop' },
+  { label: 'About Stokr', href: '/about', icon: 'about' },
+  { label: 'Help', href: '/help', icon: 'help' },
+];
+
+// Same bar for staff and owners: owners use /me too, so opening Profile from Sell keeps the Sell tab bar.
+export const STAFF_TABS: NavItem[] = [
+  { label: 'Sell', href: '/sell', icon: 'sell' },
+  { label: 'My sales', href: '/my-sales', icon: 'mySales' },
+  { label: 'Profile', href: '/me', icon: 'profile' },
+];
 
 function normalize(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
@@ -119,7 +121,6 @@ const SUB_PAGES: { prefix: string; parent: string; title: string }[] = [
   { prefix: '/stock/opening', parent: '/more', title: 'Opening stock' },
   { prefix: '/stock/count', parent: '/more', title: 'Stock count' },
   { prefix: '/profile', parent: '/dashboard', title: 'Profile' },
-  { prefix: '/me', parent: '/sell', title: 'Profile' },
   { prefix: '/sales/replace', parent: '/sales', title: 'Replacement sale' },
 ];
 
@@ -138,6 +139,7 @@ const TOP_TITLES: Record<string, string> = {
   '/more': 'More',
   '/sell': 'Sell',
   '/my-sales': 'My sales',
+  '/me': 'Profile',
 };
 
 export function headerTitle(pathname: string): string | null {

@@ -3,7 +3,7 @@ import { requireStaffOrOwnerPage } from '@/lib/auth';
 import { AppHeader } from '@/components/shell/app-header';
 import { BottomTabBar } from '@/components/shell/bottom-tab-bar';
 import { PullToRefresh } from '@/components/shell/pull-to-refresh';
-import { staffTabsFor, profileHref } from '@/lib/nav';
+import { STAFF_TABS } from '@/lib/nav';
 
 export default async function StaffLayout({
   children,
@@ -14,7 +14,7 @@ export default async function StaffLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--background)]">
-      <AppHeader profileHref={profileHref(user.role)} initial={user.fullName.charAt(0)} />
+      <AppHeader isOwner={user.role === 'owner'} />
       <PullToRefresh />
 
       {/* Main Content Area, with room for the bottom tab bar */}
@@ -22,7 +22,7 @@ export default async function StaffLayout({
         {children}
       </main>
 
-      <BottomTabBar tabs={staffTabsFor(user.role)} />
+      <BottomTabBar tabs={STAFF_TABS} />
     </div>
   );
 }

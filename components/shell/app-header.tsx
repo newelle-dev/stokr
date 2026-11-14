@@ -3,17 +3,27 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, LayoutDashboard, User } from 'lucide-react';
 import { headerTitle, parentRoute } from '@/lib/nav';
+import { LogoMark } from '@/components/ui/logo';
+import { NAV_ICONS } from '@/components/shell/nav-icons';
 
 // Height of the sticky header; the page's big title counts as "out of view" once it slides under it.
 const HEADER_PX = 57;
 
-export function AppHeader({ profileHref, initial }: { profileHref: string; initial: string }) {
+export function AppHeader({ isOwner = false }: { isOwner?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const parent = parentRoute(pathname);
   const title = headerTitle(pathname);
+  // Profile is opened from the More page only; the button lives in this header there.
+  const showProfile = pathname === '/more';
+  // Pages that use the Sell tab bar (Sell, My sales, Profile).
+  const onSellPages = pathname === '/sell' || pathname === '/my-sales' || pathname === '/me';
+  // Owners get a Sell shortcut on every page except More and the Sell-bar pages.
+  const showSell = isOwner && pathname !== '/more' && !onSellPages;
+  // On the Sell-bar pages owners get a shortcut back to the dashboard instead.
+  const showDashboard = isOwner && onSellPages;
   // Remember which page the flag belongs to, so it resets by itself when the route changes.
   const [reveal, setReveal] = React.useState({ path: '', show: false });
   const showTitle = reveal.path === pathname && reveal.show;
@@ -40,18 +50,17 @@ export function AppHeader({ profileHref, initial }: { profileHref: string; initi
 
   // Profile can be opened from any page, so Back there returns to where the user came from.
   const goBack = (e: React.MouseEvent) => {
-    if (parent && (pathname === '/profile' || pathname === '/me') && window.history.length > 1) {
+    if (parent && pathname === '/profile' && window.history.length > 1) {
       e.preventDefault();
       router.back();
     }
   };
 
-  const onProfile = pathname === profileHref;
-
   return (
     <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--card)]/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-4">
         <div className="flex min-w-0 items-center">
+          {!parent && <LogoMark className="h-8 w-8" />}
           {parent && (
             <Link
               href={parent}
@@ -71,19 +80,34 @@ export function AppHeader({ profileHref, initial }: { profileHref: string; initi
           {title}
         </p>
 
-        <div className="flex justify-end">
-          <Link
-            href={profileHref}
-            aria-label="Profile"
-            aria-current={onProfile ? 'page' : undefined}
-            className="-mr-1 flex h-11 w-11 items-center justify-center"
-          >
-            <span
-              className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold uppercase ${onProfile ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]' : 'border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)]'}`}
+        <div className="flex justify-end gap-1">
+          {showSell && (
+            <Link
+              href="/sell"
+              aria-label="Sell"
+              className="-mr-1 flex h-11 w-11 items-center justify-center rounded-full text-[var(--foreground)] active:bg-[var(--muted)]"
             >
-              {initial}
-            </span>
-          </Link>
+              <NAV_ICONS.sell className="h-5 w-5" />
+            </Link>
+          )}
+          {showProfile && (
+            <Link
+              href="/profile"
+              aria-label="Profile"
+              className="-mr-1 flex h-11 w-11 items-center justify-center rounded-full text-[var(--foreground)] active:bg-[var(--muted)]"
+            >
+              <User className="h-5 w-5" />
+            </Link>
+          )}
+          {showDashboard && (
+            <Link
+              href="/dashboard"
+              aria-label="Dashboard"
+              className="-mr-1 flex h-11 w-11 items-center justify-center rounded-full text-[var(--foreground)] active:bg-[var(--muted)]"
+            >
+              <LayoutDashboard className="h-5 w-5" />
+            </Link>
+          )}
         </div>
       </div>
     </header>

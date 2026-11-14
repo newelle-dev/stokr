@@ -15,7 +15,10 @@ export default async function MorePage() {
     <div className="space-y-6">
       <h1 className="sr-only">More</h1>
 
-      <div className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-xs">
+      <Link
+        href="/shop"
+        className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-xs active:bg-[var(--muted)]"
+      >
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--primary)]/10 text-[var(--primary)]">
           <Store className="h-5 w-5" />
         </div>
@@ -27,7 +30,8 @@ export default async function MorePage() {
           <p className="text-[11px] text-[var(--muted-foreground)]">Staff store code</p>
           <p className="font-mono text-sm font-bold tracking-wide text-[var(--foreground)]">{storeCode}</p>
         </div>
-      </div>
+        <ChevronRight className="h-4 w-4 shrink-0 text-[var(--muted-foreground)]" />
+      </Link>
 
       {MORE_SECTIONS.map((section) => (
         <section key={section.title} className="space-y-2">

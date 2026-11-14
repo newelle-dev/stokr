@@ -3,13 +3,13 @@ import {
   OWNER_TABS,
   MORE_SECTIONS,
   SIDEBAR_ITEMS,
-  staffTabsFor,
+  TABLET_EXTRA_ITEMS,
+  STAFF_TABS,
   isActive,
   isMoreActive,
   parentRoute,
   headerTitle,
   isTabActive,
-  profileHref,
   canPullRefresh,
   canSwipeBack,
 } from '@/lib/nav';
@@ -24,14 +24,9 @@ describe('tabs', () => {
     expect(MORE_SECTIONS[0].items.map((i) => i.href)).toEqual([
       '/sell', '/products', '/stock/count', '/stock/opening',
     ]);
-    expect(MORE_SECTIONS[1].items.map((i) => i.href)).toEqual(['/branches', '/team', '/shop']);
+    expect(MORE_SECTIONS[1].items.map((i) => i.href)).toEqual(['/branches', '/team']);
     expect(MORE_SECTIONS[2].items.map((i) => i.href)).toEqual(['/about', '/help']);
     MORE_SECTIONS.flatMap((s) => s.items).forEach((i) => expect(i.description.length).toBeGreaterThan(0));
-  });
-
-  it('profile lives at /profile for owners and /me for staff', () => {
-    expect(profileHref('owner')).toBe('/profile');
-    expect(profileHref('staff')).toBe('/me');
   });
 
   it('desktop sidebar keeps its seven entries with Reports disabled', () => {
@@ -41,12 +36,15 @@ describe('tabs', () => {
     expect(SIDEBAR_ITEMS.find((t) => t.label === 'Reports')?.enabled).toBe(false);
   });
 
-  it('staff never get an owner-only link', () => {
-    expect(staffTabsFor('staff').map((t) => t.href)).toEqual(['/sell', '/my-sales']);
+  it('every More page is reachable from the tablet sidebar, which has no tab bar', () => {
+    const reachable = new Set([...SIDEBAR_ITEMS, ...TABLET_EXTRA_ITEMS].map((i) => i.href));
+    MORE_SECTIONS.flatMap((s) => s.items).forEach((i) => expect(reachable.has(i.href)).toBe(true));
+    expect(reachable.has('/shop')).toBe(true);
+    expect(TABLET_EXTRA_ITEMS.some((i) => SIDEBAR_ITEMS.some((s) => s.href === i.href))).toBe(false);
   });
 
-  it('owner in the staff view also gets the Owner tab', () => {
-    expect(staffTabsFor('owner').map((t) => t.href)).toEqual(['/sell', '/my-sales', '/dashboard']);
+  it('Sell tab bar is the same for staff and owners and has no owner-only link', () => {
+    expect(STAFF_TABS.map((t) => t.href)).toEqual(['/sell', '/my-sales', '/me']);
   });
 });
 
@@ -87,7 +85,6 @@ describe('parentRoute', () => {
     ['/stock/count', '/more'],
     ['/stock/count/', '/more'],
     ['/profile', '/dashboard'],
-    ['/me', '/sell'],
     ['/sales/replace/abc', '/sales'],
   ])('%s goes back to %s', (path, parent) => {
     expect(parentRoute(path)).toBe(parent);

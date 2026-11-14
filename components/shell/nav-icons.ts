@@ -26,7 +26,6 @@ export const NAV_ICONS: Record<NavIcon, React.ComponentType<{ className?: string
   more: Menu,
   sell: ShoppingBag,
   mySales: Receipt,
-  owner: LayoutDashboard,
   products: Package,
   team: Users,
   settings: Settings,
